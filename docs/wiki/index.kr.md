@@ -1,58 +1,51 @@
-# Omni-Stack 학습 및 유지보수 Wiki
+# Omni-Stack 문서
 
-적용 기준: 주 브랜치 `fc165e3`와 문서 정리 브랜치. Java/Vue 기초를 알고 이 프로젝트를 처음 접하는 독자를 대상으로 합니다. 중국어가 내용 기준이며 [简体中文](index.md), [English](index.en.md), [日本語](index.jp.md)와 동기화합니다. 실제 번역 검토 상태(HUMAN_REVIEW와 소유자가 승인한 AI_REVIEW를 구분)는 [문서 매니페스트](../docs-manifest.yaml)에 기록합니다.
+여기서는 Omni-Stack의 개요, 사용과 기동 방법, 기존 프로젝트를 확장하는 방법을 설명합니다. 왼쪽은 소개와 사용법, 개발 방법, 핵심 기술 순서입니다. 기술 참조는 기동 안내 다음에 배치해 정확한 규칙을 쉽게 확인하게 합니다.
 
-## 1. 처음부터 시작하기
+[简体中文](index.md) · [English](index.en.md) · [日本語](index.jp.md) · [프로젝트 개요와 주요 특징](../../README.kr.md)
 
-처음 네 단계를 순서대로 완료한 다음 역할에 맞는 업무 경로를 선택합니다. 각 단계의 예상 결과를 로컬 Docker에서 확인합니다.
+## 여기서 시작하기
 
-| 단계 | 읽고 실행할 내용 | 예상 결과 |
-|---|---|---|
-| 1 | [코드 받기, 구조 이해, 첫 실행](../guides/quick-start.kr.md) | migrator 정상 종료, 선택 서비스 정상, 프런트엔드 접근 가능 |
-| 2 | [로그인과 테넌트](../guides/authentication.kr.md) | 실제 CAPTCHA로 올바른 테넌트와 사용자로 로그인 |
-| 3 | [역할, 메뉴, 버튼, 데이터 범위](../guides/permissions.kr.md) | 관리자와 직원의 기능이 다르고 권한 밖 요청은 거부됨 |
-| 4 | [시드, 교육 데이터, 테스트 fixture](data-and-fixtures.kr.md) | 빈 환경, 기본 시드, 업무 데모 기록을 구분 |
-| 5 | [프리셋 선택](../preset-quick-selection.kr.md), [프로젝트 생성](../guides/scaffold-development.kr.md) | 일부 서비스 실행과 잘라낸 프로젝트 생성의 차이를 설명 |
-
-## 2. 역할별 업무 학습
-
-| 역할 또는 목표 | 경로 | 전제 조건 |
-|---|---|---|
-| 플랫폼 관리자 | [시스템, 보안, 감사](../guides/system-security-audit.kr.md) | core, 테넌트 관리자 역할 |
-| 직원 및 승인자 | [Workflow](../guides/workflow-approval.kr.md), [개인 및 시스템 작업](../guides/scheduling.kr.md) | workflow, 후보자 할당과 작업 소유권 |
-| 영업 담당자 | [CRM 리드에서 기회로](../guides/crm-flow.kr.md) | crm, 영업 역할과 데이터 범위 |
-| 공급업체 관리자 및 공급업체 | [SRM 가입과 포털](../guides/srm-flow.kr.md) | supply-chain, 초대, SUPPLIER 역할, 유효한 연결 |
-| 요청자, 구매자, 공급업체 | [구매 요청에서 입고까지](../guides/procurement-flow.kr.md) | supply-chain, 승인 모델, 유효한 공급업체, 구매 권한 |
-| 자산 관리자, 사용자, 승인자 | [자산 생성, 할당, 이전, 처분](../guides/asset-flow.kr.md) | supply-chain, 합격한 자산 대상 입고와 승인 모델 |
-| 운영 담당자 | [운영, 백업, 업그레이드](../guides/operations-upgrade.kr.md), [문제 해결](../guides/troubleshooting.kr.md) | 확인한 로컬 환경과 백업 범위 |
-
-초기 시드는 과거 스크린샷의 주문이나 승인을 보장하지 않습니다. 그림 속 업무 번호는 예시이며 실제 작업에서 반환한 ID를 사용합니다. SQL 상태 변경으로 승인, 견적, 입고를 건너뛰지 않습니다.
-
-## 3. 소스 읽기와 확장
-
-- [소스 읽기와 중단점](source-debugging.kr.md): 요청부터 권한, 트랜잭션, 이벤트, 테스트, 실패 조건까지 추적합니다.
-- [서비스 및 CRUD 생성](../guides/scaffold-development.kr.md): dry-run 후 생성, 통합, 검증합니다.
-- [의존성 매트릭스](../preset-dependency-matrix.kr.md), [유지보수](../preset-maintenance.kr.md), [사용자 정의](../custom-preset-tutorial.kr.md), [업그레이드](../preset-upgrade-guide.kr.md): 사실 표는 catalog에서 생성됩니다.
-- [아키텍처](../architecture.kr.md), [API 계약](../api-contract.kr.md), [핵심 흐름](../core-flows.kr.md): 유지보수자를 위한 현재 기술 사실입니다.
-- [백엔드](../backend-patterns.kr.md), [프런트엔드 규칙](../frontend-patterns.kr.md): 코드 변경 전에 해당 규칙을 읽습니다.
-
-## 4. 용어
-
-| 용어 | 프로젝트에서의 의미 |
+| 장 | 주요 내용 |
 |---|---|
-| preset | 모듈 선택. catalog가 전체 의존성 폐쇄를 계산 |
-| migrator | 앱 시작 전 구조 마이그레이션, 멱등 시드, 초기 설정을 수행하는 일회성 프로세스 |
-| tenant | 격리 경계. ALL 데이터 범위도 테넌트를 넘지 않음 |
-| RBAC / DataScope | 기능 권한과 행 가시성, 두 조건 모두 적용 |
-| Gateway assertion | 게이트웨이의 서명된 신원 정보. 하위 서비스는 클라이언트 신원 헤더를 신뢰하지 않음 |
-| Outbox / Inbox | 같은 트랜잭션의 전송 대기 이벤트 / 소비 중복 제거 기록 |
-| Saga | 분산 단계와 보상. 서비스 간 ACID 트랜잭션을 대신하지 않음 |
-| fixture | 테넌트, 업무 키, 정리 범위가 명확한 테스트 또는 교육 데이터 |
-| ADR | 이유, 결과, 대체 관계가 포함된 과거 결정 |
-| Harness | 사실, 제약, 도구, 검증으로 이루어진 실행 루프 |
+| [프로젝트 소개](../../README.kr.md) | 목적과 주요 특징, 디렉터리 역할은 아래 표에서 설명 |
+| [그림으로 보는 기능별 사용법](usage-platform.kr.md) | 홈, 워크스페이스, 업무 모듈의 화면과 사용법 |
+| [Harness의 개념과 엔지니어링 실천](harness-what-and-why.kr.md) | Harness의 의미와 엔지니어링 사실이 AI 개발을 돕는 방식 |
+| [프리셋 선택·빌드·기동](presets-overview.kr.md) | 프리셋을 이해한 뒤 선택한 구성의 절차에 따라 기동 |
+| [기술 참조](../architecture.kr.md) | 시스템 경계, 인터페이스, 개발 패턴, 현재 도메인 규칙 |
+| [Harness로 추가 개발하기](harness-secondary-development.kr.md) | 하나의 구체적인 작업을 통한 개발과 검증 |
+| [common 공통 기능](common-core.kr.md) | 공통 도구가 필요한 이유, 사용법, 확장 방법 |
+| [멀티테넌트](tenancy-principles.kr.md) | 회사별 데이터 분리부터 프레임워크 처리, 권한, 백그라운드 작업까지 |
+| [워크플로](workflow-principles.kr.md) | 신청 한 건의 승인부터 엔진, 모델, 후보자, 작업, 메시지까지 |
+| [통합 로그 수집](logging-principles.kr.md) | 실행 로그·작업 기록·보안 감사의 차이부터 수집, 조회, 확장까지 |
+| [통합 MQ 관리](mq-principles.kr.md) | 비동기 메시지의 기초부터 Outbox, 재시도, 멱등성, 관리와 복구까지 |
+| [분산 예약 작업(XXL-JOB)](distributed-jobs-principles.kr.md) | 시간표와 멱등성부터 프레임워크 내부, 두 실행 계열, 실제 관리 화면까지 |
+| [인증과 인가](authentication-principles.kr.md) | 신원과 권한의 기초부터 방식 선택, 프레임워크 소스, 로그인 구현까지 |
+| [관측 가능성: 메트릭·로그·트레이스·경보](observability-principles.kr.md) | 시스템이 느린 이유부터 도구 분담, 실제 설정, 문제 조사 순서까지 |
 
-## 5. 문서 사이트와 유지보수
+화면을 먼저 살펴보려면 그림으로 보는 사용법부터, 로컬에서 실행하려면 프리셋 선택부터 시작하세요. 튜토리얼의 스크린샷과 업무 번호는 예시일 뿐입니다. 실제 결과는 이번 실행이 반환한 ID를 기준으로 합니다.
 
-[독립 문서 사이트](site-maintenance.kr.md)는 Docker 빌드, 4173 포트, 로컬 검색, 정적 결과물, 호스팅 플랫폼별 소스 링크를 설명합니다. 저장소 Markdown이 유일한 본문 원본이며 언어 디렉터리는 매니페스트로 생성합니다.
+## 디렉터리 역할
 
-현재 사실, 설계, 튜토리얼, ADR, 검수 이력의 책임은 [저장소 규칙](../repository-governance.md)에 있습니다. 과거 검수는 당시 범위만 증명합니다. 사이트 미리보기는 번역 검토나 릴리스 완료를 의미하지 않습니다.
+| 디렉터리 | 담당하는 것 | 들어갈 시점 |
+|---|---|---|
+| `omni-backend/` | Spring Boot 마이크로서비스와 common 모듈 | 백엔드 구현, 인증, 테넌트, 워크플로, 업무 도메인을 볼 때 |
+| `omni-frontend/` | Vue 단일 애플리케이션(사이트, 워크스페이스, 콘솔, 포털) | 화면, 라우팅, 권한, 프런트엔드 테스트를 볼 때 |
+| `scaffold/` | 모듈 카탈로그와 다섯 프리셋의 단일 사실 원천 | 프리셋을 선택하거나 축소하고 모듈 의존성 집합을 확인할 때 |
+| `database/` | Liquibase 마이그레이션과 시드 단언 매니페스트 | 테이블 구조, 시드, 마이그레이션 상태를 확인할 때 |
+| `docker/` | 애플리케이션, 도구, 문서 이미지의 빌드 파일 | 이미지를 빌드하거나 배포할 때 |
+| `docs/` | 사실 문서, 가이드, Wiki, 문서 품질 스크립트 | 계약, 튜토리얼, 게시 상태를 찾을 때 |
+| `ai/` | 공유 AI 자산의 규범 원천과 파생 adapter | AI 워크플로를 사용하거나 유지할 때 |
+| `tools/` | CLI, 프리셋 생성, 문서와 품질 스크립트 | 프리셋을 생성하고 품질 게이트나 문서 검사를 실행할 때 |
+| `observability/` | 메트릭, 트레이싱, 로그, 경보 설정 | 로컬 관측 스택을 구성할 때 |
+| `scripts/` | 정식 SQL 시드, fixture, 운영 스크립트 | 데이터를 초기화하거나 통제된 fixture를 실행할 때 |
+
+이 표는 역할과 들어갈 시점만 설명합니다. 구체적인 클래스, 인터페이스, 데이터 흐름은 해당 사실 문서와 소스를 기준으로 합니다.
+
+## 저장소 관계
+
+소스 코드는 [Gitee](https://gitee.com/wang-baohai/Omni-Stack)를 `origin`(fetch/push)으로, [GitHub](https://github.com/wang-baohai/Omni-Stack)를 push 원격으로 사용합니다. Wiki 본문은 이 저장소의 `docs/`에서 나오며 매니페스트로 사이트를 생성하므로 본문을 두 번 관리하지 않습니다. 중국어가 내용 기준이며 다른 언어의 검토 상태는 [문서 매니페스트](../docs-manifest.yaml)를 따릅니다. 사이트가 빌드된다고 해서 번역이 검토되었다는 뜻은 아닙니다.
+
+## 기술 참조
+
+시스템 경계, 요청 흐름, 인터페이스 형식을 정확히 확인할 때는 [시스템 아키텍처](../architecture.kr.md), [핵심 흐름](../core-flows.kr.md), [API 계약](../api-contract.kr.md)을 읽어보세요. 이 문서는 개발 규칙을 관리하며, 실제 조작은 해당 그림 튜토리얼에서 시작합니다. 과거 인수 기록은 현재 실행 환경의 검증을 대신할 수 없습니다.

@@ -5,7 +5,7 @@
  */
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import QRCode from 'qrcode'
 import { useUserStore } from '@/stores/user'
@@ -16,8 +16,10 @@ import {
   pollDeviceToken,
   DEVICE_CLIENT_ID,
 } from '@/api/auth'
+import { safeAppRedirect } from '@/utils/navigation'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const appStore = useAppStore()
@@ -91,7 +93,9 @@ async function pollOnce() {
       const username = extractUsernameFromJwt(token.access_token)
       if (username) userStore.setUsername(username)
       ElMessage.success(t('device.success'))
-      setTimeout(() => router.replace({ name: 'Dashboard' }), 1000)
+      // 设备页由站内链接进入时可携带已校验的回跳目标；伪造或外站目标一律回控制台首页
+      const redirect = safeAppRedirect(route.query.redirect)
+      setTimeout(() => router.replace(redirect ?? { name: 'Dashboard' }), 1000)
     }
     // token 为 null 表示 authorization_pending 或 slow_down，继续轮询
   } catch (err) {

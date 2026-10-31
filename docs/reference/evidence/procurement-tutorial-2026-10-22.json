@@ -1,0 +1,41 @@
+{
+  "step": "WP-27.S02/S03/S04",
+  "object": "procurement_tutorial_four_language_images",
+  "generated_at": "2026-10-22T01:30:00Z",
+  "environment": {
+    "project": "omni-stack",
+    "frontend": "omni-stack-omni-frontend-1:3000",
+    "verifier": "omni-stack-verifier",
+    "image": "omni-frontend:latest sha256:1d634d3c16df"
+  },
+  "capture": {
+    "scenes": 12,
+    "locales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "images": 48,
+    "identity": "admin real CAPTCHA; supplier portal via official invite/register/enroll with real CAPTCHA",
+    "source_scripts": [
+      "wiki-workspace-ux.records.local/wp27-s02-capture.mjs",
+      "wiki-workspace-ux.records.local/wp27-s02-final-capture.mjs",
+      "wiki-workspace-ux.records.local/wp27-s03-images.mjs",
+      "wiki-workspace-ux.records.local/wp27-s04-i18n-images.mjs"
+    ],
+    "not_captured": [
+      "supplier lifecycle write actions beyond quotation",
+      "cross-scope employee procurement 403"
+    ]
+  },
+  "desensitization": {
+    "tokens_or_passwords_present": false,
+    "phones_masked": true,
+    "emails_masked": true,
+    "test_data_only": true
+  },
+  "verification_status": "HISTORICAL_UNVERIFIED_SUPERSEDED_NOT_CURRENT_ACCEPTANCE",
+  "superseded_by": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+  "verification_notice": "Original 2026-10-22 author claims, including identity and visual coverage, are preserved for history only. Current Codex acceptance does not endorse its real-CAPTCHA claim or sampled review. Published images and current fixture identities are defined by the superseding 176-image record."
+}

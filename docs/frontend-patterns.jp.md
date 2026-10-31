@@ -103,6 +103,7 @@ Router は `createWebHistory(import.meta.env.BASE_URL)` を使用します。静
 | `/supplier-portal` | token と portalAccess 方針が必要 |
 | `/menu-load-error` | token が必要。メニュー再試行 |
 | `/admin`、`/admin/dashboard` | 管理レイアウト・既定子画面。管理アクセス方針を適用 |
+| `/workspace`、`/workspace/overview` | 保護対象。ルートは統合コックピットへ移り、旧承認・ジョブルートは5.1の同一画面内パネルへ移る |
 | `/admin/:pathMatch(.*)*`、`/:pathMatch(.*)*` | それぞれ403/404画面。前者は保護、後者は公開 |
 
 保護ルートで token がなければ safeAppRedirect でアプリ内復帰先を保持し、Login/PortalLogin を選びます。token があれば毎回 initFromToken を行います。メニュー未完了時は loadMenus を待って登録・replace 再遷移し、失敗は MenuLoadError に進みます。残りの分岐は登録を補い、管理・サプライヤーポータル・資産本人の方針を適用します。token の存在やデコードは署名の有効性・期限を証明せず、サーバー要求には引き続き認証が必要です。
@@ -112,6 +113,22 @@ Router は `createWebHistory(import.meta.env.BASE_URL)` を使用します。静
 `import.meta.glob('../views/**/index.vue')` で遅延ビューを取得します。viewOverrides は system:oauth2→views/oauth2-client/index.vue、base:operlog→views/monitor/oper-log/index.vue の二件です。動的 meta は title/icon/requiresAuth/permissionCode を持ちますが型は任意項目で、全静的記録が全部を指定しているわけではありません。登録名で重複を防ぎ、終了時に削除します。
 
 メニュー失敗でも menusLoaded=true になるため、idle/loading/loaded/failed も確認します。retryLoadMenus はリセットして再取得します。復旧操作は Wiki に記載します。
+
+---
+
+### 5.1 ホーム、ワークスペース、アプリの移動境界
+
+公式 CLI は catalog が解決したモジュールの依存閉包を `OMNI_FRONTEND_MODULES` でフロントエンドのビルド引数 `VITE_OMNI_MODULES` に渡します。ソースを小さいプリセットでビルドすると、ビュー解決とクライアント側の表示権限をその選択範囲に限定します。workflow がなければプロセス統計を要求せず承認パネルも表示しません。SRM がなければサプライヤーの入口も提供しません。この引数を指定しない直接ビルドは従来の全体動作を保ち、生成プロジェクトは実際に残るファイルにも制約されます。この絞り込みは JWT、DB のロール、サーバー認可を変更しません。実装は [deployment-modules.ts](../omni-frontend/src/utils/deployment-modules.ts)です。
+
+ホームのワークスペース入口は同一オリジンの通常リンクで、新しいタブを `noopener noreferrer` 付きで開きます。既存セッションを共有し、URL に token を入れません。ワークスペースにホーム/Wiki への戻り口はありません。
+
+概要、承認、マイジョブは `/workspace/overview` で既存一覧・フォーム・API を再利用します。旧 `/workspace/approvals`、`/workspace/jobs` は query を保ち、`#approvals`、`#my-tasks` へ移ります。三画面を別々には維持しません。
+
+ワークスペースのアプリと検索は権限があり実ビューを持つ全メニューが対象で、業務入口は新しいタブを開きます。業務レイアウトに全体アプリボタンやパネルはなく、サイドバーは現在のモジュールに集中します。検索は安定した根 ID `route.meta.appId` で入れるページを絞り、選択時も対象 appId を再確認して同じタブで移動します。無効 ID は候補なしで、URL 接頭辞から推測しません。
+
+非公開エラーページもホーム・前の画面への回復ボタンを持ちません。不明なモジュールや権限エラーでダッシュボードを代替メニューにしません。ブラウザの戻る、タブ切替、アドレス入力は制限せず、画面の境界でサーバー認可を代用しません。初回メニュー読込後は `resolveMenuReloadTarget()` で path、query、hash を個別に渡し、path に fullPath を入れず戻り先引数とアンカーを保ちます。
+
+実装は [ConsoleHeader](../omni-frontend/src/components/ConsoleHeader.vue)、[ワークスペース](../omni-frontend/src/views/workspace/index.vue)、[移動用ツール](../omni-frontend/src/utils/navigation.ts)です。
 
 ---
 
@@ -242,6 +259,8 @@ const { options, loading } = useDictOptions('workflow_category')
 ---
 
 ## 15. ビルドと静的配信の境界
+
+フロントエンドイメージはアプリの構築後、同じリポジトリの Wiki を順番に構築し、同じ3000ポートの `/wiki/` で公開静的ページを配信します。公開の `/` はログインなしで本文を表示し、認証状態はアカウント領域だけを変えます。ワークスペースと業務ルートの認証ガードは維持します。Wiki ファイルがなければアプリのホームへ戻さず404を返します。同一オリジンでの埋め込みを許可するのは Wiki 文書だけで、起動スクリプトにはレスポンスの nonce を使用します。ログインと業務パスの既存の安全方針は維持します。
 
 [フロントエンド Dockerfile](../docker/frontend/Dockerfile) は Node 22 で構築し、Nginx 1.28 で dist を3000から配信します。現在の [Nginx](../docker/frontend/nginx.conf) は /api/、/oauth2/、/.well-known/ を Docker DNS で omni-gateway:8080 に転送し、index.html の history フォールバックを提供します。
 

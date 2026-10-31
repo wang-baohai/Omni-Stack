@@ -1,58 +1,51 @@
-# Omni-Stack learning and maintenance Wiki
+# Omni-Stack documentation
 
-Baseline: main `fc165e3` and its documentation remediation branch. Readers are expected to know basic Java/Vue and be new to this project. Chinese is the content baseline; [简体中文](index.md), [日本語](index.jp.md), and [한국어](index.kr.md) stay aligned. Actual translation review status, distinguishing HUMAN_REVIEW from owner-authorized AI_REVIEW, is recorded in the [documentation manifest](../docs-manifest.yaml).
+This documentation explains what Omni-Stack is, how to use and start it, and how to develop it further. The sidebar starts with the project and its use, then development methods and key technologies. Engineering reference follows startup instructions so precise rules remain easy to find.
 
-## 1. Start from scratch
+[简体中文](index.md) · [日本語](index.jp.md) · [한국어](index.kr.md) · [Project overview and highlights](../../README.en.md)
 
-Complete the first four steps in order, then choose a business path for your role. Verify each expected result in local Docker.
+## Start reading
 
-| Step | Read and do | Expected result |
-|---|---|---|
-| 1 | [Get the code, understand the tree, and start](../guides/quick-start.en.md) | Migrator exits successfully, selected services are healthy, frontend is reachable |
-| 2 | [Login and tenants](../guides/authentication.en.md) | Real CAPTCHA login with the intended tenant and identity |
-| 3 | [Roles, menus, buttons, and data scope](../guides/permissions.en.md) | Admin and employee capabilities differ; unauthorized requests are denied |
-| 4 | [Seeds, teaching data, and test fixtures](data-and-fixtures.en.md) | Distinguish an empty environment, base seeds, and business demonstration records |
-| 5 | [Select a preset](../preset-quick-selection.en.md) and [generate a project](../guides/scaffold-development.en.md) | Explain running a subset versus generating a pruned project |
-
-## 2. Learn by role
-
-| Role or objective | Path | Prerequisites |
-|---|---|---|
-| Platform administrator | [System, security, and audit](../guides/system-security-audit.en.md) | core; tenant administrator role |
-| Employee and approver | [Workflow](../guides/workflow-approval.en.md), [personal and system jobs](../guides/scheduling.en.md) | workflow; candidate assignment and task ownership |
-| Sales | [CRM leads to opportunities](../guides/crm-flow.en.md) | crm; sales role and data scope |
-| Supplier administrator and supplier | [SRM onboarding and portal](../guides/srm-flow.en.md) | supply-chain; invitation, SUPPLIER role, and active association |
-| Requester, buyer, supplier | [Requisition to receipt](../guides/procurement-flow.en.md) | supply-chain; approval models, active suppliers, procurement permissions |
-| Asset administrator, user, approver | [Asset creation, allocation, transfer, disposal](../guides/asset-flow.en.md) | supply-chain; accepted asset-managed receipts and approval models |
-| Operator | [Operations, backups, upgrades](../guides/operations-upgrade.en.md), [troubleshooting](../guides/troubleshooting.en.md) | Confirmed local environment and backup boundaries |
-
-Base seeds do not guarantee orders or approvals shown in historical screenshots. Business numbers in images are examples; use IDs returned by your own operations. Do not change SQL state to bypass approvals, quotes, or receipt processing.
-
-## 3. Read source and extend the project
-
-- [Source reading and breakpoints](source-debugging.en.md): follow a request through permissions, transactions, events, tests, and failures.
-- [Service and CRUD generation](../guides/scaffold-development.en.md): dry-run before generating, integrating, and verifying.
-- [Dependency matrix](../preset-dependency-matrix.en.md), [maintenance](../preset-maintenance.en.md), [custom presets](../custom-preset-tutorial.en.md), [upgrades](../preset-upgrade-guide.en.md): fact tables derive from the catalog.
-- [Architecture](../architecture.en.md), [API contract](../api-contract.en.md), [core flows](../core-flows.en.md): current engineering reference for maintainers.
-- [Backend](../backend-patterns.en.md) and [frontend conventions](../frontend-patterns.en.md): read the relevant rules before changing code.
-
-## 4. Glossary
-
-| Term | Meaning in this project |
+| Chapter | Main content |
 |---|---|
-| preset | Module selection; catalog computes its full dependency closure |
-| migrator | One-shot process for schema migration, idempotent seeds, and bootstrap configuration before applications start |
-| tenant | Isolation boundary; ALL scope still cannot cross tenants |
-| RBAC / DataScope | Functional permission and row visibility, both enforced |
-| Gateway assertion | Signed gateway identity; downstream services distrust client identity headers |
-| Outbox / Inbox | Transactional pending events / consumer deduplication records |
-| Saga | Distributed steps and compensation, not cross-service ACID transactions |
-| fixture | Test or teaching setup with explicit tenant, business keys, and cleanup boundaries |
-| ADR | Historical decision with rationale, consequences, and supersession |
-| Harness | Execution loop formed by facts, constraints, tools, and verification |
+| [Project introduction](../../README.en.md) | Project purpose and highlights; directory responsibilities appear below |
+| [Illustrated feature tutorials](usage-platform.en.md) | Screenshots explaining the home page, workspace, and business modules |
+| [Harness concepts and engineering practice](harness-what-and-why.en.md) | What Harness means and how engineering facts support AI development |
+| [Choosing, building, and starting a preset](presets-overview.en.md) | Understand presets, then follow the startup instructions for your choice |
+| [Engineering reference](../architecture.en.md) | Check boundaries, interfaces, development patterns and current domain rules |
+| [Further development with Harness](harness-secondary-development.en.md) | Development and verification through one concrete task |
+| [Shared common capabilities](common-core.en.md) | Why the shared tools exist and how to use and extend them |
+| [Multiple tenants](tenancy-principles.en.md) | From separating companies’ data to framework interception, permissions, and background tasks |
+| [Workflow](workflow-principles.en.md) | Follow an application through approval, then explore the engine, models, candidates, tasks, and messages |
+| [Centralized log collection](logging-principles.en.md) | Distinguish runtime, operation, and security logs, then learn collection, queries, and extension |
+| [Unified MQ management](mq-principles.en.md) | From asynchronous messages to Outbox, retries, idempotency, and management recovery |
+| [Distributed scheduled jobs (XXL-JOB)](distributed-jobs-principles.en.md) | From timetables and idempotency to framework internals, the two project tracks and real Admin screens |
+| [Authentication and authorization](authentication-principles.en.md) | Start with identity and permissions, then explore design choices, framework source, and login implementation |
+| [Observability: metrics, logs, traces, and alerts](observability-principles.en.md) | Start with a slow system, then learn the tools, actual configuration, and troubleshooting steps |
 
-## 5. Website and maintenance
+Start with the illustrated tutorials to explore the interface, or with preset selection to run the project locally. Screenshots and business numbers in tutorials are examples only; use the IDs returned by your own run.
 
-[Independent documentation site](site-maintenance.en.md) covers Docker builds, port 4173, local search, static output, and repository links across hosts. Repository Markdown is the sole content source; locale directories are generated from the manifest.
+## Directory responsibilities
 
-Current facts, designs, tutorials, ADRs, and acceptance history have separate responsibilities; see [repository governance](../repository-governance.md). Historical acceptance only proves its original scope. A site preview does not mean translation review or release is complete.
+| Directory | Responsibility | When to enter |
+|---|---|---|
+| `omni-backend/` | Spring Boot microservices and common modules | Backend implementation, authentication, tenants, workflow, and business domains |
+| `omni-frontend/` | Vue single application (site, workspace, console, portal) | UI, routing, permissions, and frontend tests |
+| `scaffold/` | Single source of truth for the module catalog and five presets | Choosing or trimming a preset, confirming the module dependency set |
+| `database/` | Liquibase migrations and the seed assertion manifest | Checking schema, seeds, and migration state |
+| `docker/` | Build files for application, tool, and documentation images | Building or deploying images |
+| `docs/` | Fact documents, guides, the Wiki, and documentation quality scripts | Looking up contracts, tutorials, and publication status |
+| `ai/` | Normative sources and derived adapters for shared AI assets | Using or maintaining AI workflows |
+| `tools/` | CLI, preset generation, documentation and quality scripts | Generating presets, running quality gates or documentation checks |
+| `observability/` | Metrics, tracing, logging, and alerting configuration | Configuring the local observability stack |
+| `scripts/` | Formal SQL seeds, fixtures, and operations scripts | Initializing data or running controlled fixtures |
+
+The directory table only describes responsibilities and when to enter; concrete classes, interfaces, and data flows follow the matching fact documents and source.
+
+## Repository relationships
+
+Source code uses [Gitee](https://gitee.com/wang-baohai/Omni-Stack) as `origin` (fetch/push), and [GitHub](https://github.com/wang-baohai/Omni-Stack) as the push remote. Wiki content comes from `docs/` in this repository; the site is generated from the manifest, with no second copy of the content. Chinese is the content baseline; review status for other languages follows the [documentation manifest](../docs-manifest.yaml). A site that builds does not mean its translations have been reviewed.
+
+## Engineering reference
+
+Read [System architecture](../architecture.en.md), [Core flows](../core-flows.en.md), and the [API contract](../api-contract.en.md) to check precise system boundaries, request flows, or interface formats. These documents maintain engineering rules; use the matching illustrated tutorial for operating instructions. Historical acceptance records cannot replace current runtime verification.

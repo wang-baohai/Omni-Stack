@@ -468,7 +468,7 @@ onMounted(async () => {
       width="520px"
       destroy-on-close
     >
-      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryRules" label-width="100px">
+      <el-form ref="categoryFormRef" :model="categoryForm" :rules="categoryRules" label-width="auto">
         <el-form-item :label="t('procurementMaterialPage.parentCategory')">
           <el-tree-select
             v-model="categoryForm.parentId"
@@ -505,7 +505,7 @@ onMounted(async () => {
       width="620px"
       destroy-on-close
     >
-      <el-form ref="materialFormRef" :model="materialForm" :rules="materialRules" label-width="100px">
+      <el-form ref="materialFormRef" :model="materialForm" :rules="materialRules" label-width="auto">
         <el-form-item :label="t('procurementMaterialPage.materialCode')" prop="materialCode">
           <el-input v-model="materialForm.materialCode" :disabled="Boolean(editingMaterial)" maxlength="64" />
         </el-form-item>

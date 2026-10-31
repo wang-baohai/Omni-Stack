@@ -302,7 +302,7 @@ onMounted(() => {
 
     <!-- 新增用户对话框 -->
     <el-dialog v-model="createDialogVisible" :title="t('user.createUser')" width="500px">
-      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="80px">
+      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="auto">
         <el-form-item :label="t('user.username')" prop="username">
           <el-input v-model="createForm.username" :placeholder="t('user.usernamePlaceholder')" />
         </el-form-item>

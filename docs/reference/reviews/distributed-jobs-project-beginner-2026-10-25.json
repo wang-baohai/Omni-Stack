@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "distributed-jobs-project",
+  "source": "docs/wiki/distributed-jobs-project.md",
+  "source_sha256": "e74ce5d764aabd3d9130bb24b980070b0f53b703c196afaf5f3dd26d6c73ffad",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Actual current article, literal source and reviewed-image digests",
+  "method": "本人逐篇实际完整读完七篇中文与21篇英日韩，日文正文自然化后复核；随后对八篇使用/恢复最终全文再读，另两处My Jobs实际界面名称改动逐项复核。12张适用原生/工作台/表单图逐张看过。脚本仅绑定既有真实审校与摘要，不产生机器语义盖章或真人签核。",
+  "image_bindings": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/distributed-jobs-project.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "b5ed9e191763d8372296dbef09fef9404daf248bafb6d6e007b09bbb13b38f8a",
+      "checks": {
+        "coverage_and_meaning": "完整解释双注解系统目录、个人共享入口、Bean名路由、个人结果落库、父任务归属与注册未知结果的恢复关联。",
+        "technical_literals": "SystemJobRegistry、UserJobHandlerRegistry、UserJobExecuteHandler、MyJobController原文均保留；Task-00001、userJobExecuteHandler与显式tenantId准确。",
+        "security_and_failure_semantics": "只有确认远端无残留才删本地，查询清理失败保留恢复关联；参数解析和落库失败可能无个人日志，不夸称所有SQL额外租户过滤或共同事务。",
+        "language_and_terminology": "全文逐段对照中文复读，dispatch/execute/callback和ownership不混同；按当前截图统一My Jobs与Trigger Now原生文字，代码原文不改。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/distributed-jobs-project.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "42e8d56101738e0123a28118a9eaf600d2159365556990ff3106e232c639dd1b",
+      "checks": {
+        "coverage_and_meaning": "完整解释双注解系统目录、个人共享入口、Bean名路由、个人结果落库、父任务归属与注册未知结果的恢复关联。",
+        "technical_literals": "SystemJobRegistry、UserJobHandlerRegistry、UserJobExecuteHandler、MyJobController原文均保留；Task-00001、userJobExecuteHandler与显式tenantId准确。",
+        "security_and_failure_semantics": "只有确认远端无残留才删本地，查询清理失败保留恢复关联；参数解析和落库失败可能无个人日志，不夸称所有SQL额外租户过滤或共同事务。",
+        "language_and_terminology": "全文复读后自然化概念、派发、阻塞方针与复旧用语；按当前截图统一マイジョブ/今すぐ実行/毎分，原生中文配置和值与源码注释如实保留。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/distributed-jobs-project.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "d7b6ab92a3e37dd502ac01048b933c98e69d4b32adc91579610e643852ddfc02",
+      "checks": {
+        "coverage_and_meaning": "完整解释双注解系统目录、个人共享入口、Bean名路由、个人结果落库、父任务归属与注册未知结果的恢复关联。",
+        "technical_literals": "SystemJobRegistry、UserJobHandlerRegistry、UserJobExecuteHandler、MyJobController原文均保留；Task-00001、userJobExecuteHandler与显式tenantId准确。",
+        "security_and_failure_semantics": "只有确认远端无残留才删本地，查询清理失败保留恢复关联；参数解析和落库失败可能无个人日志，不夸称所有SQL额外租户过滤或共同事务。",
+        "language_and_terminology": "全文逐段对照中文复读，배정/실행/콜백与소유권边界完整；新表单실행 일정/매분与实际截图一致，共享中文数据明确说明。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    }
+  }
+}

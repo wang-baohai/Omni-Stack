@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "original_step": "WP-24.S02",
+  "scope": "只替换全功能教程的四张首页图，其他120平台场景图不由本记录签核",
+  "capture_script": "scripts/fixtures/capture-wiki-home.mjs",
+  "capture_script_sha256": "c441385d61ab20c731132893c5b05dac96b76a7667fb3f6785caf99ced05a68a",
+  "runtime_image_id": "sha256:fd39f8a85a78a815f756b65770b3ffe77788e697f92a515f807b9d5d2deeacc4",
+  "identity_source": "anonymous-no-token",
+  "human_captcha_login_claimed": false,
+  "response_mocked": false,
+  "display_dom_modified": false,
+  "workers": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "working-tree contents with current per-file digests, not a clean commit claim",
+  "screenshots": [
+    {
+      "id": "platform-site-home-zh-CN",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/platform-site-home.png",
+      "image_sha256": "3b2f518ab71e0a889d1c6c38d87c9fb372b36eb8bb7ce5fb85cbc83f56264cd1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T10:25:09.894Z",
+      "wiki_body_sha256": "907543a61dd78c631b49d0aa6d382d39ebbd81073a1e6ec4424b1bdb86242e1c",
+      "wiki_chapters": 10,
+      "header": "Omni-Stack\n中\n供应商入口\n登录",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-24 18:27:37",
+      "result": "passed-scoped",
+      "finding": "本人逐张查看完整1920×1080原图：本语正文/搜索/两侧目录和十章表清晰，外层为真实匿名登录与供应商入口，旧Hero/立即开始不再出现；未见账号、令牌、密码、Cookie或验证码答案。"
+    },
+    {
+      "id": "platform-site-home-en-US",
+      "locale": "en-US",
+      "image": "docs/images/en-US/platform-site-home.png",
+      "image_sha256": "9fc26a247eb369980f5692b017d23b9507f19f1bef332be3684ceabf20de02d2",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T10:25:10.971Z",
+      "wiki_body_sha256": "827c109f1a6f77fb811596e526915d3c0171ad89e8d5cf38b8a57df2292695d7",
+      "wiki_chapters": 10,
+      "header": "Omni-Stack\nEN\nSupplier Portal\nLogin",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-24 18:27:37",
+      "result": "passed-scoped",
+      "finding": "本人逐张查看完整1920×1080原图：本语正文/搜索/两侧目录和十章表清晰，外层为真实匿名登录与供应商入口，旧Hero/立即开始不再出现；未见账号、令牌、密码、Cookie或验证码答案。"
+    },
+    {
+      "id": "platform-site-home-ja-JP",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/platform-site-home.png",
+      "image_sha256": "7ac8e1d11f63e5778e66c739218efc946ecd680af2b56e955538196266c5ab3d",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T10:25:12.061Z",
+      "wiki_body_sha256": "1fccd65afbc038150aa98ac5483c2c7810db194ddf2e964c4ddb87416e88ead0",
+      "wiki_chapters": 10,
+      "header": "Omni-Stack\n日\nサプライヤー入口\nログイン",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-24 18:27:37",
+      "result": "passed-scoped",
+      "finding": "本人逐张查看完整1920×1080原图：本语正文/搜索/两侧目录和十章表清晰，外层为真实匿名登录与供应商入口，旧Hero/立即开始不再出现；未见账号、令牌、密码、Cookie或验证码答案。"
+    },
+    {
+      "id": "platform-site-home-ko-KR",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/platform-site-home.png",
+      "image_sha256": "8cbcb87fa83aeeda73de91216da4da6a2a08bf3e447441818020bc85afd045d0",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T10:25:13.141Z",
+      "wiki_body_sha256": "d41290c1fdcdd3dac9319620afdd854a000cdb205bdf21259f62e8562062147e",
+      "wiki_chapters": 10,
+      "header": "Omni-Stack\n한\n공급업체 입구\n로그인",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-24 18:27:37",
+      "result": "passed-scoped",
+      "finding": "本人逐张查看完整1920×1080原图：本语正文/搜索/两侧目录和十章表清晰，外层为真实匿名登录与供应商入口，旧Hero/立即开始不再出现；未见账号、令牌、密码、Cookie或验证码答案。"
+    }
+  ],
+  "boundary": "截图来自十章正式运行镜像；随后仅教程图文打包会改变镜像摘要，最终绑定须复验首页正文与本图匹配，不把旧镜像号改成未来镜像号。"
+}

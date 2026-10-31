@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-device-social",
+  "source": "docs/wiki/authentication-device-social.md",
+  "source_sha256": "56c414170ab9c669a1b754b3d2e8a73bca6d798303187cbbd421acf0cc66b32d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-device-social.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 18:05:27",
+      "result": "approved",
+      "translation_sha256": "e20f216cf4950cdaa657145c0b49fb325cc6aa7dd3e16044201af4bf8d7da552",
+      "checks": {
+        "coverage_and_meaning": "device_code/user_code与完整时序、五设备限制、三提供商编排/标识/前缀/绑定、state/错误表、注册与门户全过程完整。",
+        "technical_literals": "五连续源码原文与提供商id/sub/gh_/go_/ge_、10分钟、唯一重试、端点字段保留；两时序标签逐项对应。",
+        "security_and_failure_semantics": "slow_down不退避、拒绝只本地；全局社交绑定不按state迁租；state无nonce/一次消费/浏览器绑定；门户SUPPLIER+ACTIVE不能以管理员代替。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        },
+        {
+          "id": "mermaid-sequence-semicolon",
+          "status": "resolved",
+          "description": "实际G5英文社交登录时序图遇分号被解析为语句分隔而失败；构建门未覆盖此语法。",
+          "resolution": "只将两标签中的分号改为逗号，文字含义和工程源码不变；增量实际复读后，容器浏览器用同版本解析器检验全部44图通过，原分号负例真实拒绝；新镜像页面仍需重验。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-device-social.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:40:16",
+      "result": "approved",
+      "translation_sha256": "765bdd1ebf531bc2799355d2d47200d11a0c91e6c7f6fc0dbace486d90ead521",
+      "checks": {
+        "coverage_and_meaning": "device_code/user_code与完整时序、五设备限制、三提供商编排/标识/前缀/绑定、state/错误表、注册与门户全过程完整。",
+        "technical_literals": "五连续源码原文与提供商id/sub/gh_/go_/ge_、10分钟、唯一重试、端点字段保留；两时序标签逐项对应。",
+        "security_and_failure_semantics": "slow_down不退避、拒绝只本地；全局社交绑定不按state迁租；state无nonce/一次消费/浏览器绑定；门户SUPPLIER+ACTIVE不能以管理员代替。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        },
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-device-social.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:40:16",
+      "result": "approved",
+      "translation_sha256": "bc02ba74be95bef70d9465fc5a18a0ea2a647fb7e7f1c73dee476a8621a1254f",
+      "checks": {
+        "coverage_and_meaning": "device_code/user_code与完整时序、五设备限制、三提供商编排/标识/前缀/绑定、state/错误表、注册与门户全过程完整。",
+        "technical_literals": "五连续源码原文与提供商id/sub/gh_/go_/ge_、10分钟、唯一重试、端点字段保留；两时序标签逐项对应。",
+        "security_and_failure_semantics": "slow_down不退避、拒绝只本地；全局社交绑定不按state迁租；state无nonce/一次消费/浏览器绑定；门户SUPPLIER+ACTIVE不能以管理员代替。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "korean-sequence-spacing",
+          "status": "resolved",
+          "resolution": "补自然空格，协议字段和消息顺序不改，修正后逐行复读。",
+          "description": "设备及社交时序初稿部分韩文未正常分词。"
+        },
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        }
+      ]
+    }
+  },
+  "rendering_delta_review": {
+    "at": "2026-10-24 18:05:27",
+    "step": "WP-09.S04",
+    "source": "actual browser failure ten-chapters-browser-r1",
+    "review": "只两处英文图标签标点变化，正文及工程/上游源码块保持；未冒称本次完整重读未变三语。",
+    "syntax_evidence": "wiki-workspace-ux.records.local/wp09-s04/diagram-preflight-r1/result.json",
+    "actual_runtime_recheck": "PENDING"
+  }
+}

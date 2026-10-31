@@ -1,9 +1,7 @@
 {
   "label": "简体中文",
-  "wiki": "学习路径",
-  "guides": "操作指南",
+  "wiki": "文档首页",
   "truth": "工程事实",
-  "design": "设计与历史",
   "outline": "本页内容",
   "search": "搜索文档",
   "back": "返回顶部",
@@ -29,5 +27,20 @@
   },
   "sourceOnlyTitle": "中文规范参考",
   "sourceOnlyNotice": "此文档按清单登记仅维护中文正文；这里是源文档入口，不代表已存在其他语言译文。",
-  "sourceOnlyLink": "阅读中文规范源"
+  "sourceOnlyLink": "阅读中文规范源",
+  "chapters": {
+    "WIKI-01": "项目介绍",
+    "WIKI-02": "Harness 思想与工程实践",
+    "WIKI-03": "全功能图文使用教程",
+    "WIKI-04": "预设选择、构建与启动",
+    "WIKI-05": "认证授权",
+    "WIKI-06": "多租户",
+    "WIKI-07": "工作流",
+    "WIKI-08": "common 公共支撑能力",
+    "WIKI-09": "使用 Harness 开展二次开发",
+    "WIKI-10": "可观测性：指标、链路、日志与告警",
+    "WIKI-11": "统一日志采集",
+    "WIKI-12": "统一MQ管理",
+    "WIKI-13": "分布式定时任务（XXL-JOB）"
+  }
 }

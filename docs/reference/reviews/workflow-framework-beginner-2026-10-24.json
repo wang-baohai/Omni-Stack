@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "workflow-framework",
+  "source": "docs/wiki/workflow-framework.md",
+  "source_sha256": "86d0413ebdcc47a130dab096a278af9b01518203a6cc70b68e72c7417f48c10b",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人完整复读七篇中文，再逐篇完整复读全部21篇英日韩，修改后检查差异；框架/工程源码已实际阅读，三译原文另作逐字绑定。不是抽样/机械QA盖章，不冒称真人、运行或图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/workflow-framework.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "77922ce8df381cb4ac52ac9ae6e49d87570d52f4cd92b839d66cb738ecc483f6",
+      "checks": {
+        "coverage_and_meaning": "统一命令、TaskHelper推进、多实例完成或条件满足、MI清理及部署五段原文逐段解释完整。",
+        "technical_literals": "五处代码与中文和Flowable8.0.0摘录逐字一致；原路径、行号、官方SHA256和许可出处保留。",
+        "security_and_failure_semantics": "推进不是同请求全部完成；MI_END不是投票；框架能力不冒称项目暴露或业务实测；官方版本/校验/许可和可选外链准确。",
+        "language_and_terminology": "全文对照中文实际复读；术语、句式和段落自然，events修正standalone与internal API歧义。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/workflow-framework.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "146dfa918c5f1576e8308d0b6fa0a3d94231babd8fba65bc82a7eebc87d301d4",
+      "checks": {
+        "coverage_and_meaning": "统一命令、TaskHelper推进、多实例完成或条件满足、MI清理及部署五段原文逐段解释完整。",
+        "technical_literals": "五处代码与中文和Flowable8.0.0摘录逐字一致；原路径、行号、官方SHA256和许可出处保留。",
+        "security_and_failure_semantics": "推进不是同请求全部完成；MI_END不是投票；框架能力不冒称项目暴露或业务实测；官方版本/校验/许可和可选外链准确。",
+        "language_and_terminology": "全文复读并修正claim/摘要/跨服务/设计器/组织关系等直译；保留源码注释原文，最终改动段落再次核对。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "result": "fixed-and-reread",
+          "resolution": "按所在页面改为引き受け/ハッシュ/組織関係/サービス間/ローカルトランザクション等自然措辞；实际差异已复读",
+          "issue": "日语claim/摘要/组织关系/跨服务及本地交易等直译",
+          "status": "resolved",
+          "id": "ja-JP-terminology-1",
+          "description": "日语claim/摘要/组织关系/跨服务及本地交易等直译"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/workflow-framework.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "c240461b28e503f9911263a01db2385a77b3bcdb66da8f88efe72042dc6f2f97",
+      "checks": {
+        "coverage_and_meaning": "统一命令、TaskHelper推进、多实例完成或条件满足、MI清理及部署五段原文逐段解释完整。",
+        "technical_literals": "五处代码与中文和Flowable8.0.0摘录逐字一致；原路径、行号、官方SHA256和许可出处保留。",
+        "security_and_failure_semantics": "推进不是同请求全部完成；MI_END不是投票；框架能力不冒称项目暴露或业务实测；官方版本/校验/许可和可选外链准确。",
+        "language_and_terminology": "全文复读并修正启用主组织修饰、设计画面用词及助词、兼容处理器与任务委派混淆、终止权限句式，最终差异复核。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -1,0 +1,12 @@
+                        CallbackRequest callback = getInstance().callBackQueue.take();
+                        if (callback != null) {
+
+                            // collect callback data
+                            List<CallbackRequest> callbackParamList = new ArrayList<>();
+                            callbackParamList.add(callback);                                            // add one element
+                            int drainToNum = getInstance().callBackQueue.drainTo(callbackParamList);    // drainTo other all elements
+
+                            // do callback, will retry if error
+                            if (CollectionTool.isNotEmpty(callbackParamList)) {
+                                doCallback(callbackParamList);
+                            }

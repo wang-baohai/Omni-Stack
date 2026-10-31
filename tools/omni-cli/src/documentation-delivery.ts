@@ -183,33 +183,49 @@ function pruneDomainSections(content: string, selected: Set<string>): string {
 
 function pruneScreenshotMetadata(root: string, selected: Set<string>): void {
   const directory = resolve(root, 'omni-frontend/e2e-docs');
+  const coveragePath = resolve(directory, 'screenshot-coverage.yaml');
+  type CoverageModule = { id: string; existing_assets?: string[]; required_flows?: string[]; required_states?: string[]; flow_modules?: Record<string, string[]>; flow_evidence?: Record<string, string>; gaps?: string[] };
+  const coverage = existsSync(coveragePath)
+    ? parse(readFileSync(coveragePath, 'utf8')) as { modules?: CoverageModule[] }
+    : {};
+  const requirements = new Map((coverage.modules ?? []).map((entry) => [entry.id, entry]));
+  const owners: Record<string, string> = {
+    authentication: 'auth', 'system-management': 'base', 'scheduling-workspace': 'xxl-job',
+    'platform-tutorial': 'base', 'crm-tutorial': 'crm', 'srm-tutorial': 'srm',
+    'procurement-tutorial': 'procurement', 'asset-tutorial': 'asset',
+  };
+  const keep = (module: string): boolean => {
+    const owner = owners[module] ?? (domainIds.includes(module) ? module : undefined);
+    return !owner || selected.has(owner);
+  };
+  // 适用性只取决于模块依赖；缺少证据必须由交付门报错，不能反向删除覆盖义务。
+  const flowIncluded = (module: string, flow?: string): boolean => keep(module) &&
+    (!flow || (requirements.get(module)?.flow_modules?.[flow] ?? []).every((owner) => selected.has(owner)));
   for (const name of ['screenshot-manifest.yaml', 'screenshot-coverage.yaml']) {
     const path = resolve(directory, name);
     if (!existsSync(path)) continue;
     const value = parse(readFileSync(path, 'utf8')) as {
-      screenshots?: Array<{ module: string; id: string; route: string }>;
-      terminal_evidence?: Array<{ module: string }>;
-      modules?: Array<{ id: string; existing_assets?: string[]; required_flows?: string[]; flow_modules?: Record<string, string[]>; flow_evidence?: Record<string, string>; gaps?: string[] }>;
+      screenshots?: Array<{ module: string; id: string; route: string; flow?: string }>;
+      terminal_evidence?: Array<{ module: string; flow?: string }>;
+      modules?: CoverageModule[];
     };
-    const keep = (module: string): boolean => module === 'scheduling-workspace'
-      ? selected.has('xxl-job')
-      : !domainIds.includes(module) || selected.has(module);
     const portal = (text: string): boolean => /supplier-portal|\/portal-(?:login|register)/.test(text);
     // 共享权限模块中的业务路由也有明确归属，不能把裁掉领域的取证入口交给生成物。
     const routeIncluded = (route: string): boolean => !domainIds.some((module) =>
       !selected.has(module) && route.startsWith(`/admin/${module}/`));
     if (value.screenshots) value.screenshots = value.screenshots.filter((entry) =>
-      keep(entry.module) && routeIncluded(entry.route) && (selected.has('srm') || !portal(entry.id + ' ' + entry.route)));
-    if (value.terminal_evidence) value.terminal_evidence = value.terminal_evidence.filter((entry) => keep(entry.module));
+      flowIncluded(entry.module, entry.flow) && routeIncluded(entry.route) && (selected.has('srm') || !portal(entry.id + ' ' + entry.route)));
+    if (value.terminal_evidence) value.terminal_evidence = value.terminal_evidence.filter((entry) => flowIncluded(entry.module, entry.flow));
     if (value.modules) value.modules = value.modules.filter((entry) => keep(entry.id)).map((entry) => {
       const removed = new Set((entry.required_flows ?? []).filter((flow) =>
-        (entry.flow_modules?.[flow] ?? []).some((module) => !selected.has(module))));
+        !flowIncluded(entry.id, flow)));
+      const remainingFlows = (entry.required_flows ?? []).filter((flow) => !removed.has(flow));
       return {
         ...entry,
-        ...(entry.required_flows ? { required_flows: entry.required_flows.filter((flow) => !removed.has(flow)) } : {}),
+        ...(entry.required_flows ? { required_flows: remainingFlows } : {}),
         ...(entry.flow_modules ? { flow_modules: Object.fromEntries(Object.entries(entry.flow_modules).filter(([flow]) => !removed.has(flow))) } : {}),
         ...(entry.flow_evidence ? { flow_evidence: Object.fromEntries(Object.entries(entry.flow_evidence).filter(([flow]) => !removed.has(flow))) } : {}),
-        ...(entry.gaps ? { gaps: entry.gaps.filter((gap) => !removed.has(gap)) } : {}),
+        ...(entry.gaps ? { gaps: entry.gaps.filter((gap) => flowIncluded(entry.id, gap)) } : {}),
         ...(entry.existing_assets ? { existing_assets: entry.existing_assets.filter((asset) =>
           (selected.has('srm') || !portal(asset)) && !domainIds.some((module) => !selected.has(module) && asset.includes(`/${module}-`))) } : {}),
       };

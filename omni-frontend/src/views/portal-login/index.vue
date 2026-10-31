@@ -9,17 +9,17 @@ import { ElMessage } from 'element-plus'
 import LoginForm from '@/components/LoginForm.vue'
 import LanguageSelector from '@/components/LanguageSelector.vue'
 import { useAppStore } from '@/stores/app'
-import { safeAppRedirect } from '@/utils/navigation'
+import { resolveAppLanding } from '@/utils/navigation'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 
-/** 登录成功回调：跳转到供应商门户工作台 */
+/** 登录成功回调：优先回到已校验的原目标，否则进入供应商门户工作台 */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
-  router.push(safeAppRedirect(route.query.redirect) || '/supplier-portal')
+  router.push(resolveAppLanding(route.query.redirect, { entry: 'portal' }))
 }
 
 /** 切换主题模式 */

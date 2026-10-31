@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "mq-practice",
+  "source": "docs/wiki/mq-practice.md",
+  "source_sha256": "d4cb680a99ad1a27b98b91def4093a116ca0a3d139eda15162e2f2237e6e93d9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/mq-practice.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "150e483e876213f489e2e8033f8ed45b72798786c353e1eba4e73dcda39dd083",
+      "checks": {
+        "coverage_and_meaning": "六态、管理范围、运行开关、先查后动作与正式恢复说明完整。",
+        "technical_literals": "Base/CRM常量、runtime接口、deliveryEnabled两开关、FAILED/DEAD_LETTER/SKIPPED和权限原义准确。",
+        "security_and_failure_semantics": "只读实拍非重发验收，其他服务不在列表不等于丢失；CAS与租户/功能权限边界明确；日文已复读修正。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "已本人实际查看本语引用PNG；8图摘要见unified-support-tutorial证据。长编号/时间局部截断，图不作完整字段或写动作证明；本语邻页有效。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/mq-practice.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "946008b98f4326a4e48479495963d85be264ddcc1a8e8af5e8a5196bb5787b6c",
+      "checks": {
+        "coverage_and_meaning": "六态、管理范围、运行开关、先查后动作与正式恢复说明完整。",
+        "technical_literals": "Base/CRM常量、runtime接口、deliveryEnabled两开关、FAILED/DEAD_LETTER/SKIPPED和权限原义准确。",
+        "security_and_failure_semantics": "只读实拍非重发验收，其他服务不在列表不等于丢失；CAS与租户/功能权限边界明确；日文已复读修正。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "已本人实际查看本语引用PNG；8图摘要见unified-support-tutorial证据。长编号/时间局部截断，图不作完整字段或写动作证明；本语邻页有效。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/mq-practice.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "a4f27305660446b20ac5b3761bcd4c1808a81238a01d4553f64b30009f95ec58",
+      "checks": {
+        "coverage_and_meaning": "六态、管理范围、运行开关、先查后动作与正式恢复说明完整。",
+        "technical_literals": "Base/CRM常量、runtime接口、deliveryEnabled两开关、FAILED/DEAD_LETTER/SKIPPED和权限原义准确。",
+        "security_and_failure_semantics": "只读实拍非重发验收，其他服务不在列表不等于丢失；CAS与租户/功能权限边界明确；日文已复读修正。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "已本人实际查看本语引用PNG；8图摘要见unified-support-tutorial证据。长编号/时间局部截断，图不作完整字段或写动作证明；本语邻页有效。"
+      },
+      "findings": []
+    }
+  }
+}

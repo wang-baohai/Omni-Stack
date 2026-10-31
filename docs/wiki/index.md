@@ -1,58 +1,51 @@
-# Omni-Stack 学习与维护 Wiki
+# Omni-Stack 项目文档
 
-适用基线：主干 `fc165e3` 及其文档整改分支。默认读者具备基本 Java/Vue 知识，第一次接触本项目。中文是内容基准；[English](index.en.md)、[日本語](index.jp.md)、[한국어](index.kr.md) 与中文同步，实际译文复核状态（区分 HUMAN_REVIEW 与所有者授权的 AI_REVIEW）见 [文档清单](../docs-manifest.yaml)。
+这里介绍 Omni-Stack 是什么、怎样使用和启动，以及怎样在现有工程上继续开发。左侧先安排项目与使用入门，再安排开发方法和关键技术；“工程事实”放在启动教程之后，方便随时核对精确规则。
 
-## 1. 从零开始
+[English](index.en.md) · [日本語](index.jp.md) · [한국어](index.kr.md) · [项目简介与亮点](../../README.md)
 
-按顺序完成前四步，再按角色选择业务路径。每一步应在本机 Docker 中验证预期结果。
+## 开始阅读
 
-| 步骤 | 阅读和操作 | 完成后应看到 |
-|---|---|---|
-| 1 | [获取代码、认识目录与首次启动](../guides/quick-start.md) | migrator 正常退出，所选服务健康，前端可访问 |
-| 2 | [登录与租户](../guides/authentication.md) | 真实验证码登录，正确租户和用户身份 |
-| 3 | [角色、菜单、按钮和数据范围](../guides/permissions.md) | 管理员与员工看见不同能力，越权请求被拒绝 |
-| 4 | [正式种子、教学数据和测试数据](data-and-fixtures.md) | 能区分空环境、基础种子和业务演示记录 |
-| 5 | [预设选择](../preset-quick-selection.md)、[生成项目](../guides/scaffold-development.md) | 能解释启动子集与生成裁剪工程的区别 |
-
-## 2. 按角色学习业务
-
-| 角色或目标 | 路径 | 前置条件 |
-|---|---|---|
-| 平台管理员 | [系统、安全与审计](../guides/system-security-audit.md) | core；租户管理员角色 |
-| 员工和审批人 | [Workflow](../guides/workflow-approval.md)、[个人与系统任务](../guides/scheduling.md) | workflow；候选人和任务所有权 |
-| 销售人员 | [CRM 线索到商机](../guides/crm-flow.md) | crm；销售角色和数据范围 |
-| 供应商管理员、供应商 | [SRM 准入与门户](../guides/srm-flow.md) | supply-chain；邀请、SUPPLIER 角色和有效关联 |
-| 申请人、采购员、供应商 | [请购到收货](../guides/procurement-flow.md) | supply-chain；审批模型、有效供应商和采购权限 |
-| 资产管理员、使用人、审批人 | [建卡、领用、调拨与处置](../guides/asset-flow.md) | supply-chain；合格资产化收货和审批模型 |
-| 运维人员 | [运维、备份和升级](../guides/operations-upgrade.md)、[排错](../guides/troubleshooting.md) | 已确认本地环境与备份边界 |
-
-初始种子不承诺存在历史截图中的订单或审批。截图里的业务号只是示例；使用本次操作返回的 ID。不要用 SQL 改状态跳过审批、报价或收货。
-
-## 3. 学习源码和二次开发
-
-- [源码阅读与断点路径](source-debugging.md)：从请求追到权限、事务和事件，查看测试入口与失败条件。
-- [服务生成与 CRUD](../guides/scaffold-development.md)：先 dry-run，再生成、接入并验证。
-- [预设依赖矩阵](../preset-dependency-matrix.md)、[维护](../preset-maintenance.md)、[自定义](../custom-preset-tutorial.md)、[升级](../preset-upgrade-guide.md)：事实表由 catalog 派生。
-- [架构](../architecture.md)、[API 契约](../api-contract.md)、[核心流程](../core-flows.md)：维护者的当前工程事实。
-- [后端规范](../backend-patterns.md)、[前端规范](../frontend-patterns.md)：修改代码前按任务阅读。
-
-## 4. 常用术语
-
-| 术语 | 在本项目中的含义 |
+| 章节 | 主要内容 |
 |---|---|
-| preset / 预设 | 模块选择；catalog 计算完整依赖闭包 |
-| migrator | 应用启动前执行结构迁移、幂等种子与引导配置的一次性进程 |
-| tenant / 租户 | 数据隔离边界；ALL 数据范围仍不能跨租户 |
-| RBAC / DataScope | 功能权限与行级可见范围，两者同时有效 |
-| Gateway assertion | 网关签名的身份断言，下游不信任客户端身份头 |
-| Outbox / Inbox | 同事务保存待发事件／消费去重凭据 |
-| Saga | 多服务步骤及补偿，不能代替跨服务 ACID 事务 |
-| fixture | 有明确租户、业务键和清理边界的测试或教学数据准备 |
-| ADR | 记录决定、理由、后果和替代关系的历史决策 |
-| Harness | 事实、约束、工具和验证形成的工程执行闭环 |
+| [项目介绍](../../README.md) | 项目定位与亮点；目录职责见下方 |
+| [全功能图文使用教程](usage-platform.md) | 结合截图认识首页、工作台和各业务模块 |
+| [Harness 思想与工程实践](harness-what-and-why.md) | 理解 Harness，以及工程事实如何帮助 AI 开发 |
+| [预设选择、构建与启动](presets-overview.md) | 先理解预设，再按所选预设完成启动 |
+| [工程事实](../architecture.md) | 核对系统边界、接口、开发模式和各领域当前规则 |
+| [使用 Harness 开展二次开发](harness-secondary-development.md) | 从一个具体任务走完开发和验证过程 |
+| [common 公共支撑能力](common-core.md) | 了解公共工具为什么存在、怎样使用和扩展 |
+| [多租户](tenancy-principles.md) | 从不同公司的数据如何分开，读到框架拦截、权限和后台任务 |
+| [工作流](workflow-principles.md) | 从一张申请怎样审批，读到流程引擎、模型、候选人、任务与消息 |
+| [统一日志采集](logging-principles.md) | 从运行日志、操作日志和安全审计的区别，读到采集、查询与扩展 |
+| [统一MQ管理](mq-principles.md) | 从消息为什么异步处理，读到Outbox、重试、幂等与管理恢复 |
+| [分布式定时任务（XXL-JOB）](distributed-jobs-principles.md) | 从时间表与幂等讲起，读到框架、工程双轨和真实调度网页 |
+| [认证授权](authentication-principles.md) | 从“我是谁、能做什么”讲起，再读方案选择、框架源码和登录实践 |
+| [可观测：指标、日志、链路与告警](observability-principles.md) | 从“系统为什么慢”讲起，逐步读懂工具分工、实际配置和排障方法 |
 
-## 5. 文档网站与维护
+只想先了解界面，可以从图文使用教程开始；准备在本机运行，先看预设选择。教程中的截图和业务号只是示例，实际结果以本次运行返回的 ID 为准。
 
-[独立文档站](site-maintenance.md)介绍 Docker 构建、4173 端口、本地搜索、静态产物和跨平台源码链接。仓库 Markdown 是唯一正文来源；网站的语言目录由清单生成，不再维护第二套 Wiki。
+## 目录职责
 
-当前事实、设计、教程、ADR 和验收历史各有职责，见 [仓库治理](../repository-governance.md)。旧验收记录只证明当时的范围，不能代替当前步骤验证。站点预览不代表译文复核或发布已完成。
+| 目录 | 负责什么 | 什么时候进入 |
+|---|---|---|
+| `omni-backend/` | Spring Boot 微服务与 common 模块 | 看后端实现、鉴权、租户、工作流和业务域 |
+| `omni-frontend/` | Vue 单应用（官网、工作台、控制台、门户） | 看界面、路由、权限与前端测试 |
+| `scaffold/` | 模块目录与五种预设的单一事实源 | 选择或裁剪预设、确认模块依赖关系 |
+| `database/` | Liquibase 迁移与种子断言清单 | 核对表结构、种子和迁移状态 |
+| `docker/` | 应用、工具和文档镜像的构建文件 | 构建或部署镜像 |
+| `docs/` | 事实文档、指南、Wiki 与文档质量脚本 | 查契约、教程和发布状态 |
+| `ai/` | 共享 AI 资产的规范源与派生 adapter | 使用或维护 AI 工作流 |
+| `tools/` | CLI、预设生成、文档与质量脚本 | 生成预设、跑质量门或文档检查 |
+| `observability/` | 指标、追踪、日志和告警配置 | 配置本地可观测栈 |
+| `scripts/` | 正式 SQL 种子、fixture 与运维脚本 | 初始化数据或运行受控 fixture |
+
+目录表只说明职责和使用时机；具体类、接口和数据流以对应事实文档与源码为准。
+
+## 仓库关系
+
+源码以 [Gitee](https://gitee.com/wang-baohai/Omni-Stack) 为 `origin`（fetch/push），[GitHub](https://github.com/wang-baohai/Omni-Stack) 是推送远端（push）。Wiki 正文来自本仓库 `docs/`，站点由清单生成，不维护第二份正文。中文是内容基准，其他语言的复核状态以 [文档清单](../docs-manifest.yaml) 为准；站点能构建不代表译文已经复核。
+
+## 工程参考
+
+需要精确核对系统边界、请求流转或接口格式时，阅读[系统架构](../architecture.md)、[核心流程](../core-flows.md)和 [API 契约](../api-contract.md)。这些文档维护工程规则，具体操作仍以对应的图文教程为入口；历史验收记录不能代替当前运行验证。

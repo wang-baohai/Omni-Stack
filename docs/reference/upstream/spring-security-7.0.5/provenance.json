@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "artifact": "org.springframework.security:spring-security-oauth2-authorization-server:7.0.5",
+  "version": "7.0.5",
+  "source_archive": "https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-oauth2-authorization-server/7.0.5/spring-security-oauth2-authorization-server-7.0.5-sources.jar",
+  "source_archive_sha256": "b4a1d3648bd81b718804305623a3847851e1811f3be50490adc9a0ac4a54d473",
+  "official_checksum": {
+    "url": "https://repo.maven.apache.org/maven2/org/springframework/security/spring-security-oauth2-authorization-server/7.0.5/spring-security-oauth2-authorization-server-7.0.5-sources.jar.sha1",
+    "status": 200,
+    "algorithm": "sha1",
+    "value": "d474023eb244862cf27eeb9bfdfb0e27bf5220e0",
+    "matched": true
+  },
+  "license": "Apache-2.0",
+  "license_file": "LICENSE.txt",
+  "copyright": "Copyright belongs to the Spring Security authors; original excerpts are redistributed under Apache License 2.0.",
+  "purpose": "文档引用的连续上游原文，不是新增运行依赖或自写框架实现。每段保留原缩进，正文用少量片段解释，不复制整类替代教学。",
+  "extracted_at": "2026-10-24T00:37:28.169Z",
+  "excerpts": [
+    {
+      "id": "authorization-request-dispatch",
+      "path": "org/springframework/security/oauth2/server/authorization/web/OAuth2AuthorizationEndpointFilter.java",
+      "start": 193,
+      "end": 201,
+      "file": "authorization-request-dispatch.java.txt",
+      "source_sha256": "734a0649a389227b949988e46501e3d75078aac519bec65a2bcae8c1b75a8fb5",
+      "excerpt_sha256": "6988d47b85ec341e3865cff77d707a2c78660b10cc6497c425e8c54a2da02b84",
+      "source_notice": "/*\n * Copyright 2004-present the original author or authors.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "id": "pkce-s256",
+      "path": "org/springframework/security/oauth2/server/authorization/authentication/CodeVerifierAuthenticator.java",
+      "start": 151,
+      "end": 170,
+      "file": "pkce-s256.java.txt",
+      "source_sha256": "5b875a70f957b7b488048fafad566e2413153430e63c1c10f4f8d41b082c20f4",
+      "excerpt_sha256": "0a79a6e00b9d7a20ce5585bd0b5427e4a3c0efb9e82274435a86d93001c9860b",
+      "source_notice": "/*\n * Copyright 2004-present the original author or authors.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "id": "authorization-code-consumption",
+      "path": "org/springframework/security/oauth2/server/authorization/authentication/OAuth2AuthorizationCodeAuthenticationProvider.java",
+      "start": 294,
+      "end": 299,
+      "file": "authorization-code-consumption.java.txt",
+      "source_sha256": "39a3ecb8c040f9d95834b4887ee636a4b1c8a806caad573223dcc0158dc42eea",
+      "excerpt_sha256": "042951f65a9addf096001ef8b0b31fb4c3e95408a6c255e5444a9d16103e5a8a",
+      "source_notice": "/*\n * Copyright 2004-present the original author or authors.\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *      https://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    }
+  ],
+  "license_sha256": "7200000367e0e8b47822d563a5ddd2dd3a97cc05b32bd7dbcc7b4eeb92b76628"
+}

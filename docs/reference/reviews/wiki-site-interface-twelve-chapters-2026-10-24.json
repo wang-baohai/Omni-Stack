@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "wiki-site-interface-copy",
+  "source": "docs/.vitepress/locales/zh-CN.json",
+  "source_sha256": "259b4604cc329398cc8a2f7e8168b1e557997543f610323b089bb8591e31e180",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整读取四语JSON全部39叶子项，逐键审读导航、搜索、键盘、原文提示与12章节标题。此前十章与其他字段另有Docker精确不变证明；本轮新增8个本语标题实际语义审读，不是仅哈希签核。",
+  "translations": {
+    "en-US": {
+      "path": "docs/.vitepress/locales/en-US.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:34:51",
+      "result": "approved",
+      "translation_sha256": "c4c3f4ee92fa29c84ebe9f61ad280c41eb80713066be76885cb74df7047eeb66",
+      "checks": {
+        "coverage_and_meaning": "本人逐键完整阅读39项，12章/上一下一/搜索/主题/中文原文提示齐全，日志与MQ新标题语义对应。",
+        "technical_literals": "39个键结构一致，WIKI01至12和Enter/Esc不改编号；原十章ID和其余字段实际不变。",
+        "security_and_failure_semantics": "仅中文提示仍明确不是译文；待审状态不隐藏；本次文字核对不冒称已部署站点。",
+        "language_and_terminology": "中英日韩39项全部实际复读；Centralized log collection、統合ログ収集、통합 로그 수집及MQ管理自然一致。",
+        "images_and_links": "JSON没有图片或路径链接；新增目录标题由本次实际桌面/手机和搜索随后验证，不借元数据冒签运行。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/.vitepress/locales/ja-JP.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:34:51",
+      "result": "approved",
+      "translation_sha256": "b9d930ce22e5c76d0391bebac0d6067b1a8b7414ca5c0453efea2819236eb7d0",
+      "checks": {
+        "coverage_and_meaning": "本人逐键完整阅读39项，12章/上一下一/搜索/主题/中文原文提示齐全，日志与MQ新标题语义对应。",
+        "technical_literals": "39个键结构一致，WIKI01至12和Enter/Esc不改编号；原十章ID和其余字段实际不变。",
+        "security_and_failure_semantics": "仅中文提示仍明确不是译文；待审状态不隐藏；本次文字核对不冒称已部署站点。",
+        "language_and_terminology": "中英日韩39项全部实际复读；Centralized log collection、統合ログ収集、통합 로그 수집及MQ管理自然一致。",
+        "images_and_links": "JSON没有图片或路径链接；新增目录标题由本次实际桌面/手机和搜索随后验证，不借元数据冒签运行。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/.vitepress/locales/ko-KR.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:34:51",
+      "result": "approved",
+      "translation_sha256": "2a9efa14cf1e8f01793c0be7f3c0940cd1268e9c07665a0ba6f0b335a09ab84d",
+      "checks": {
+        "coverage_and_meaning": "本人逐键完整阅读39项，12章/上一下一/搜索/主题/中文原文提示齐全，日志与MQ新标题语义对应。",
+        "technical_literals": "39个键结构一致，WIKI01至12和Enter/Esc不改编号；原十章ID和其余字段实际不变。",
+        "security_and_failure_semantics": "仅中文提示仍明确不是译文；待审状态不隐藏；本次文字核对不冒称已部署站点。",
+        "language_and_terminology": "中英日韩39项全部实际复读；Centralized log collection、統合ログ収集、통합 로그 수집及MQ管理自然一致。",
+        "images_and_links": "JSON没有图片或路径链接；新增目录标题由本次实际桌面/手机和搜索随后验证，不借元数据冒签运行。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -436,7 +436,7 @@ onMounted(() => {
         <el-table-column :label="t('srmEvaluationPage.level')" width="110">
           <template #default="{ row }">{{ levelLabel[row.levelCode] || row.levelCode }}</template>
         </el-table-column>
-        <el-table-column :label="t('srmSupplierOverview.status')" width="100">
+        <el-table-column :label="t('srmSupplierOverview.status')" width="120">
           <template #default="{ row }">
             <el-tag :type="statusType[row.status as SupplierStatus]">{{ statusLabel[row.status as SupplierStatus] }}</el-tag>
           </template>
@@ -447,7 +447,7 @@ onMounted(() => {
           </template>
         </el-table-column>
         <el-table-column prop="createTime" :label="t('procurementRequisitionPage.createTime')" width="170" />
-        <el-table-column :label="t('common.actions')" fixed="right" width="360">
+        <el-table-column :label="t('common.actions')" fixed="right" width="280">
           <template #default="{ row }">
             <el-button size="small" @click="openOverview(row)">{{ t('srmSupplierPage.overview') }}</el-button>
             <el-button v-if="row.status !== 'ELIMINATED'" v-permission="'srm:supplier:update'" size="small" @click="openEdit(row)">
@@ -516,7 +516,7 @@ onMounted(() => {
       :title="editingSupplier ? t('srmSupplierPage.edit') : t('srmSupplierPage.create')"
       width="760px"
     >
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item :label="t('srmSupplierPage.supplierName')" prop="name">
@@ -552,6 +552,7 @@ onMounted(() => {
                 :remote-method="loadOwners"
                 :loading="ownerLoading"
                 :placeholder="t('srmSupplierPage.ownerPlaceholder')"
+                popper-class="srm-owner-options"
                 style="width: 100%"
               >
                 <el-option
@@ -599,4 +600,8 @@ onMounted(() => {
 .card-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 .search-form { margin-bottom: 4px; }
 .pagination { display: flex; justify-content: flex-end; margin-top: 18px; }
+/* 门户账号被排除后的空候选提示须清晰；浮层传送到 body，限定负责人选择器。 */
+:global(.srm-owner-options .el-select-dropdown__empty) {
+  color: var(--el-text-color-primary);
+}
 </style>

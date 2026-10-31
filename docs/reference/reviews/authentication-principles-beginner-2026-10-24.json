@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-principles",
+  "source": "docs/wiki/authentication-principles.md",
+  "source_sha256": "b9c15a56d4ea5539cc3b12e27209e56b1993d45ddcb01c04e2b4e1cfb705ce66",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "1a6b6dd7ab94148fc3f147be8a77ac4dce2f2dc842beeff0f093e2cc339b36f6",
+      "checks": {
+        "coverage_and_meaning": "零基础故事、认证/授权/数据范围三问、会话与JWT分工、七篇阅读顺序完整对应。",
+        "technical_literals": "无代码片段；六个相邻篇链接保持各自语言，术语先解释后使用。",
+        "security_and_failure_semantics": "保留公共Wiki与账户区区别、隐藏按钮不是接口保护、JWT签名不是加密。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.en.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "29cfdee8e010cfd6043762789e5764a47035a5b44bc3a79859ef96371bb54c7b",
+      "checks": {
+        "coverage_and_meaning": "零基础故事、认证/授权/数据范围三问、会话与JWT分工、七篇阅读顺序完整对应。",
+        "technical_literals": "无代码片段；六个相邻篇链接保持各自语言，术语先解释后使用。",
+        "security_and_failure_semantics": "保留公共Wiki与账户区区别、隐藏按钮不是接口保护、JWT签名不是加密。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.jp.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        },
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "bfa99917200747fb1fef9f96c8977b0b3c024679785a45ca510d4a51cffe3d4d",
+      "checks": {
+        "coverage_and_meaning": "零基础故事、认证/授权/数据范围三问、会话与JWT分工、七篇阅读顺序完整对应。",
+        "technical_literals": "无代码片段；六个相邻篇链接保持各自语言，术语先解释后使用。",
+        "security_and_failure_semantics": "保留公共Wiki与账户区区别、隐藏按钮不是接口保护、JWT签名不是加密。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.kr.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        }
+      ]
+    }
+  }
+}

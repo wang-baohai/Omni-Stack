@@ -1,0 +1,1716 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "usage-srm",
+  "source": "docs/wiki/usage-srm.md",
+  "source_sha256": "34eafa7837926cae2df01fef9c7113604ff219a3d51bd5782631d9f39351e0bc",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source/translation/image bytes; not a clean commit claim",
+  "method": "本次接续逐段实际完整复读四语各313行，英文输出被截去的81至99行已单独补读；中文及三译对应全部12节和子节。此前96幅最终原生PNG已逐张实际view_image，本轮按每批8幅逐字节发布，明确84r3与12r4来源及实际视口。不是机械QA或摘要代替阅读。 本脚本只登记已经实际完成的全文阅读与逐图判断，不替代语义审校。",
+  "actual_complete_reading_sha256": "3fca475f4595132c2fcb6499af541afc89ddba5c279943bf6af30d8a88631e03",
+  "images": [
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-overview.png",
+      "image_sha256": "d23b405b8f8a9e26df64bb6cda993c4241d122902141115b769bc30387d6cfd2",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:32:58.796Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-supplier-create.png",
+      "image_sha256": "98323967f72c0fe942612b227b06acb91ecc7415cfaaf8def44d77a5898742bd",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:00.279Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-suppliers.png",
+      "image_sha256": "a36b0ea304bac0f9a28469c811b489092f2152afd4672c7020a74b0ce737b752",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:32:59.963Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-supplier-empty.png",
+      "image_sha256": "7bbe67a0c54e9f314a1cfbefbdbb232274a3c2b1d4204125b27dae4bab7e50eb",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:07.925Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用代码",
+        "电话",
+        "邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-supplier-detail.png",
+      "image_sha256": "a3b0d795c68aa21459976d891969445893e9199b7500f324079228ef45232ae8",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:01.984Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "电话",
+        "邮箱",
+        "手机",
+        "邮箱",
+        "账号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-supplier-detail-bottom.png",
+      "image_sha256": "48dbf53e75f01cc8ee1f928d9eb5510f2c75e4494e56ee3147c787f63356588f",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:02.242Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "电话",
+        "邮箱",
+        "手机",
+        "邮箱",
+        "账号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-owner-internal.png",
+      "image_sha256": "a46201116896130133ab2f7c62cecdefb14253ce40b2805c11a2c998c663102c",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:06.335Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用代码",
+        "电话",
+        "邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-owner-portal-empty.png",
+      "image_sha256": "ad5acd3484bd8b07b24805c422660ff6e99e91b3c084ae04d2c7fb30963764fe",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:06.819Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用代码",
+        "电话",
+        "邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-contacts.png",
+      "image_sha256": "7f7c4f897d40523759201616b4364bf3c2a72442dde2b4e538d0b7ff5ff86b04",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:04.076Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "手机",
+        "邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-qualifications.png",
+      "image_sha256": "9f9e7e1c496136355ac423b230ad6c0f782467e1981787a9c9444dd8e8936876",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:16.728Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-bank-accounts.png",
+      "image_sha256": "3d23838b8ebcd8c4a0f252c331918330177bf649568cf16302962a5649670024",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:04.376Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "账号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-evaluations.png",
+      "image_sha256": "8a43fc283a1e2f0889853f47ac9c8fd685dac2087849db6142610580084194c9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:08.778Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-evaluation-detail.png",
+      "image_sha256": "18f8defca239eec0fbcaa0f5005a9aba532a2ae49a484ad252f25184874957a6",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:09.261Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-risks.png",
+      "image_sha256": "e192ea3ac39a1a749fbd7c7e2b2d7aa42c09a2943d2c2bd79bb80139b9e69815",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:10.236Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-risk-detail.png",
+      "image_sha256": "4791f94ccbf3f39077834c5cf2f2d7560178b446b68e773dd5aa873e373ab7a1",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:10.733Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-risk-history.png",
+      "image_sha256": "2782f134cf840efcad6ecd2b52369710042c3dbfabb7a418fbff1b21f73223d4",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:11.103Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-risk-config.png",
+      "image_sha256": "affb25be7d5b534b80e878baa77815b8fa8f16df61769f746be3ff4bc9d00b36",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:17.727Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-risk-thresholds.png",
+      "image_sha256": "36519606756c856a1d64f3c156eb2f7e97e810561fb37f61c13a6aadde383a1f",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:17.870Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 700
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-invites.png",
+      "image_sha256": "4fc69f9ccc8dfc5b1433e392328c0a7aa7749e578289b09a75d647ad0ab96da6",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:13.019Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-portal-profile.png",
+      "image_sha256": "9ad5c3f3d72828eb330de0fb442abe334a9cc940ede717dc2df6a85255fee6d9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:13.994Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "统一社会信用代码",
+        "联系电话",
+        "电子邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-portal-evaluation.png",
+      "image_sha256": "9ea6a25733cf889c90a8eeccd2a5f9c51c6a19b090e59b870c297c361ef6567d",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:15.659Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "统一社会信用代码",
+        "联系电话",
+        "电子邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-portal-quotation.png",
+      "image_sha256": "e9fff3a60d6821521865ad1eb423d5251a8a8e193d0dfc21d4b672ae670fa114",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:14.245Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "统一社会信用代码",
+        "联系电话",
+        "电子邮箱"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-portal-quotation-detail.png",
+      "image_sha256": "70c2c4edc8b58e50806c10303b86038568f7703dd4a6b70d6b0b9c88e0419d0a",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:14.619Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.md",
+      "image": "docs/images/zh-CN/srm-employee-403.png",
+      "image_sha256": "e005de6b70ca893bfede2e8ed0ccfadb1e21942e4182a6f0fe1c74c6a054e1c6",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:16.443Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-overview.png",
+      "image_sha256": "362d303018671aef624deff9740753b61fa7c0031d7834dbf25541c7d1d37eb5",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:17.459Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-supplier-create.png",
+      "image_sha256": "68e3f53868f6f89d7e78640e11b41ec599f83ffb2d0db0edd14e2c2e624b3cdb",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:18.877Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-suppliers.png",
+      "image_sha256": "a4497841950ccbfe892d968c7719fc306434f623dd8706beb30665d2214fe8df",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:18.590Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-supplier-empty.png",
+      "image_sha256": "3ac76c7c21fe27e9d0785594f394cb5a8cb640b694fcd99f0f05d4285e08062b",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:26.243Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-supplier-detail.png",
+      "image_sha256": "2e9ea567aecf415fb559967193652ed5c4274183771cbec146283b44e8e328a9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:20.334Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Phone",
+        "Email",
+        "Mobile",
+        "Email",
+        "Account No."
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-supplier-detail-bottom.png",
+      "image_sha256": "506071c74e3c6730e358aa4b459c02ec7135c57ba22094381cefd4252a8da1f4",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:20.557Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Phone",
+        "Email",
+        "Mobile",
+        "Email",
+        "Account No."
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-owner-internal.png",
+      "image_sha256": "0c40b01fc66ff36937bc1e31a40ac815b9e342c4c9e88611870990c27e75fbe3",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:24.599Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-owner-portal-empty.png",
+      "image_sha256": "f07e22742f948de0db5eae1fe5509482738f12c66daf3f2ef1d708d86922db27",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:25.085Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-contacts.png",
+      "image_sha256": "24855295d03306488c911f7018b602140e53e65a21d89378f7e28d8b5b9dcf55",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:22.374Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Mobile",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-qualifications.png",
+      "image_sha256": "41bf09336788d6b58511933e73a5f50fe45e9481aba82fa141b6d85fc57b0d06",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:20.213Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-bank-accounts.png",
+      "image_sha256": "0256308f67cd70caec6f4c9b2fa4607e5843da732056d58a7c5f8e6436e16e1d",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:22.678Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Account No."
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-evaluations.png",
+      "image_sha256": "c1355971c1748fe6c107e9e8a10876106976dbb8b71be8bae5c59b23f4791968",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:27.148Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-evaluation-detail.png",
+      "image_sha256": "48407cd6a79ad158d80354925e2c19d8bea76c8c802650b05b4e20929a6c5e8b",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:27.672Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-risks.png",
+      "image_sha256": "2ef3f1a3a49c1255ca7b9fc853eea58e2bbe96526af6474c3b9425bcad8a8f6e",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:28.534Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-risk-detail.png",
+      "image_sha256": "b7127c0fee8ca75cea08258d0463dff3c88492bd39baf2d42881f10fea8902af",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:29.044Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-risk-history.png",
+      "image_sha256": "4a41a77f3f8d32ca6762b1aca44b59c09cbf720ddf924a3d34ccd9c63e9f6af7",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:29.339Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-risk-config.png",
+      "image_sha256": "f4766ca37e77c49c4dbea3ba97a7a04afe062f21a17ea738606c95a2eedb8633",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:21.292Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-risk-thresholds.png",
+      "image_sha256": "31d84a2f81f506c3a9ae6b018dbd2544c3240e9ae25a3ebb5eef23eab7bb07d9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:21.459Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 700
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-invites.png",
+      "image_sha256": "d341095b8ab074a3f54679c4b32a4e3e7c3ba88e7b1a5bd50bc3d36194ae314f",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:31.202Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-portal-profile.png",
+      "image_sha256": "a4b0b750a6a89af8f53d997d7399d200897ce592056d8dd167c4d610d56f5685",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:32.125Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Unified Social Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-portal-evaluation.png",
+      "image_sha256": "8294ac2aa543c4cedfa37b81b755ef901d4ce138d52b6e1f21906e5164d634d4",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:33.710Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Unified Social Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-portal-quotation.png",
+      "image_sha256": "cfcd066b24a0a83cceb0a3168d2497bb8adbf044fcffae91844757396106acc9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:32.347Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "Unified Social Credit Code",
+        "Phone",
+        "Email"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-portal-quotation-detail.png",
+      "image_sha256": "fd2c30386bdad660ea81d591570d6afffe8662ba98f6c1ae8605fe20ca9e4188",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:32.659Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.en.md",
+      "image": "docs/images/en-US/srm-employee-403.png",
+      "image_sha256": "80bfe92e638a7192030690917214f98a9965080655975127220336949f48d4af",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:34.509Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-overview.png",
+      "image_sha256": "66b132a4393875ec67196ced665a3dc782ee99de3d87f55758ae52991b2360fb",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:35.508Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-supplier-create.png",
+      "image_sha256": "1afcf7c0d15a02d9765a2a59a0b451436952afb6efe54f63d59285a656c14239",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:36.945Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-suppliers.png",
+      "image_sha256": "cd29c08deac0ec72e80673f58e6f41342f16b16c02bc711d468caa5327b98fc0",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:36.654Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-supplier-empty.png",
+      "image_sha256": "f7172f70f740fcefe077bd7ce615cdd75664e584e4d64d3a412e017e89f53783",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:44.539Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用コード",
+        "電話",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-supplier-detail.png",
+      "image_sha256": "3a5efc3a4b07c2c017b2d3b387d8e7945062bf1cb811681aec578441d8bb60a4",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:38.566Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "電話",
+        "メール",
+        "携帯電話",
+        "メール",
+        "口座番号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-supplier-detail-bottom.png",
+      "image_sha256": "2abfc98d3bc56cde73370014b1e0830563d7846352430bf474d309c3beda40ca",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:38.822Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "電話",
+        "メール",
+        "携帯電話",
+        "メール",
+        "口座番号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-owner-internal.png",
+      "image_sha256": "17a7ea7de6ec7187f4f226032aaab243f105e9e3e285a9d69ad1f8747772edc8",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:42.948Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用コード",
+        "電話",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-owner-portal-empty.png",
+      "image_sha256": "2042c575392d0c45965ff0c216139f71baf1324e70619ee199d1a4e8d9977077",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:43.429Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "信用コード",
+        "電話",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-contacts.png",
+      "image_sha256": "c191245c1a25c335c69b8d962e4b403b7e55ce4f204819855f32c2e3fd6c8d03",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:40.672Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "携帯電話",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-qualifications.png",
+      "image_sha256": "95983a4046ab3d299ecbf2b2812ee1ae313c5e77f967140515a37bcb2241af12",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:23.825Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-bank-accounts.png",
+      "image_sha256": "c85e947b44898adea65396a57e4854ea7b43b53821ef4057e65a3e7f362c73b9",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:41.058Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "口座番号"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-evaluations.png",
+      "image_sha256": "6b3c28b9d6c240d2d68f9b7c894226c44153dc7fff7be23bf38e8429f8a7b32b",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:45.393Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-evaluation-detail.png",
+      "image_sha256": "6ee687497c5897d1d5595281db4b0af7a759ebb70b67ef1fc5933f9ee1ad4adc",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:45.888Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-risks.png",
+      "image_sha256": "7318e79fddad13c2692187f7edc1c942bae7da00ca984b59175644b85d60ca95",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:46.766Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-risk-detail.png",
+      "image_sha256": "5434c5e7119e2cd64c5dc90a58a3bdc10984b14b9479f85e0b1637707ce6381c",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:47.259Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-risk-history.png",
+      "image_sha256": "d9d3acd78f07ba0aeaad922091e030e0f0236c8d512e11975ecdb0f1091d3dd6",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:47.558Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-risk-config.png",
+      "image_sha256": "c02790ac747af4a95423df7f14c3583b316403f3e9d6039cef2ae4a53326ad28",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:24.808Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-risk-thresholds.png",
+      "image_sha256": "56b3bedf2a0492c7cfdd2efc7950fc9600eddb2fb3bf9b49e9e407d1c343ebf0",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:24.953Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 700
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-invites.png",
+      "image_sha256": "2f4fa9c0680408bf102d85be35fb77de1f3f99df73de6017d227c018f52697cd",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:49.367Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-portal-profile.png",
+      "image_sha256": "b73f1fc950ff7acbe9676a08a9f24e2fa35ddac02d01a82080161eb21ebbb1b7",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:50.308Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "統一社会信用コード（USCC）",
+        "電話番号",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-portal-evaluation.png",
+      "image_sha256": "f630a9f6932525bbc2d49c827a7c64ab8f9944c8c469767d59c4ba70143ec478",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:51.926Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "統一社会信用コード（USCC）",
+        "電話番号",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-portal-quotation.png",
+      "image_sha256": "bd5eaed320a59f72afbc57e4facfed34cf3d815539b09310b436a650c9c7d45b",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:50.526Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "統一社会信用コード（USCC）",
+        "電話番号",
+        "メール"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-portal-quotation-detail.png",
+      "image_sha256": "a3a02a7dc6fd601ed2dd6508e9c1794c6b97f8b33db38f4d7c5ca4d7b34436f8",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:50.882Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.jp.md",
+      "image": "docs/images/ja-JP/srm-employee-403.png",
+      "image_sha256": "1ef518bbb0fc9a0254da8b0684dc5fde56fe4b1a7679027bb97716b5350c08a7",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:52.692Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-overview.png",
+      "image_sha256": "ad342b3f1e0de552e573d1336aa926615e065e7db201c97a66bd02825d3f1c61",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:53.729Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-supplier-create.png",
+      "image_sha256": "58954df038975e9c6064cb9ec98b39377ace137b2b9810aee4d9b1eca97fc21c",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:55.243Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-suppliers.png",
+      "image_sha256": "7c332eef537e8639f5df44c1520d45c80da789d321556c475d66e6da9881d5d0",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:54.956Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-supplier-empty.png",
+      "image_sha256": "d7e4e505705e46748f2b11edbf8d80ddba1c292f5b4e56c07e0624f1e4d45e14",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:02.518Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "신용 코드",
+        "전화",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-supplier-detail.png",
+      "image_sha256": "68a19f9d3f2607ab7982aa61873f7eee4964b04e352765463bc00cf1b484daf5",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:56.691Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "전화",
+        "이메일",
+        "휴대전화",
+        "이메일",
+        "계좌번호"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-supplier-detail-bottom.png",
+      "image_sha256": "90e001ad4409982bdd3570304c9e9c80b958e4cd50cb9eb8140321b5c2609aa7",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:56.911Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "전화",
+        "이메일",
+        "휴대전화",
+        "이메일",
+        "계좌번호"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-owner-internal.png",
+      "image_sha256": "3092c1e83f1f6f02db6312d9af53f5454da365fd0b5494aa057827266c6deca1",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:00.958Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "신용 코드",
+        "전화",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-owner-portal-empty.png",
+      "image_sha256": "1c623eb455243448aef371cd94cffcbc0157a28569cc3f71bf603601cf26fa2c",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:01.429Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "신용 코드",
+        "전화",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-contacts.png",
+      "image_sha256": "e0f17add8bbd3d0ce5c56740a48fca996e77adf368dbf756687bf915e7d2ecdd",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:58.716Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "휴대전화",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-qualifications.png",
+      "image_sha256": "84568cd252fd98de828f0fba0428143cd853c547f06535da03a909237a13f994",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:27.372Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-bank-accounts.png",
+      "image_sha256": "cc4608048ef2a58c88c04699c0ed815dfdcec07d2204d954b74f354df84b9939",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:33:59.005Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "계좌번호"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-evaluations.png",
+      "image_sha256": "daa41330f74a9abda6965aa01589470845dbd5a1caa506a7c42dd5a5803e05eb",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:03.356Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-evaluation-detail.png",
+      "image_sha256": "21a86027251f9fd883415e602518a97384098b5e782ba2f70db7e7a66e3da987",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:03.878Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-risks.png",
+      "image_sha256": "b07d23c3b86f22a02644dd9b827856d16e25afaef3c54572028b271873cdf990",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:04.732Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-risk-detail.png",
+      "image_sha256": "c4a81c194b4aa2d4636ff3a1ba3e1882b04a8b268da8a9f6b2e183633f2304ec",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:05.224Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-risk-history.png",
+      "image_sha256": "a4c6a11aa4a876de329dd41f196ee03b5ec70d715bc8bfa8bdd5e3afa41541f4",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:05.532Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-risk-config.png",
+      "image_sha256": "9096a918cbae85bfd3fc719c47712fcad9432da4d8b70d27ada5c53f1af58788",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:28.306Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-risk-thresholds.png",
+      "image_sha256": "0869ad8fe6001bbb68427de7bcbc191b3217519c8a51ea4debd56ae3b06241d0",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T08:03:28.455Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 700
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-invites.png",
+      "image_sha256": "1ebba0eccb846bab87a2d281f470217dd7c1bc5716ab042c3a17fe0f73732164",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:07.398Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-portal-profile.png",
+      "image_sha256": "b3024b8fba32141388cb1fb0b88cc6b6b543070a29a8e2b90dccbeeb69398c80",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:08.422Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "통일사회신용코드(USCC)",
+        "전화번호",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-portal-evaluation.png",
+      "image_sha256": "399c5f52b8725f591655f1eb905c81673d5311987738b932839976b810a020f5",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:09.989Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "통일사회신용코드(USCC)",
+        "전화번호",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-portal-quotation.png",
+      "image_sha256": "25cdeac9686dc94e9b723518f64ad17568e255ea6d1cdcafda0c1519829dd865",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:08.640Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": [
+        "통일사회신용코드(USCC)",
+        "전화번호",
+        "이메일"
+      ]
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-portal-quotation-detail.png",
+      "image_sha256": "0ecb5102c1e24d781c2d36d45f3722cc999cb0efc086a22adfa7a7ea7c6d2bba",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:08.953Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    },
+    {
+      "article": "docs/wiki/usage-srm.kr.md",
+      "image": "docs/images/ko-KR/srm-employee-403.png",
+      "image_sha256": "3090fbad83297bc3dbcd09240c933084950e0a571f5d2b39637ffae6e1b8152b",
+      "visual_review_evidence": "docs/reference/evidence/srm-tutorial-2026-10-26.json",
+      "visual_review_evidence_sha256": "ab43b7e47ad835fd84d40641c8ed155b0f0e62ab7bbad5e83c708837d52b21f0",
+      "captured_at": "2026-10-26T07:34:10.793Z",
+      "runtime_image": "sha256:bd68180a95abd83bd54ea73705d1d9c814678fa58fca199828df28d3293a0f83",
+      "runtime_srm_image": "sha256:169eb5f48c0ebf44367a09e8771f7c8b45cb8b1ff5eb1d16185a0795a6640143",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "masks": []
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/usage-srm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 16:33:14",
+      "result": "approved",
+      "translation_sha256": "2076b3389e2e3f7174724de878affac230ffb23f6ce83bf3fb41a7e258f53e96",
+      "checks": {
+        "coverage_and_meaning": "完整核对四语12节及全部子节，覆盖内部准入审批/查找/360/负责人/生命周期、三类资料、绩效、风险配置/历史、邀请/门户入驻/报价及失败恢复，保留全部23用户功能的实际前提与结果。",
+        "technical_literals": "不含程序代码、SQL或必须跳仓库的步骤；30/30/20/20权重、20至100总分和90/75/60分级、风险加总与区间、门户版本及到期日期规则按已核对真实行为说明。",
+        "security_and_failure_semantics": "合法内部负责人、父子组织与同级边界、门户自身企业隔离和403、注册/关联/批准三阶段、仅发起人结束审批、资料先保存/转交失败、历史报价不可新提交均准确；不冒称真人CAPTCHA、外部通知或第三方实联。",
+        "language_and_terminology": "逐段完整复读自然英语313行并对照中文；My Workspace、More、Maintain Related Resources、RFQ Quotations等与原生入口一致；scope、approval round、rating与lifecycle state区分，保留不确定保存先读回的恢复语义。",
+        "images_and_links": "本语24幅最终图逐项核对状态、按钮、阅读次序、敏感遮罩及真实尺寸；全96图均实际逐张查看。资质原生横滚、风险历史部分视口和阈值1440×700明确说明；取消RFQ仅历史报价、空表单和负责人候选不冒称写入成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧短教程未覆盖完整日常操作、角色边界与失败恢复，部分截图或身份来源过时。",
+          "resolution": "四语扩为完整12节、313行和每语24图，按23项实际用户功能解释入口、前提、结果和恢复；原图来源保留历史，新图明确受控测试身份。"
+        },
+        {
+          "status": "resolved",
+          "issue": "绩效等级与生命周期淘汰、风险单项与综合颜色、注册与关联批准、保存与转交回退易混淆。",
+          "resolution": "逐段核对代码和既有真实业务结果，分别明确四组语义与权限边界，不保证不存在的自动重启、原子回滚或模板管理。"
+        },
+        {
+          "status": "resolved",
+          "issue": "资质状态未完全展示、风险配置未选指标、阈值同画面及取消询价的图文状态需要解释。",
+          "resolution": "12幅原生重拍已逐张查看并替换；其余84幅保留真实脚本来源，正文补滚动、类型选择、真实阈值视口和已取消询价的只读限制，未改DOM或业务状态。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/usage-srm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 16:33:14",
+      "result": "approved",
+      "translation_sha256": "9bf18c7e9cd6c19a71e838016f37130cece699c7a3a1fb55b8bfb38b3a4aab91",
+      "checks": {
+        "coverage_and_meaning": "完整核对四语12节及全部子节，覆盖内部准入审批/查找/360/负责人/生命周期、三类资料、绩效、风险配置/历史、邀请/门户入驻/报价及失败恢复，保留全部23用户功能的实际前提与结果。",
+        "technical_literals": "不含程序代码、SQL或必须跳仓库的步骤；30/30/20/20权重、20至100总分和90/75/60分级、风险加总与区间、门户版本及到期日期规则按已核对真实行为说明。",
+        "security_and_failure_semantics": "合法内部负责人、父子组织与同级边界、门户自身企业隔离和403、注册/关联/批准三阶段、仅发起人结束审批、资料先保存/转交失败、历史报价不可新提交均准确；不冒称真人CAPTCHA、外部通知或第三方实联。",
+        "language_and_terminology": "逐段完整复读日语313行并对照中文；マイワークスペース、承認進捗、審査を再申請、担当者・関連資料を管理・見積回答等按原生入口说明，明确取引先連絡先与社内担当者不同；阈值图采用自然日语解释实际缩小视口。",
+        "images_and_links": "本语24幅最终图逐项核对状态、按钮、阅读次序、敏感遮罩及真实尺寸；全96图均实际逐张查看。资质原生横滚、风险历史部分视口和阈值1440×700明确说明；取消RFQ仅历史报价、空表单和负责人候选不冒称写入成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧短教程未覆盖完整日常操作、角色边界与失败恢复，部分截图或身份来源过时。",
+          "resolution": "四语扩为完整12节、313行和每语24图，按23项实际用户功能解释入口、前提、结果和恢复；原图来源保留历史，新图明确受控测试身份。"
+        },
+        {
+          "status": "resolved",
+          "issue": "绩效等级与生命周期淘汰、风险单项与综合颜色、注册与关联批准、保存与转交回退易混淆。",
+          "resolution": "逐段核对代码和既有真实业务结果，分别明确四组语义与权限边界，不保证不存在的自动重启、原子回滚或模板管理。"
+        },
+        {
+          "status": "resolved",
+          "issue": "资质状态未完全展示、风险配置未选指标、阈值同画面及取消询价的图文状态需要解释。",
+          "resolution": "12幅原生重拍已逐张查看并替换；其余84幅保留真实脚本来源，正文补滚动、类型选择、真实阈值视口和已取消询价的只读限制，未改DOM或业务状态。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/usage-srm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 16:33:14",
+      "result": "approved",
+      "translation_sha256": "920a7fda755304554b50921b3edd67c173dafb8145e16c65e6f78ae41d820ddd",
+      "checks": {
+        "coverage_and_meaning": "完整核对四语12节及全部子节，覆盖内部准入审批/查找/360/负责人/生命周期、三类资料、绩效、风险配置/历史、邀请/门户入驻/报价及失败恢复，保留全部23用户功能的实际前提与结果。",
+        "technical_literals": "不含程序代码、SQL或必须跳仓库的步骤；30/30/20/20权重、20至100总分和90/75/60分级、风险加总与区间、门户版本及到期日期规则按已核对真实行为说明。",
+        "security_and_failure_semantics": "合法内部负责人、父子组织与同级边界、门户自身企业隔离和403、注册/关联/批准三阶段、仅发起人结束审批、资料先保存/转交失败、历史报价不可新提交均准确；不冒称真人CAPTCHA、外部通知或第三方实联。",
+        "language_and_terminology": "逐段完整复读韩语313行并对照中文；내 작업대、승인 진행、심사 재제출、담당자、취소、견적 응답与原生界面一致；企业关联/审批、等级/交易结束、联系人/内部负责人区分；保留实际失败和重试语义。",
+        "images_and_links": "本语24幅最终图逐项核对状态、按钮、阅读次序、敏感遮罩及真实尺寸；全96图均实际逐张查看。资质原生横滚、风险历史部分视口和阈值1440×700明确说明；取消RFQ仅历史报价、空表单和负责人候选不冒称写入成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧短教程未覆盖完整日常操作、角色边界与失败恢复，部分截图或身份来源过时。",
+          "resolution": "四语扩为完整12节、313行和每语24图，按23项实际用户功能解释入口、前提、结果和恢复；原图来源保留历史，新图明确受控测试身份。"
+        },
+        {
+          "status": "resolved",
+          "issue": "绩效等级与生命周期淘汰、风险单项与综合颜色、注册与关联批准、保存与转交回退易混淆。",
+          "resolution": "逐段核对代码和既有真实业务结果，分别明确四组语义与权限边界，不保证不存在的自动重启、原子回滚或模板管理。"
+        },
+        {
+          "status": "resolved",
+          "issue": "资质状态未完全展示、风险配置未选指标、阈值同画面及取消询价的图文状态需要解释。",
+          "resolution": "12幅原生重拍已逐张查看并替换；其余84幅保留真实脚本来源，正文补滚动、类型选择、真实阈值视口和已取消询价的只读限制，未改DOM或业务状态。"
+        }
+      ]
+    }
+  }
+}

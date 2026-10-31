@@ -321,6 +321,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_EXACT_PATHS = List.of(
             "/api/auth/login",
             "/api/auth/session-login",
+            "/api/auth/session-check",
             "/api/auth/register",
             "/api/auth/captcha",
             "/api/auth/tenants",

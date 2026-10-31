@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "document_id": "common",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/common.md",
+  "source_sha256": "71dc91abc3e39e025348d6b59f4cf4736f81044cc9670978dad0402d782c57ce",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮逐篇完整Get-Content读取两篇中文和六篇译文，CN分段且六篇译文完整无截断；以当前相关Java原文复核结论，修正后实际读取最终差量。不是用文件/行数/哈希或结构检查代替语义审读。没有栅格图片；Mermaid布局留最终G5，不冒称本轮已看新渲染。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-common-contracts-actual-reading-20261029.json",
+  "actual_reading_sha256": "1b0d3d1470f2e33eb4974935a7278bb4898e7062c9e8f91578b1c019518e4efc",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:41:16",
+      "result": "approved",
+      "translation_sha256": "091ed859473f5c679fd0618abc12fd80df624f3b31f224ba3802907470599441",
+      "checks": {
+        "coverage_and_meaning": "七项自动配置全文对照：JSON双栈/HTTP状态映射/追踪号finally/Feign重试非幂等/CORS/XSS条件/OTLP缺省，保留源码级非实测边界。HTTP和JSON失败分支按当前源码修正，日文残留中文词已更正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "COMMON-HTTP-STATUS",
+          "status": "resolved",
+          "description": "当前多数映射用@ResponseStatus返回400/403/404/405/415/500，BusinessException另保留业务码。"
+        },
+        {
+          "id": "COMMON-JSON-FAILURE",
+          "status": "resolved",
+          "description": "无HttpMessageNotReadableException专门映射，JSON反序列化不能泛称400；明确可能兜底500，不改产品语义。"
+        },
+        {
+          "id": "COMMON-JA-TERMS",
+          "status": "resolved",
+          "description": "修复最常见的、接口、可靠等混入日文的词，不重写全文。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:41:16",
+      "result": "approved",
+      "translation_sha256": "0e19e63d915e0fd82b42847722cd60ce6c20b44b951eec4ad8a20419945057c2",
+      "checks": {
+        "coverage_and_meaning": "七项自动配置全文对照：JSON双栈/HTTP状态映射/追踪号finally/Feign重试非幂等/CORS/XSS条件/OTLP缺省，保留源码级非实测边界。HTTP和JSON失败分支按当前源码修正，日文残留中文词已更正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "COMMON-HTTP-STATUS",
+          "status": "resolved",
+          "description": "当前多数映射用@ResponseStatus返回400/403/404/405/415/500，BusinessException另保留业务码。"
+        },
+        {
+          "id": "COMMON-JSON-FAILURE",
+          "status": "resolved",
+          "description": "无HttpMessageNotReadableException专门映射，JSON反序列化不能泛称400；明确可能兜底500，不改产品语义。"
+        },
+        {
+          "id": "COMMON-JA-TERMS",
+          "status": "resolved",
+          "description": "修复最常见的、接口、可靠等混入日文的词，不重写全文。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:41:16",
+      "result": "approved",
+      "translation_sha256": "810242e7ca214bc9d274190952fbb3f4c3c43239f7c8bd24a939582d0ea52c0b",
+      "checks": {
+        "coverage_and_meaning": "七项自动配置全文对照：JSON双栈/HTTP状态映射/追踪号finally/Feign重试非幂等/CORS/XSS条件/OTLP缺省，保留源码级非实测边界。HTTP和JSON失败分支按当前源码修正，日文残留中文词已更正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "COMMON-HTTP-STATUS",
+          "status": "resolved",
+          "description": "当前多数映射用@ResponseStatus返回400/403/404/405/415/500，BusinessException另保留业务码。"
+        },
+        {
+          "id": "COMMON-JSON-FAILURE",
+          "status": "resolved",
+          "description": "无HttpMessageNotReadableException专门映射，JSON反序列化不能泛称400；明确可能兜底500，不改产品语义。"
+        },
+        {
+          "id": "COMMON-JA-TERMS",
+          "status": "resolved",
+          "description": "修复最常见的、接口、可靠等混入日文的词，不重写全文。"
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

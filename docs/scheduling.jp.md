@@ -1,6 +1,6 @@
 # 定期実行の制約
 
-本書は定期実行の事実と工程上の制約を定義します。画面操作、画像、ソースのデバッグは [定期実行チュートリアル](guides/scheduling.jp.md)、実行設定は [Docker デプロイ](docker-deployment.jp.md) を参照してください。
+本書は定期実行の事実と工程上の制約を定義します。基礎概念、フレームワーク原文、工程実装、実画面は [XXL-JOB の独立章](wiki/distributed-jobs-principles.jp.md)、既存の詳細操作は [定期実行チュートリアル](guides/scheduling.jp.md)、実行設定は [Docker デプロイ](docker-deployment.jp.md) を参照してください。
 
 ## 1. 境界とデータの所有者
 

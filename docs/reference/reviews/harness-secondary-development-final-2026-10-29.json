@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "document_id": "harness-secondary-development",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/harness-secondary-development.md",
+  "source_sha256": "a734381063832a757395a9aeabb125a1b0e2697372c5168aaa4f47d86db804d3",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮Get-Content逐篇完整读取中文7篇及三译21篇（长篇分段），不是摘要/哈希/行数自动审批；修正8文件后实际读取最终8段。无栅格图片引用，不用其他站点截图冒充本章逐图审读。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-harness-actual-reading-20261029.json",
+  "actual_reading_sha256": "7c125ea2c122a4d62c4f181a2411366e35281dd6cd352091fda558a59d2aab37",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/harness-secondary-development.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "719af04cf7919a8da107cc1558fcc7e830a163dcfc30bdc8f1c4631d551966b6",
+      "checks": {
+        "coverage_and_meaning": "生成学习工程及AI工作台实例两部分全文读完，Docker/无共享库写入/权限及新标签/失败留痕一致；1038到220历史数值与wp07-s02-capture对应，运行命令仍为读者预期，不冒称本轮运行。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/harness-secondary-development.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "87471626c532dcd8e52809c8bf5849aeaf3fe90154792515f29dcae0276f6ae9",
+      "checks": {
+        "coverage_and_meaning": "生成学习工程及AI工作台实例两部分全文读完，Docker/无共享库写入/权限及新标签/失败留痕一致；1038到220历史数值与wp07-s02-capture对应，运行命令仍为读者预期，不冒称本轮运行。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/harness-secondary-development.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "acac171c0979f75a0d141199a3ed6cecd14b86cb2ddacfb7b2df09820cf04904",
+      "checks": {
+        "coverage_and_meaning": "生成学习工程及AI工作台实例两部分全文读完，Docker/无共享库写入/权限及新标签/失败留痕一致；1038到220历史数值与wp07-s02-capture对应，运行命令仍为读者预期，不冒称本轮运行。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    }
+  },
+  "global_release_claimed": false
+}

@@ -1,0 +1,69 @@
+{
+  "artifact": "com.xuxueli:xxl-job-core:3.3.1 and xxl-job-admin:3.3.1",
+  "repository": "https://github.com/xuxueli/xxl-job",
+  "version": "3.3.1",
+  "commit": "7548d1a62b187684b698e05618947f26d3e4a54a",
+  "license": "GPL-3.0-only",
+  "license_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/LICENSE",
+  "copyright": "Copyright (c) 2015-present, xuxueli.",
+  "excerpts": [
+    {
+      "file": "schedule-lock.java.txt",
+      "original_path": "xxl-job-admin/src/main/java/com/xxl/job/admin/scheduler/thread/JobScheduleHelper.java",
+      "original_sha256": "33653229a32858ff8921744fc43c99955714b3f4fe201abd456f790173df9a73",
+      "git_blob_sha1": "e2c93eb691f09dc872dfdcd0de56a9305c007cb8",
+      "source_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/xxl-job-admin/src/main/java/com/xxl/job/admin/scheduler/thread/JobScheduleHelper.java",
+      "start_line": 68,
+      "end_line": 74,
+      "excerpt_sha256": "5c2f30760be0d2919b4977169a999f992cb94f408e0eea539fb109a99f8683ea",
+      "copyright_and_license_header": "Copyright (c) 2015-present, xuxueli.\nSee the accompanying unchanged NOTICE.txt and GPL-3.0-only LICENSE.txt."
+    },
+    {
+      "file": "trigger-envelope.java.txt",
+      "original_path": "xxl-job-admin/src/main/java/com/xxl/job/admin/scheduler/trigger/JobTrigger.java",
+      "original_sha256": "13e75a3fd132e7f9fac114b2153cc4fb7299d30b38f6ca59b67a43267a9a4db4",
+      "git_blob_sha1": "29df350c4466269a7ca91ec80402ca2358c50b62",
+      "source_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/xxl-job-admin/src/main/java/com/xxl/job/admin/scheduler/trigger/JobTrigger.java",
+      "start_line": 150,
+      "end_line": 163,
+      "excerpt_sha256": "0779a92e3189faf69bf627fdc5211ab593f3b2a9936f10249b5feda69ddf2806",
+      "copyright_and_license_header": "Copyright (c) 2015-present, xuxueli.\nSee the accompanying unchanged NOTICE.txt and GPL-3.0-only LICENSE.txt."
+    },
+    {
+      "file": "handler-registration.java.txt",
+      "original_path": "xxl-job-core/src/main/java/com/xxl/job/core/executor/impl/XxlJobSpringExecutor.java",
+      "original_sha256": "0a486543344ab0840b0060e74386390e21194e82ad63fa3c2668520f9516de8c",
+      "git_blob_sha1": "f313ed900e9446dae4e264c42dd569dc262a3f64",
+      "source_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/xxl-job-core/src/main/java/com/xxl/job/core/executor/impl/XxlJobSpringExecutor.java",
+      "start_line": 153,
+      "end_line": 160,
+      "excerpt_sha256": "54335d20722a8ab2504c529bebad10e2a1903b4cabc367a6aaa2bc94eff01fa4",
+      "copyright_and_license_header": "Copyright (c) 2015-present, xuxueli.\nSee the accompanying unchanged NOTICE.txt and GPL-3.0-only LICENSE.txt."
+    },
+    {
+      "file": "handler-invocation.java.txt",
+      "original_path": "xxl-job-core/src/main/java/com/xxl/job/core/handler/impl/MethodJobHandler.java",
+      "original_sha256": "6205ac54e8010ed536235cf65c6a5569e65302e5320d332e92c3f6e3f1331e5b",
+      "git_blob_sha1": "2912638b2aeea31d3c67965985238059e92ac02a",
+      "source_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/xxl-job-core/src/main/java/com/xxl/job/core/handler/impl/MethodJobHandler.java",
+      "start_line": 25,
+      "end_line": 33,
+      "excerpt_sha256": "3d09bd1c4140cc44eaaa82d4180ef5a5e20e03dbc723c02139b7330e3f91b37f",
+      "copyright_and_license_header": "Copyright (c) 2015-present, xuxueli.\nSee the accompanying unchanged NOTICE.txt and GPL-3.0-only LICENSE.txt."
+    },
+    {
+      "file": "completion-callback.java.txt",
+      "original_path": "xxl-job-core/src/main/java/com/xxl/job/core/thread/TriggerCallbackThread.java",
+      "original_sha256": "8dcc54bb15ed48490c0810ec006fb4690a73c67579af846692b583abb25ee473",
+      "git_blob_sha1": "2417a36d8bec0517c7845a4e7d9848c6bffb17b7",
+      "source_url": "https://github.com/xuxueli/xxl-job/blob/7548d1a62b187684b698e05618947f26d3e4a54a/xxl-job-core/src/main/java/com/xxl/job/core/thread/TriggerCallbackThread.java",
+      "start_line": 75,
+      "end_line": 86,
+      "excerpt_sha256": "700a64d33bf7876b1267465645c90e713a4846cc8d8c52dea52df9ab09ee17d4",
+      "copyright_and_license_header": "Copyright (c) 2015-present, xuxueli.\nSee the accompanying unchanged NOTICE.txt and GPL-3.0-only LICENSE.txt."
+    }
+  ],
+  "excerpt_policy": "仅教学所需连续短摘录，原文不改；保全本版本完整 LICENSE 和 NOTICE，不引入新运行依赖。",
+  "license_sha256": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
+  "notice_sha256": "af3edb4e1ea83d854e1588e7934c2b72d2b19fb1569834af7a26065acb0ff06a"
+}

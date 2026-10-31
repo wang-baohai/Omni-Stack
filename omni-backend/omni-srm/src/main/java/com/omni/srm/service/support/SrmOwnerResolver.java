@@ -1,10 +1,13 @@
 package com.omni.srm.service.support;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.omni.common.core.internal.InternalDataScopeDTO;
 import com.omni.common.core.internal.InternalUserDTO;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.srm.client.AuthInternalClient;
+import com.omni.srm.entity.SrmSupplierPortalUser;
+import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
 import com.omni.common.service.identity.ServiceRequestIdentity;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class SrmOwnerResolver {
 
     private final AuthInternalClient authInternalClient;
+    private final SrmSupplierPortalUserMapper portalUserMapper;
 
     /**
      * 解析创建命令负责人，指定其他用户时额外校验 assign/transfer 权限范围。
@@ -111,6 +115,16 @@ public class SrmOwnerResolver {
     private Owner resolveUser(Long targetUserId) {
         if (targetUserId == null) {
             throw new BusinessException(400, "负责人不能为空");
+        }
+        Long portalAssociations = portalUserMapper.selectCount(Wrappers.<SrmSupplierPortalUser>lambdaQuery()
+                .eq(SrmSupplierPortalUser::getTenantId, ServiceIdentityContext.requireTenantId())
+                .eq(SrmSupplierPortalUser::getUserId, targetUserId)
+                .eq(SrmSupplierPortalUser::getDeleted, 0));
+        if (portalAssociations == null) {
+            throw new BusinessException(503, "门户身份校验暂时不可用");
+        }
+        if (portalAssociations > 0) {
+            throw new BusinessException(403, "供应商门户账号不能作为内部负责人");
         }
         R<InternalUserDTO> response;
         try {

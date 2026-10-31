@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-design",
+  "source": "docs/wiki/tenancy-design.md",
+  "source_sha256": "cd7f3ac3f1e27b5f6ff351946cdef1ec40c9f000daf442298cb94c099d19121c",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "765d4ad52a3bedb47fa116585ea6069483f2d6797f4d6e377e32cd00fb1bc24d",
+      "checks": {
+        "coverage_and_meaning": "三种存储安排的利弊、服务分库与租户维度、MyBatis/Plus/common-service定义、三类统一与共享边界完整。",
+        "technical_literals": "tenant_id、MyBatis-Plus3.5.16、common-service、Auth/Workflow/Redis/Nacos/XXL-JOB等字面量保留；同语后续链接。",
+        "security_and_failure_semantics": "独立schema限定数据库支持；没有让读者立即新建环境；选型明确是源码推导而非虚构历史评审，插件不代替业务判断。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "68b690b01c427f512079d729805f82d64b4419362a6de76cddb87faaa0bbc453",
+      "checks": {
+        "coverage_and_meaning": "三种存储安排的利弊、服务分库与租户维度、MyBatis/Plus/common-service定义、三类统一与共享边界完整。",
+        "technical_literals": "tenant_id、MyBatis-Plus3.5.16、common-service、Auth/Workflow/Redis/Nacos/XXL-JOB等字面量保留；同语后续链接。",
+        "security_and_failure_semantics": "独立schema限定数据库支持；没有让读者立即新建环境；选型明确是源码推导而非虚构历史评审，插件不代替业务判断。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "description": "初稿存在租戸或工程側直译。",
+          "id": "japanese-tenant-project-terms",
+          "status": "resolved",
+          "resolution": "按当前文义改为テナント/プロジェクト側，原文源码不变，修正后全文复读。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "dd726410ce1160667b5ebfcf1ce460e5e7912c53b01adde60c9f2a924c22d43c",
+      "checks": {
+        "coverage_and_meaning": "三种存储安排的利弊、服务分库与租户维度、MyBatis/Plus/common-service定义、三类统一与共享边界完整。",
+        "technical_literals": "tenant_id、MyBatis-Plus3.5.16、common-service、Auth/Workflow/Redis/Nacos/XXL-JOB等字面量保留；同语后续链接。",
+        "security_and_failure_semantics": "独立schema限定数据库支持；没有让读者立即新建环境；选型明确是源码推导而非虚构历史评审，插件不代替业务判断。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "description": "韩文草稿把服务作为主语时误用了宾格助词。",
+          "id": "korean-grammar-and-domain-words",
+          "status": "resolved",
+          "resolution": "将서비스를改为서비스가，明确由服务引入并开启库能力，修正后全文复读。"
+        }
+      ]
+    }
+  }
+}

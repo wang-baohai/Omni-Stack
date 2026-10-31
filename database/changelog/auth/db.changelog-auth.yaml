@@ -16,3 +16,5 @@ databaseChangeLog:
   # WP-011 S18(P0-2)：forward-only 补齐 full 预设 E2E 第二供应商身份 supplier2
   - include:
       file: database/changelog/auth/0007-wp011-supplier2-identity.yaml
+  - include:
+      file: database/changelog/auth/0008-srm-workflow-approver-permissions.yaml

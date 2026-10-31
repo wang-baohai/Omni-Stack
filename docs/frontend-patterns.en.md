@@ -103,6 +103,7 @@ Router uses `createWebHistory(import.meta.env.BASE_URL)`. Static means predeclar
 | `/supplier-portal` | Token and portalAccess policy |
 | `/menu-load-error` | Token required; menu retry |
 | `/admin`, `/admin/dashboard` | Admin layout/default child, subject to management policy |
+| `/workspace`, `/workspace/overview` | Protected; the workspace root redirects to the unified cockpit, while legacy approvals/jobs routes locate its panels as described in 5.1 |
 | `/admin/:pathMatch(.*)*`, `/:pathMatch(.*)*` | 403/404 views respectively; the former protected, the latter public |
 
 Without a token, protected navigation uses safeAppRedirect and selects Login/PortalLogin. With a token, initFromToken runs each time. Unfinished menus are awaited, registered and replace-navigated; failures go to MenuLoadError. Remaining branches ensure registration and apply management/supplier-portal/asset-self-service policy. Token presence and local decoding do not prove validity or expiry; server requests still authenticate.
@@ -112,6 +113,22 @@ Dynamic registration handles matching MENU components, excludes srm:portal: chil
 `import.meta.glob('../views/**/index.vue')` supplies lazy views. Exactly two viewOverrides exist: system:oauth2→views/oauth2-client/index.vue and base:operlog→views/monitor/oper-log/index.vue. Dynamic meta has title/icon/requiresAuth/permissionCode. Meta types are optional; not every static record explicitly supplies all fields. Registered names prevent duplicates and are removed on logout.
 
 Menu failure also sets menusLoaded=true. Inspect idle/loading/loaded/failed state as well; retryLoadMenus resets then reloads. Operational recovery belongs in the Wiki.
+
+---
+
+### 5.1 Home, Workspace and application navigation boundaries
+
+The official CLI passes the catalog-resolved module closure through `OMNI_FRONTEND_MODULES` to the frontend build argument `VITE_OMNI_MODULES`. For a source checkout built with a smaller preset, view resolution and client-side presentation permissions are intersected with that selection. Without workflow, the client neither requests process statistics nor mounts the approvals panel; without SRM, supplier entries are unavailable. Direct builds without this argument retain full behavior, while generated projects remain constrained by their actual file pruning. This filter changes neither JWTs, database roles nor server authorization. See [deployment-modules.ts](../omni-frontend/src/utils/deployment-modules.ts).
+
+My Workspace on Home is a native same-origin link opening a new tab with `noopener noreferrer`. It shares the existing session without tokens in URLs. Workspace offers no Home/Wiki return entry.
+
+Overview, approvals and My Jobs share `/workspace/overview`, reusing their lists, forms and APIs. Legacy `/workspace/approvals` and `/workspace/jobs` retain query and locate `#approvals` or `#my-tasks`; there are no three separate maintained pages.
+
+Workspace Apps and search cover all authorized menus with actual views. Catalog and drawer business entries open new tabs. Business layouts omit the global Apps button and drawer; their sidebar focuses on the current module. Search filters enterable pages by the stable root `route.meta.appId`, rechecks the target appId and navigates in the current tab. Invalid IDs yield no candidates; URL prefixes do not determine membership.
+
+Private error pages omit Home/Back recovery buttons; unknown modules and access-denied pages do not use Dashboard as a fallback menu. Native browser Back, tab switching and manually entered URLs remain available; UI boundaries do not replace server authorization. After initial menu loading, `resolveMenuReloadTarget()` supplies path, query and hash separately, preserving redirect parameters and anchors without putting fullPath inside the object's path.
+
+Implementation: [ConsoleHeader](../omni-frontend/src/components/ConsoleHeader.vue), [Workspace](../omni-frontend/src/views/workspace/index.vue) and [navigation helpers](../omni-frontend/src/utils/navigation.ts).
 
 ---
 
@@ -242,6 +259,8 @@ That isolation belongs to useDictOptions, not permissionStore menu requests. use
 ---
 
 ## 15. Build and Static Serving Boundaries
+
+After building the application, the frontend image builds the Wiki from the same repository and serves its public static pages under `/wiki/` on the same port, 3000. The public `/` page displays these documents without requiring login; identity changes only the account area, while workspace and business routes retain their authentication guards. Missing Wiki files return 404 instead of the application homepage. Only Wiki documents allow same-origin embedding, and their startup scripts use a response nonce; login and business paths retain their existing security policy.
 
 The [frontend Dockerfile](../docker/frontend/Dockerfile) builds with Node 22 and serves dist with Nginx 1.28 on 3000. Current [Nginx](../docker/frontend/nginx.conf) proxies /api/, /oauth2/ and /.well-known/ to omni-gateway:8080 using Docker DNS and provides index.html history fallback.
 

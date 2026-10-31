@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "mq-principles",
+  "source": "docs/wiki/mq-principles.md",
+  "source_sha256": "e97a3669e4e4a856440f22f353e6d2ca958f6b03e764865b9073a58745885664",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/mq-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "ce2d1447ada3b7d75670c207a1e15518657896f18efc8857e05472917e29698e",
+      "checks": {
+        "coverage_and_meaning": "寄件类比解释生产者/Broker/消费者/Outbox/中继，先记录意图和多阶段结果容易理解。",
+        "technical_literals": "RocketMQ、XXL-JOB与sys_mq_message保持原值；有效本地事务的前置清楚。",
+        "security_and_failure_semantics": "同数据源/有效事务/代理和OperLog捕获异常边界齐全，不承诺无重复或已消费。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/mq-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "cc1f24af34a4fa6fa828a7ef08203a4431b314cdf63672ba031e47ec26e8b509",
+      "checks": {
+        "coverage_and_meaning": "寄件类比解释生产者/Broker/消费者/Outbox/中继，先记录意图和多阶段结果容易理解。",
+        "technical_literals": "RocketMQ、XXL-JOB与sys_mq_message保持原值；有效本地事务的前置清楚。",
+        "security_and_failure_semantics": "同数据源/有效事务/代理和OperLog捕获异常边界齐全，不承诺无重复或已消费。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/mq-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "77443edd3a8cb0ddf258b5f8d6f13e1040dd6575ffefc7bd021217071395e0e4",
+      "checks": {
+        "coverage_and_meaning": "寄件类比解释生产者/Broker/消费者/Outbox/中继，先记录意图和多阶段结果容易理解。",
+        "technical_literals": "RocketMQ、XXL-JOB与sys_mq_message保持原值；有效本地事务的前置清楚。",
+        "security_and_failure_semantics": "同数据源/有效事务/代理和OperLog捕获异常边界齐全，不承诺无重复或已消费。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

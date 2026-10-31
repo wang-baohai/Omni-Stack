@@ -225,7 +225,7 @@ modules:
     # permission-and-failure-states：employee-forbidden-403 四语言（AUTHENTICATED_BUT_FORBIDDEN）
     # + 业务校验失败（crmLead.nameRequired 四语言）。
   - id: srm
-    status: partial
+    status: covered
     required_flows: [ invite, portal-register, admission, activation, lifecycle, evaluation, risk, supplier-quotation ]
     existing_assets:
       - docs/images/srm-invite.png
@@ -403,6 +403,93 @@ modules:
       - { width: 1024, height: 768, flow: dashboard }
     gaps: []
     #2026-10-13: The historical English/scroll receipts remain baseline evidence. Current source-localized official Elm UI passed four languages, 12 real-alert captures and eight desktop/phone control scenarios. All images were actually inspected; normal vertical phone scrolling remains documented.
+  - id: platform-tutorial
+    status: covered
+    required_flows: [ site-home, login, register, portal-login, portal-register, device, consent, workspace, approvals, jobs, users, roles, orgs, tenant, oauth2, audit, login-record, auth-record, online, config, xss, dict, operlog, mq-messages, job-types, system-jobs, workflow-models, workflow-instances, access-denied, not-found, user-dialog ]
+    flow_modules:
+      portal-login: [ srm ]
+      portal-register: [ srm ]
+      approvals: [ workflow ]
+      workflow-models: [ workflow ]
+      workflow-instances: [ workflow ]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/platform-*.png
+    gaps: []
+    # 2026-10-21：WP-24.S02/S04 平台教程四语原图 124 张（31 场景 × 4 语），
+    # 采集于唯一 omni-stack 环境，登录场景用真实验证码；受控身份与真实登录分开登记。
+    # 审计/在线用户等高风险页已抽查脱敏（邮箱与网段由产品掩码）；逐张复核仍待完成，
+    # 因此本模块只声明“图片与场景映射齐全”，不声明人工视觉/翻译复核通过。
+    # /callback 外部 OAuth 未配置、monitor 无独立页、无 admin approvals 页均未造图。
+
+  - id: crm-tutorial
+    status: covered
+    required_flows: [ crm-overview, crm-leads, crm-lead-dialog, crm-lead-validation, crm-lead-converted, crm-lead-empty, crm-customers, crm-customer-360, crm-contacts, crm-opportunities, crm-opportunity-won, crm-activities, crm-activity-completed, crm-employee-403 ]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/crm-*.png
+    gaps: []
+    # 2026-10-21：WP-25.S02/S04 CRM 教程四语原图 56 张（14 场景 × 4 语），
+    # 真实链路（线索→跟进→资格→转换→商机→赢单→回访）与筛选/空态/拒绝/必填校验。
+    # 销售员工角色可见性未单独验证（共享库无 CRM 种子身份），本模块不声称角色范围通过。
+
+  - id: srm-tutorial
+    status: covered
+    required_flows:
+      - srm-overview
+      - srm-suppliers
+      - srm-supplier-create
+      - srm-supplier-detail
+      - srm-supplier-detail-bottom
+      - srm-contacts
+      - srm-qualifications
+      - srm-bank-accounts
+      - srm-owner-internal
+      - srm-owner-portal-empty
+      - srm-supplier-empty
+      - srm-evaluations
+      - srm-evaluation-detail
+      - srm-risks
+      - srm-risk-detail
+      - srm-risk-history
+      - srm-risk-config
+      - srm-risk-thresholds
+      - srm-invites
+      - srm-portal-profile
+      - srm-portal-quotation
+      - srm-portal-quotation-detail
+      - srm-portal-evaluation
+      - srm-employee-403
+    flow_modules:
+      srm-portal-quotation: [ procurement ]
+      srm-portal-quotation-detail:
+        - procurement
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/srm-*.png
+    gaps: []
+      # 2026-10-26：96张原生只读截图（24场景×四语）全部逐张AI审图，真实fixture来源与尺寸逐图登记。
+      # 本图层不代替WP-26.S02既有真实审批、生命周期、资料、评估和报价写入证据；历史原结果保留。
+    # 2026-10-22：WP-26.S02/S04 SRM 教程四语原图 48 张（12 场景 × 4 语）。
+    # 门户三页签使用正式邀请/入驻取得的真实身份；员工 403 与空筛选四语。
+    # 供应商生命周期写动作未逐项触发，本模块不声称其通过。
+
+  - id: procurement-tutorial
+    status: covered
+    required_flows: [ procurement-overview, procurement-material-category, procurement-material, procurement-requisition, procurement-requisition-detail, procurement-approval-route, procurement-supplier-approved, procurement-rfq, procurement-portal-quote, procurement-purchase-order, procurement-goods-receipt, procurement-assets ]
+    flow_modules:
+      procurement-assets: [ asset ]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/procurement-*.png
+    gaps: []
+    # 2026-10-28：WP-27.S04 四语176张原生实审图（44场景×4语）；12个原flow保留，8张故障当时宽屏图保留历史版本，未提交表单与最终结果分别说明。
+
+  - id: asset-tutorial
+    status: covered
+    required_flows: [ asset-overview, asset-ledger, asset-detail, asset-create-dialog, asset-transfer-completed, asset-transfer-rejected, asset-disposal-completed, asset-my-in-use, asset-my-returned ]
+    required_states: [ entry, list, detail, create-or-edit, key-action, success, failure-or-forbidden ]
+    existing_assets:
+      - docs/images/{zh-CN,en-US,ja-JP,ko-KR}/asset-*.png
+    gaps: []
+    # 2026-10-29：WP-28.S04 四语144张实际审读图（36场景×4语），另复用采购来源4图；原9flow/全部state/gaps不删。S02明确START_FAILED本地取消真实正例仍另保留阻塞。
+
 rules:
   - 正式图片必须在 screenshot-manifest.yaml 中与稳定 Playwright 用例一一对应
   - 同一流程的四语言必须使用相同 fixture、步骤编号和视口

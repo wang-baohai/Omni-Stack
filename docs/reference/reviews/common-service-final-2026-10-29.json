@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "document_id": "common-service",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/common-service.md",
+  "source_sha256": "739e8704e4c858786202cdfd9f31152ea147e6015396cc681035211be3fe6043",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮4篇中文及12译文全部实际完整Get-Content读取且无截断；相关Java/POM/YML原文和开关条件实读。最小修正后最终四语差量实际复读；没有用哈希/行数/代码一致性替代语义审读。无栅格图片；Mermaid新渲染统一原29S04。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-common-infrastructure-actual-reading-20261029.json",
+  "actual_reading_sha256": "3727f0b8290b87f4bb58fce79e9866e99de95bc08a438e842d2688050f3e3b35",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-service.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "0aa8a88e2fe0d321302fdbcb6aa8ecb8cba85536b6adefbf09f3693c71cf3d0c",
+      "checks": {
+        "coverage_and_meaning": "八功能族全文对照29文件相关源码：身份/HMAC可选/失败关闭/租户与数据权限/内部API/XSS回源/客户端/启动校验/Inbox指标。修正策略仅在对应开关启用才必需、Order不能断言事务之后，外语回源术语明确Auth再查询。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "SERVICE-POLICY-CONDITIONS",
+          "status": "resolved",
+          "description": "只对启用功能要求唯一对应策略，未启用功能无强制Provider要求。"
+        },
+        {
+          "id": "SERVICE-ASPECT-ORDER",
+          "status": "resolved",
+          "description": "Order300不证明总在事务之后，按实际其他切面配置决定；未改切面顺序。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-service.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "3a07af91447ef15653b547ab3cae44343d2e27ba5de1b1968f41b164fcb22b4b",
+      "checks": {
+        "coverage_and_meaning": "八功能族全文对照29文件相关源码：身份/HMAC可选/失败关闭/租户与数据权限/内部API/XSS回源/客户端/启动校验/Inbox指标。修正策略仅在对应开关启用才必需、Order不能断言事务之后，外语回源术语明确Auth再查询。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "SERVICE-POLICY-CONDITIONS",
+          "status": "resolved",
+          "description": "只对启用功能要求唯一对应策略，未启用功能无强制Provider要求。"
+        },
+        {
+          "id": "SERVICE-ASPECT-ORDER",
+          "status": "resolved",
+          "description": "Order300不证明总在事务之后，按实际其他切面配置决定；未改切面顺序。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-service.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "72125a4acb7ff05878ec99c8e1178205b684581dbfd6c2579dd69820f52d126a",
+      "checks": {
+        "coverage_and_meaning": "八功能族全文对照29文件相关源码：身份/HMAC可选/失败关闭/租户与数据权限/内部API/XSS回源/客户端/启动校验/Inbox指标。修正策略仅在对应开关启用才必需、Order不能断言事务之后，外语回源术语明确Auth再查询。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "SERVICE-POLICY-CONDITIONS",
+          "status": "resolved",
+          "description": "只对启用功能要求唯一对应策略，未启用功能无强制Provider要求。"
+        },
+        {
+          "id": "SERVICE-ASPECT-ORDER",
+          "status": "resolved",
+          "description": "Order300不证明总在事务之后，按实际其他切面配置决定；未改切面顺序。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

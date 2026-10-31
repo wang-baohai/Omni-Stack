@@ -1,6 +1,6 @@
 # 定时任务系统约束
 
-本文是调度模块的事实与工程约束。界面操作、截图和源码调试步骤见 [调度教程](guides/scheduling.md)；运行配置见 [Docker 部署](docker-deployment.md)。
+本文是调度模块的事实与工程约束。从零开始的概念、框架原文、工程实现与真实网页见 [XXL-JOB 独立章节](wiki/distributed-jobs-principles.md)；既有细化操作见 [调度教程](guides/scheduling.md)，运行配置见 [Docker 部署](docker-deployment.md)。
 
 ## 1. 边界与数据所有权
 

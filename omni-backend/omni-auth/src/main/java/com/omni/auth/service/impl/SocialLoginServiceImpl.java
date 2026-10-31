@@ -129,6 +129,10 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
         // 4. 获取归一化的第三方用户资料
         ProviderUser providerUser = handler.fetchUserProfile(accessToken);
+        if (providerUser == null || providerUser.getProviderUserId() == null
+                || providerUser.getProviderUserId().isBlank()) {
+            throw new BusinessException(502, "第三方用户资料缺少唯一标识");
+        }
 
         // 5. 查找已有的第三方身份关联
         SysUserOauthProvider oauthProvider = sysUserOauthProviderMapper
@@ -141,6 +145,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             if (user == null) {
                 throw new BusinessException(500, "关联的本地用户不存在");
             }
+            requireUserTenant(user, tenantId);
             // 更新 access_token 和最新的用户资料
             oauthProvider.setAccessToken(accessToken);
             oauthProvider.setProviderUsername(providerUser.getUsername());
@@ -155,6 +160,9 @@ public class SocialLoginServiceImpl implements SocialLoginService {
             log.info("{} 首次登录，已自动创建本地用户: userId={}, username={}",
                     provider, user.getId(), user.getUsername());
         }
+
+        // 并发创建关联的回读也必须服从同一租户边界，再加载权限和签发令牌。
+        requireUserTenant(user, tenantId);
 
         // 6. 校验用户状态
         if (user.getStatus() != 1) {
@@ -216,6 +224,13 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         }
         if (TenantProvisionStatusEnum.ACTIVE != tenant.getProvisioningStatus()) {
             throw new BusinessException(409, "租户初始化未完成，暂时无法登录");
+        }
+    }
+
+    /** 已有全局第三方绑定只能进入其本地用户所属租户，禁止覆盖另一个租户的绑定令牌。 */
+    private void requireUserTenant(SysUser user, Long tenantId) {
+        if (user == null || !tenantId.equals(user.getTenantId())) {
+            throw new BusinessException(403, "第三方身份已关联其他租户，请选择正确的租户");
         }
     }
 
@@ -290,6 +305,9 @@ public class SocialLoginServiceImpl implements SocialLoginService {
                 user = sysUserMapper.selectById(oauthProvider.getUserId());
             }
         }
+
+        // 并发关联回读可能落到既有用户，先确认租户，不能给其他租户用户分配当前租户角色。
+        requireUserTenant(user, tenantId);
 
         // 分配默认 USER 角色（失败不阻塞用户创建）
         try {

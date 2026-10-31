@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "scheduling",
+  "source": "docs/scheduling.md",
+  "source_sha256": "6f9d96f8c3b9fbd058a9c289725b9673d0527ecda50814d82649db9a73e2d23d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source and translation contents",
+  "method": "本人实际完整读完四语正文/JSON，按中文逐段对照；common-job日韩补漏与日文术语修正后逐项复核。此脚本只登记这些具体审校及校验摘要，不审签未读的前端事实、平台教程或其他文章。",
+  "translations": {
+    "en-US": {
+      "path": "docs/scheduling.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "133b7562f2b60388cc61fd752170933c55a5bf0c9dc65ad76e64a3cc1f731f99",
+      "checks": {
+        "coverage_and_meaning": "逐篇全文对照四语调度事实：模块所有者、全局类型目录、系统权限、个人归属、创建及外部先行、日志失败、扩展、源码入口和运行边界完整。",
+        "technical_literals": "UserJobMessage五字段、userJobExecuteHandler、Task类型Bean、status0/1、UNREGISTERED/RUNNING/STOPPED、API路径权限和yyyy-MM-dd HH:mm:ss字面量不变。",
+        "security_and_failure_semantics": "日志SQL未用tenantId的当前事实与父任务校验同时保留；Cookie仅内存、重登录不保证写幂等；未知结果不盲删、启停不等于执行、目录不是部署证明。",
+        "language_and_terminology": "全文逐段对照中文实际审读，事实、限制和恢复语气自然准确；保留协议、代码、接口和目录原文，不用术语代替解释。",
+        "images_and_links": "本篇无栅格图片，新增XXL独立章与原详细指南/部署/源码入口逐项本语核对；事实只维护契约，不复制教程或扩展生产保证。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/scheduling.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "bf82fa967ada350e16d76f68b2dec454ad3aed620e2d84354c1616ddfca0d38c",
+      "checks": {
+        "coverage_and_meaning": "逐篇全文对照四语调度事实：模块所有者、全局类型目录、系统权限、个人归属、创建及外部先行、日志失败、扩展、源码入口和运行边界完整。",
+        "technical_literals": "UserJobMessage五字段、userJobExecuteHandler、Task类型Bean、status0/1、UNREGISTERED/RUNNING/STOPPED、API路径权限和yyyy-MM-dd HH:mm:ss字面量不变。",
+        "security_and_failure_semantics": "日志SQL未用tenantId的当前事实与父任务校验同时保留；Cookie仅内存、重登录不保证写幂等；未知结果不盲删、启停不等于执行、目录不是部署证明。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job修正執行器/工程/定点整理等直译并补代理父类接口与private说明，最后变更再次核对。其他文档术语与索引语义一致。",
+        "images_and_links": "本篇无栅格图片，新增XXL独立章与原详细指南/部署/源码入口逐项本语核对；事实只维护契约，不复制教程或扩展生产保证。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/scheduling.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "b62c1943152858cc9dfe56826a4b4f571c50c0e44cb704274889be6ff4f4ba9a",
+      "checks": {
+        "coverage_and_meaning": "逐篇全文对照四语调度事实：模块所有者、全局类型目录、系统权限、个人归属、创建及外部先行、日志失败、扩展、源码入口和运行边界完整。",
+        "technical_literals": "UserJobMessage五字段、userJobExecuteHandler、Task类型Bean、status0/1、UNREGISTERED/RUNNING/STOPPED、API路径权限和yyyy-MM-dd HH:mm:ss字面量不变。",
+        "security_and_failure_semantics": "日志SQL未用tenantId的当前事实与父任务校验同时保留；Cookie仅内存、重登录不保证写幂等；未知结果不盲删、启停不等于执行、目录不是部署证明。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job补齐Bean条件/扫描两段引导和代理父类接口/private注意项，日期、权限、失败与归属限制未省略。",
+        "images_and_links": "本篇无栅格图片，新增XXL独立章与原详细指南/部署/源码入口逐项本语核对；事实只维护契约，不复制教程或扩展生产保证。"
+      },
+      "findings": []
+    }
+  }
+}

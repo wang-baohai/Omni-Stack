@@ -115,6 +115,7 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
                     .uri(URI.create(oauth2Properties.getGithub().getTokenUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
+                    .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("User-Agent", USER_AGENT)
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
@@ -178,6 +179,9 @@ public class GitHubOAuth2Handler implements OAuth2ProviderHandler {
             }
 
             GitHubUser user = objectMapper.readValue(response.body(), GitHubUser.class);
+            if (user.getId() == null) {
+                throw new BusinessException(502, "GitHub 用户资料缺少唯一标识");
+            }
             log.info("GitHub 用户信息获取成功: id={}, login={}", user.getId(), user.getLogin());
             return ProviderUser.builder()
                     .providerUserId(String.valueOf(user.getId()))

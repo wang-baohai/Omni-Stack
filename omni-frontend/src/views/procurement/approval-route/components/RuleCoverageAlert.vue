@@ -2,7 +2,7 @@
 /** 持续展示审批覆盖风险，避免只有提交失败时才发现配置断档。 */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { CoverageReport } from '@/api/procurement-approval-route'
+import type { CategoryCoverage, CoverageReport } from '@/api/procurement-approval-route'
 
 const props = defineProps<{
   report?: CoverageReport
@@ -21,6 +21,22 @@ const healthy = computed(() => Boolean(props.report)
   && riskyCategories.value.length === 0
   && !props.report?.allRulesInactive
   && props.report?.workflowAvailability === 'AVAILABLE')
+
+/** 按结构化区间解释风险，不直接展示后端诊断文案。 */
+function issueMessages(category: CategoryCoverage) {
+  const messages: string[] = []
+  for (const segment of category.segments) {
+    const range = { min: segment.minAmount, max: segment.maxAmount ?? '∞' }
+    if (segment.outcome === 'GAP') {
+      messages.push(t('procurementApprovalRules.coverageGapRange', range))
+    } else if (segment.outcome === 'AMBIGUOUS') {
+      messages.push(t('procurementApprovalRules.coverageConflictRange', range))
+    } else if (segment.workflowAvailability !== 'AVAILABLE') {
+      messages.push(t('procurementApprovalRules.coverageInvalidRange', range))
+    }
+  }
+  return messages.length ? messages : [t('procurementApprovalRules.coverageRisk')]
+}
 </script>
 
 <template>
@@ -66,7 +82,7 @@ const healthy = computed(() => Boolean(props.report)
         :name="category.categoryCode"
       >
         <ul>
-          <li v-for="issue in category.issues" :key="issue">{{ issue }}</li>
+          <li v-for="issue in issueMessages(category)" :key="issue">{{ issue }}</li>
         </ul>
       </el-collapse-item>
     </el-collapse>

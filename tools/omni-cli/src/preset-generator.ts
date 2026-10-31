@@ -50,6 +50,11 @@ const GENERATED_SUBPATH_EXCLUDES = [
   'scripts/wp010',
   'omni-frontend/e2e/wp006-visual-screenshot.mjs',
   'omni-frontend/e2e/wp009-f',
+  // 四份本次改造的执行材料不属于生成项目文档，按精确路径排除，不改动 docs 校验。
+  'docs/design/wiki-workspace-ux-goal-prompt.md',
+  'docs/design/wiki-workspace-ux-work-packages.md',
+  'docs/design/wiki-workspace-ux-requirements.md',
+  'docs/design/wiki-workspace-ux-plan-lock.json',
 ];
 
 /**
@@ -228,7 +233,7 @@ function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<stri
   filterPlatformDatabases(root, selected);
   filterMigrationTargets(root, selected);
   filterFrontendLocales(root, catalog, selected);
-  filterHomeWorkspace(root, selected);
+  filterWorkspaceRoutes(root, selected);
   filterFrontendRegistrations(root, omitted.map((module) => module.id));
   filterPresetFiles(root, presetId);
   if (!selected.has('workflow')) {
@@ -240,10 +245,11 @@ function pruneWorkspace(root: string, catalog: ModuleCatalog, selected: Set<stri
     removeRelative(root, 'docs/reference/evidence/workflow-2026-10-10.json');
     const packagePath = resolve(root, 'omni-frontend/package.json');
     const packageJson = JSON.parse(readFileSync(packagePath, 'utf8')) as { scripts: Record<string, string> };
-    packageJson.scripts['test:unit'] = 'node --experimental-strip-types --test "tests/wp012/*.test.ts"';
+    packageJson.scripts['test:unit'] = 'node --experimental-strip-types --test "tests/wp012/*.test.ts" "tests/base/*.test.ts" "tests/navigation/*.test.ts"';
     writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`, 'utf8');
   }
   if (!selected.has('crm')) {
+    removeRelative(root, 'omni-frontend/src/utils/crm-activity-labels.ts');
     removeRelative(root, 'omni-frontend/e2e-docs/flows/crm-teaching.flows.spec.ts');
     removeRelative(root, 'omni-frontend/e2e-docs/flows/crm-teaching-ui.flows.spec.ts');
     removeRelative(root, 'docs/reference/evidence/crm-2026-10-10.json');
@@ -646,49 +652,32 @@ function filterMigrationTargets(root: string, selected: Set<string>): void {
   writeFileSync(path, `${content.replace(/\s*$/, '')}\n`, 'utf8');
 }
 
-function filterHomeWorkspace(root: string, selected: Set<string>): void {
-  const path = resolve(root, 'omni-frontend/src/views/home/index.vue');
+/**
+ * 裁剪工作台静态路由：workflow 缺失时移除审批子路由。
+ * 新版工作台以 overview 为默认落点，审批页属于 workflow 模块，不能留下指向已裁视图的静态导入。
+ */
+function filterWorkspaceRoutes(root: string, selected: Set<string>): void {
+  if (selected.has('workflow')) return;
+  const path = resolve(root, 'omni-frontend/src/router/index.ts');
   let content = readFileSync(path, 'utf8');
-  if (!selected.has('workflow')) {
-    content = removeImport(content, '@/api/workflow');
-    content = removeImport(content, '@/api/procurement-requisition');
-    content = removeImport(content, '@/api/asset-transfer');
-    content = removeImport(content, '@/api/asset-disposal');
-    content = content.replace("import { useDictOptions } from '@/composables/useDictOptions'\n", '');
-    content = removeBetween(content, '// ─── 流程分类字典映射 ───', '// ─── 通用状态 ───', true);
-    content = content.replace(/\s*\/\/ 加载工作流统计和待办\r?\n\s*loadWfStats\(\)\r?\n\s*loadTodoList\(\)/, '');
-    content = removeBetween(content, '// ─── 工作流标签页状态 ───', '</script>', false);
-    content = removeBetween(content, '        <!-- Tab 1: 待我审批 -->', '        <!-- Tab 4: 我的定时任务 -->', true);
-    content = content.replace('<el-tabs v-model="activeTab" @tab-change="handleTabChange">', '<el-tabs model-value="jobs">');
-    content = removeBetween(content, '      <!-- 审批对话框 -->', '    </main>', true);
-    content = content.replace('</el-tabs>\n\n    </main>', '</el-tabs>\n    </main>');
-  } else if (!selected.has('procurement') && !selected.has('asset')) {
-    content = removeImport(content, '@/api/procurement-requisition');
-    content = removeImport(content, '@/api/asset-transfer');
-    content = removeImport(content, '@/api/asset-disposal');
-    content = content.replace(
-      /  completeApproval, getTaskFormData, getWorkspaceStats,/,
-      '  completeApproval, getWorkspaceStats,',
-    );
-    content = content.replace(
-      /const businessFormLoading = ref\(false\)[\s\S]*?const approvalCanSubmit = computed\(\(\) => Boolean\([\s\S]*?\)\)\r?\n/,
-      'const approvalCanSubmit = computed(() => Boolean(approvalTask.value))\n',
-    );
-    content = content.replace(
-      /function positiveInteger\(value: unknown\): number \| null \{[\s\S]*?\r?\n\}\r?\n\r?\n/,
-      '',
-    );
-    content = content.replace(
-      /async function openApproval\(task: TodoTask\) \{[\s\S]*?\n\}/,
-      `async function openApproval(task: TodoTask) {\n  approvalTask.value = task\n  approvalForm.approved = true\n  approvalForm.comment = ''\n  approvalVisible.value = true\n}`,
-    );
-    content = content.replace(
-      /  if \(hasBusinessApprovalView\.value\) \{[\s\S]*?  \} else \{\r?\n    ElMessage\.success\(t\('common\.success'\)\)\r?\n  \}/,
-      "  ElMessage.success(t('common.success'))",
-    );
-    content = content.replace(":width=\"hasBusinessApprovalView ? '860px' : '500px'\"", 'width="500px"');
-    content = removeBetween(content, '        <div v-loading="businessFormLoading">', '        <el-form :model="approvalForm" label-width="100">', true);
+  const marker = "      {\n        path: 'approvals',";
+  const start = content.indexOf(marker);
+  if (start < 0) throw new CliError('无法定位工作台审批子路由');
+  let depth = 0;
+  let end = -1;
+  for (let index = start; index < content.length; index += 1) {
+    if (content[index] === '{') depth += 1;
+    if (content[index] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        end = content[index + 1] === ',' ? index + 2 : index + 1;
+        break;
+      }
+    }
   }
+  if (end < 0) throw new CliError('工作台审批子路由括号不完整');
+  if (content[end] === '\n') end += 1;
+  content = `${content.slice(0, start)}${content.slice(end)}`;
   writeFileSync(path, `${content.replace(/\s*$/, '')}\n`, 'utf8');
 }
 

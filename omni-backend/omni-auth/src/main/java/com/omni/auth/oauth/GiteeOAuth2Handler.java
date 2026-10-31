@@ -117,6 +117,7 @@ public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
                     .uri(URI.create(oauth2Properties.getGitee().getTokenUrl()))
                     .timeout(Duration.ofSeconds(30))
                     .header("Accept", "application/json")
+                    .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("User-Agent", USER_AGENT)
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
@@ -181,6 +182,9 @@ public class GiteeOAuth2Handler implements OAuth2ProviderHandler {
 
             JsonNode json = objectMapper.readTree(response.body());
             String id = json.path("id").asText(null);
+            if (id == null || id.isBlank()) {
+                throw new BusinessException(502, "Gitee 用户资料缺少唯一标识");
+            }
             String login = json.path("login").asText(null);
             String name = json.path("name").asText(null);
             String email = json.path("email").asText(null);

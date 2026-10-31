@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "logging-extension",
+  "source": "docs/wiki/logging-extension.md",
+  "source_sha256": "4944308acba25124e411aa3de6f95176cb25010bbe46306712db858422ac4cd4",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/logging-extension.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "19e187802fd047e58536439de492b500dbd690682e42e892eeb4fbc0f40d2f83",
+      "checks": {
+        "coverage_and_meaning": "按事件/受众/期限选择记录类型，四步接入与四类边界逻辑完整，改良方向与当前事实分开。",
+        "technical_literals": "traceId、operlog、Servlet、认证独立路径和SQL输出用词准确，没有新接口或库配置。",
+        "security_and_failure_semantics": "敏感文本、跨租户、Docker socket控制面和真实采集证据边界明确；已修日文术语。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/logging-extension.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "60f9e705119ea4fc462849a055ab26648db2fd96fa3ea7f7e19a74a7b038b4ce",
+      "checks": {
+        "coverage_and_meaning": "按事件/受众/期限选择记录类型，四步接入与四类边界逻辑完整，改良方向与当前事实分开。",
+        "technical_literals": "traceId、operlog、Servlet、认证独立路径和SQL输出用词准确，没有新接口或库配置。",
+        "security_and_failure_semantics": "敏感文本、跨租户、Docker socket控制面和真实采集证据边界明确；已修日文术语。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/logging-extension.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "201cb30034ccd309a6840bfda2d2c41195dfbf412f40a2b66d902ac1f684c389",
+      "checks": {
+        "coverage_and_meaning": "按事件/受众/期限选择记录类型，四步接入与四类边界逻辑完整，改良方向与当前事实分开。",
+        "technical_literals": "traceId、operlog、Servlet、认证独立路径和SQL输出用词准确，没有新接口或库配置。",
+        "security_and_failure_semantics": "敏感文本、跨租户、Docker socket控制面和真实采集证据边界明确；已修日文术语。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

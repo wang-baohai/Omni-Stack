@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "distributed-jobs-admin",
+  "source": "docs/wiki/distributed-jobs-admin.md",
+  "source_sha256": "d6203409d7a1ddd87e3f0056bdd5b17e3020e3ae542a8bf3f692997e631ad1c8",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Actual current article, literal source and reviewed-image digests",
+  "method": "本人逐篇实际完整读完七篇中文与21篇英日韩，日文正文自然化后复核；随后对八篇使用/恢复最终全文再读，另两处My Jobs实际界面名称改动逐项复核。12张适用原生/工作台/表单图逐张看过。脚本仅绑定既有真实审校与摘要，不产生机器语义盖章或真人签核。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/distributed-jobs-admin.md",
+      "image": "docs/images/shared/xxl-admin-dashboard.png",
+      "sha256": "8b1a70259386f101ff0acbe1c6ee5b7d61212765e7534cd986c173555261966a",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.md",
+      "image": "docs/images/shared/xxl-admin-executors.png",
+      "sha256": "55c71871b3e48ab6f186e2aa8e73fb36713e5d7aa458416cc89f4ed7c067d78e",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.md",
+      "image": "docs/images/shared/xxl-admin-tasks.png",
+      "sha256": "66933363159b0282b3dd3c1a00b384dcf904dbc75d3254cef4739072329ae8d7",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.md",
+      "image": "docs/images/shared/xxl-admin-logs.png",
+      "sha256": "2bb584e179535e64be0938e4f2d1eb98ca58ca486bb31aae3f7ce9be3940a725",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.en.md",
+      "image": "docs/images/shared/xxl-admin-dashboard.png",
+      "sha256": "8b1a70259386f101ff0acbe1c6ee5b7d61212765e7534cd986c173555261966a",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.en.md",
+      "image": "docs/images/shared/xxl-admin-executors.png",
+      "sha256": "55c71871b3e48ab6f186e2aa8e73fb36713e5d7aa458416cc89f4ed7c067d78e",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.en.md",
+      "image": "docs/images/shared/xxl-admin-tasks.png",
+      "sha256": "66933363159b0282b3dd3c1a00b384dcf904dbc75d3254cef4739072329ae8d7",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.en.md",
+      "image": "docs/images/shared/xxl-admin-logs.png",
+      "sha256": "2bb584e179535e64be0938e4f2d1eb98ca58ca486bb31aae3f7ce9be3940a725",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.jp.md",
+      "image": "docs/images/shared/xxl-admin-dashboard.png",
+      "sha256": "8b1a70259386f101ff0acbe1c6ee5b7d61212765e7534cd986c173555261966a",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.jp.md",
+      "image": "docs/images/shared/xxl-admin-executors.png",
+      "sha256": "55c71871b3e48ab6f186e2aa8e73fb36713e5d7aa458416cc89f4ed7c067d78e",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.jp.md",
+      "image": "docs/images/shared/xxl-admin-tasks.png",
+      "sha256": "66933363159b0282b3dd3c1a00b384dcf904dbc75d3254cef4739072329ae8d7",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.jp.md",
+      "image": "docs/images/shared/xxl-admin-logs.png",
+      "sha256": "2bb584e179535e64be0938e4f2d1eb98ca58ca486bb31aae3f7ce9be3940a725",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.kr.md",
+      "image": "docs/images/shared/xxl-admin-dashboard.png",
+      "sha256": "8b1a70259386f101ff0acbe1c6ee5b7d61212765e7534cd986c173555261966a",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.kr.md",
+      "image": "docs/images/shared/xxl-admin-executors.png",
+      "sha256": "55c71871b3e48ab6f186e2aa8e73fb36713e5d7aa458416cc89f4ed7c067d78e",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.kr.md",
+      "image": "docs/images/shared/xxl-admin-tasks.png",
+      "sha256": "66933363159b0282b3dd3c1a00b384dcf904dbc75d3254cef4739072329ae8d7",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-admin.kr.md",
+      "image": "docs/images/shared/xxl-admin-logs.png",
+      "sha256": "2bb584e179535e64be0938e4f2d1eb98ca58ca486bb31aae3f7ce9be3940a725",
+      "evidence": "docs/reference/evidence/xxl-native-tutorial-2026-10-25.json",
+      "evidence_sha256": "87f594c9f0143fef8e9616c1db3449e838d235d2b4b8584a31c5e91164a3456b",
+      "actual_view_image": true
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/distributed-jobs-admin.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "f5022f94231c08ed6835b3a58974950f82987f3699dfd51f59ca46f1fac16b45",
+      "checks": {
+        "coverage_and_meaning": "以四个实际原生Admin网页解释运行概览、任务、调度/执行日志和执行器；从实际10任务、7在线机器走到具体字段。",
+        "technical_literals": "原生Admin是中文共享图并向三语读者说明；实际注册组含离线sample，调度和执行两阶段、Cron与时区不混同。",
+        "security_and_failure_semantics": "只读实拍未触发、编辑或清理任务；旧失败和离线组保留，不把任务列表或派发成功冒称业务成功。",
+        "language_and_terminology": "全文逐段对照中文复读，dispatch/execute/callback和ownership不混同；按当前截图统一My Jobs与Trigger Now原生文字，代码原文不改。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/distributed-jobs-admin.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "c4e96915756232c9dc79a63dc555cee0cfb0c6a37cd758943296b0de33781bb7",
+      "checks": {
+        "coverage_and_meaning": "以四个实际原生Admin网页解释运行概览、任务、调度/执行日志和执行器；从实际10任务、7在线机器走到具体字段。",
+        "technical_literals": "原生Admin是中文共享图并向三语读者说明；实际注册组含离线sample，调度和执行两阶段、Cron与时区不混同。",
+        "security_and_failure_semantics": "只读实拍未触发、编辑或清理任务；旧失败和离线组保留，不把任务列表或派发成功冒称业务成功。",
+        "language_and_terminology": "全文复读后自然化概念、派发、阻塞方针与复旧用语；按当前截图统一マイジョブ/今すぐ実行/毎分，原生中文配置和值与源码注释如实保留。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/distributed-jobs-admin.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "66d9aafcd4d3b0592c8bfc4023ca038627bfbfd7777d6d6a88cbf20aeebc1b58",
+      "checks": {
+        "coverage_and_meaning": "以四个实际原生Admin网页解释运行概览、任务、调度/执行日志和执行器；从实际10任务、7在线机器走到具体字段。",
+        "technical_literals": "原生Admin是中文共享图并向三语读者说明；实际注册组含离线sample，调度和执行两阶段、Cron与时区不混同。",
+        "security_and_failure_semantics": "只读实拍未触发、编辑或清理任务；旧失败和离线组保留，不把任务列表或派发成功冒称业务成功。",
+        "language_and_terminology": "全文逐段对照中文复读，배정/실행/콜백与소유권边界完整；新表单실행 일정/매분与实际截图一致，共享中文数据明确说明。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": []
+    }
+  }
+}

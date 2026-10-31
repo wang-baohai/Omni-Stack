@@ -421,7 +421,7 @@ onMounted(loadRows)
         <el-table-column prop="brand" :label="t('assetLedger.brand')" min-width="110"><template #default="{ row }">{{ row.brand || '—' }}</template></el-table-column>
         <el-table-column prop="locationCode" :label="t('assetLedger.location')" min-width="120"><template #default="{ row }">{{ row.locationCode || '—' }}</template></el-table-column>
         <el-table-column :label="t('assetLedger.originalValue')" min-width="140" align="right"><template #default="{ row }">{{ row.purchaseAmount ? `${row.purchaseAmount} ${row.currencyCode}` : '—' }}</template></el-table-column>
-        <el-table-column :label="t('common.status')" min-width="110"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
+        <el-table-column :label="t('common.status')" min-width="180"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
         <el-table-column :label="t('common.actions')" min-width="320" fixed="right" class-name="fixed-actions-col">
           <template #default="{ row }">
             <el-button v-if="activeTab === 'ledger'" link type="primary" @click="openDetail(row)">{{ t('assetDisposal.details') }}</el-button>
@@ -440,7 +440,7 @@ onMounted(loadRows)
     </el-card>
 
     <el-dialog v-model="saveVisible" :title="editingId ? t('assetLedger.editAsset') : t('assetLedger.manualStock')" width="760px">
-      <el-form ref="saveRef" :model="form" :rules="saveRules" label-width="110px">
+      <el-form ref="saveRef" :model="form" :rules="saveRules" label-position="top">
         <el-row :gutter="16">
           <el-col :span="12"><el-form-item :label="t('assetDisposal.assetName')" prop="name"><el-input v-model="form.name" maxlength="200" /></el-form-item></el-col>
           <el-col :span="12"><el-form-item :label="t('assetLedger.categoryCode')" prop="categoryCode"><el-input v-model="form.categoryCode" maxlength="64" /></el-form-item></el-col>
@@ -489,7 +489,7 @@ onMounted(loadRows)
     </el-dialog>
 
     <el-dialog v-model="allocateVisible" :title="t('assetLedger.allocateAsset')" width="520px">
-      <el-form ref="allocateRef" :model="allocateForm" :rules="allocateRules" label-width="100px">
+      <el-form ref="allocateRef" :model="allocateForm" :rules="allocateRules" label-width="auto">
         <el-form-item :label="t('assetTransfer.toUser')" prop="targetUserId">
           <el-select
             v-model="allocateForm.targetUserId"
@@ -535,8 +535,8 @@ onMounted(loadRows)
         <h3>{{ t('assetLedger.changeHistory') }}</h3>
         <el-table :data="history" border>
           <el-table-column prop="changedTime" :label="t('crmOpportunity.time')" min-width="170" />
-          <el-table-column prop="fromStatus" :label="t('assetTransfer.previousStatus')" min-width="120"><template #default="{ row }">{{ row.fromStatus || t('common.create') }}</template></el-table-column>
-          <el-table-column prop="toStatus" :label="t('assetLedger.newStatus')" min-width="120" />
+          <el-table-column prop="fromStatus" :label="t('assetTransfer.previousStatus')" min-width="120"><template #default="{ row }">{{ row.fromStatus ? statusInfo(row.fromStatus)?.label || row.fromStatus : t('common.create') }}</template></el-table-column>
+          <el-table-column prop="toStatus" :label="t('assetLedger.newStatus')" min-width="120"><template #default="{ row }">{{ statusInfo(row.toStatus)?.label || row.toStatus }}</template></el-table-column>
           <el-table-column prop="changedByUserId" :label="t('crmOpportunity.operator')" min-width="100" />
           <el-table-column prop="remark" :label="t('assetLedger.description')" min-width="240"><template #default="{ row }">{{ row.remark || '—' }}</template></el-table-column>
         </el-table>

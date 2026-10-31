@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "artifact": "com.baomidou:mybatis-plus-jsqlparser-4.9:3.5.16",
+  "version": "3.5.16",
+  "archive_url": "https://repo.maven.apache.org/maven2/com/baomidou/mybatis-plus-jsqlparser-4.9/3.5.16/mybatis-plus-jsqlparser-4.9-3.5.16-sources.jar",
+  "archive_sha256": "34ecfbc9e413a8fb1ec3856ae441725cfc4fb0210565c23ead56926029d84c65",
+  "official_checksum": {
+    "url": "https://repo.maven.apache.org/maven2/com/baomidou/mybatis-plus-jsqlparser-4.9/3.5.16/mybatis-plus-jsqlparser-4.9-3.5.16-sources.jar.sha256",
+    "status": 200,
+    "algorithm": "sha256",
+    "value": "34ecfbc9e413a8fb1ec3856ae441725cfc4fb0210565c23ead56926029d84c65",
+    "matched": true
+  },
+  "license": "Apache-2.0",
+  "license_source": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+  "license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "extraction": "连续原文；仅把CRLF统一为LF，未改代码、注释或插入省略内容。版权头另原文保存在本记录。",
+  "excerpts": [
+    {
+      "file": "query-rewrite.java.txt",
+      "original_path": "com/baomidou/mybatisplus/extension/plugins/inner/TenantLineInnerInterceptor.java",
+      "original_sha256": "c0b55b354acd37392b6df6d09587be51a2659dc28848e220df944e21a2a2f179",
+      "start_line": 63,
+      "end_line": 70,
+      "excerpt_sha256": "d19b2fc5577efadb008c7385e03de34f185eeef5faa6088912a885df61215211",
+      "copyright_and_license_header": "/*\n * Copyright (c) 2011-2025, baomidou (jobob@qq.com).\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "tenant-condition.java.txt",
+      "original_path": "com/baomidou/mybatisplus/extension/plugins/inner/TenantLineInnerInterceptor.java",
+      "original_sha256": "c0b55b354acd37392b6df6d09587be51a2659dc28848e220df944e21a2a2f179",
+      "start_line": 264,
+      "end_line": 270,
+      "excerpt_sha256": "77cd59d59f23eeb6fb484ba72022cf971b6e2cf0ebcc97916006999780cf8405",
+      "copyright_and_license_header": "/*\n * Copyright (c) 2011-2025, baomidou (jobob@qq.com).\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "tenant-column.java.txt",
+      "original_path": "com/baomidou/mybatisplus/extension/plugins/handler/TenantLineHandler.java",
+      "original_sha256": "0277eea6eb87aeed15496cb27d8016ec77cfed77082291295b2ae13acfcfe399",
+      "start_line": 46,
+      "end_line": 48,
+      "excerpt_sha256": "d6c2c50d10d78fec7cfe08253551e87451a8aaacd7b291a71344f6b27c439e23",
+      "copyright_and_license_header": "/*\n * Copyright (c) 2011-2025, baomidou (jobob@qq.com).\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "permission-delegation.java.txt",
+      "original_path": "com/baomidou/mybatisplus/extension/plugins/inner/DataPermissionInterceptor.java",
+      "original_sha256": "018b8215f1d0c832cc37ce003cb4b96dd18074d08d0d00ac82e56b71fe9cb48c",
+      "start_line": 166,
+      "end_line": 174,
+      "excerpt_sha256": "92e4657b284e42dd7e1664101a418e9849c776415470b0e3d0f628d8ae4dcf29",
+      "copyright_and_license_header": "/*\n * Copyright (c) 2011-2025, baomidou (jobob@qq.com).\n *\n * Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n *\n *     http://www.apache.org/licenses/LICENSE-2.0\n *\n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "document_id": "core-flows",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/core-flows.md",
+  "source_sha256": "6d2086c21f8124ad2769afd581d3448887c37b43e65f2cec99e2d536f0516b60",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "8篇四语全文实际语义审读；SRM及核心流程中文读取原始全文。核心流程三译在显示时仅去掉Markdown链接URL，保留标签、全部正文、代码及Mermaid；分段读取，遇截断重新读取缺段。链接URL另行与中文目标、文件存在性及发布链接门核对。最终8篇改动段已实际复读，不能以哈希或此收据代替语义审读；Mermaid最终视觉渲染仍待本S。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-final-facts-actual-reading-20261030.json",
+  "actual_reading_sha256": "cafc2a3b0dfa9fd0f1e795bc0fa4eac1ad8a6f2e9c5a9b7738144fc90b13a931",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/core-flows.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "9a1202d4a984989f10b46de2f0e5e49595dfdbe0e6bd6b76c655ab1aec5e0051",
+      "checks": {
+        "coverage_and_meaning": "实际全读18个流程与15.1节，含验证码一次消费、OAuth/PKCE和社交限制、功能/数据权限、XSS、字典、日志、定时任务、CRM、SRM/采购/资产及Portal Saga；区分同步本地写入、独立服务提交、Outbox投递和真实运行证据。最终新导航段及两处jobs链接已四语复读。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "Full English prose, code and Mermaid text actually read against Chinese; implementation limits, failures and independent-transaction boundaries retain their meaning.",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-WORKSPACE-JOB-SOURCE",
+          "topics": [
+            "core-flows"
+          ],
+          "status": "resolved",
+          "description": "两处个人任务源码由已改为公开Wiki的home/index.vue改为实际workspace/jobs/index.vue，并同步当前首页/工作台/业务模块新页签与菜单边界。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/core-flows.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "51c67a1512316404ea607eaff72009124dbf31c7087b9bb17c4fa65dd138ea75",
+      "checks": {
+        "coverage_and_meaning": "实际全读18个流程与15.1节，含验证码一次消费、OAuth/PKCE和社交限制、功能/数据权限、XSS、字典、日志、定时任务、CRM、SRM/采购/资产及Portal Saga；区分同步本地写入、独立服务提交、Outbox投递和真实运行证据。最终新导航段及两处jobs链接已四语复读。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "全文を実際に読み、中国語の事実と照合した。権限、失敗、別トランザクションと既存テストの証拠範囲を維持している。",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-WORKSPACE-JOB-SOURCE",
+          "topics": [
+            "core-flows"
+          ],
+          "status": "resolved",
+          "description": "两处个人任务源码由已改为公开Wiki的home/index.vue改为实际workspace/jobs/index.vue，并同步当前首页/工作台/业务模块新页签与菜单边界。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/core-flows.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "31c2d468cb8542945f0a2ee0efbbd94b62befff574bf37d039ca431df851a9ba",
+      "checks": {
+        "coverage_and_meaning": "实际全读18个流程与15.1节，含验证码一次消费、OAuth/PKCE和社交限制、功能/数据权限、XSS、字典、日志、定时任务、CRM、SRM/采购/资产及Portal Saga；区分同步本地写入、独立服务提交、Outbox投递和真实运行证据。最终新导航段及两处jobs链接已四语复读。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한, 실패, 독립 트랜잭션과 기존 테스트의 증거 범위를 유지한다.",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-WORKSPACE-JOB-SOURCE",
+          "topics": [
+            "core-flows"
+          ],
+          "status": "resolved",
+          "description": "两处个人任务源码由已改为公开Wiki的home/index.vue改为实际workspace/jobs/index.vue，并同步当前首页/工作台/业务模块新页签与菜单边界。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

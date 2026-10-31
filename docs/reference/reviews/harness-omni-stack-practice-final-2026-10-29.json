@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "document_id": "harness-omni-stack-practice",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/harness-omni-stack-practice.md",
+  "source_sha256": "0647bc2a15cfd2c8937959456b91d4beddfdbf6f1605e730b1a12799ead83024",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮Get-Content逐篇完整读取中文7篇及三译21篇（长篇分段），不是摘要/哈希/行数自动审批；修正8文件后实际读取最终8段。无栅格图片引用，不用其他站点截图冒充本章逐图审读。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-harness-actual-reading-20261029.json",
+  "actual_reading_sha256": "7c125ea2c122a4d62c4f181a2411366e35281dd6cd352091fda558a59d2aab37",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/harness-omni-stack-practice.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "38c8c83fbbb048cda40b8c4f4df744d1ea170160e37c82053254de678453ebaa",
+      "checks": {
+        "coverage_and_meaning": "逐项对照当前AGENTS、脚本和AI资产入口，修正本地片段实际比对与上游版本标记检查的区别；四语最终差量实际复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "HARNESS-SOURCE-CHECK-SCOPE",
+          "status": "resolved",
+          "description": "本地源码比对与上游仅版本标记格式检查分开说明；不扩展检查器。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/harness-omni-stack-practice.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "e65382ee96bdafd0d9ae5179a04ad2425491e4170b49f7fcb6c1c42a6e41b02b",
+      "checks": {
+        "coverage_and_meaning": "逐项对照当前AGENTS、脚本和AI资产入口，修正本地片段实际比对与上游版本标记检查的区别；四语最终差量实际复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "HARNESS-SOURCE-CHECK-SCOPE",
+          "status": "resolved",
+          "description": "本地源码比对与上游仅版本标记格式检查分开说明；不扩展检查器。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/harness-omni-stack-practice.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "998f5e46f74c80f99b25cfc8d84766d7f6d3b84bed617d88f2c1d6b638dcad39",
+      "checks": {
+        "coverage_and_meaning": "逐项对照当前AGENTS、脚本和AI资产入口，修正本地片段实际比对与上游版本标记检查的区别；四语最终差量实际复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "HARNESS-SOURCE-CHECK-SCOPE",
+          "status": "resolved",
+          "description": "本地源码比对与上游仅版本标记格式检查分开说明；不扩展检查器。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

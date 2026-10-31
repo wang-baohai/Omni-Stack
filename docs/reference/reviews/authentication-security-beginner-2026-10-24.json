@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-security",
+  "source": "docs/wiki/authentication-security.md",
+  "source_sha256": "8a34e268a2e2a493ecc8721f4ce22b7664ba2d3bed3ded1bd3fa38909b953a64",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-security.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "8385157606c700ededf3e73d0c96da39ef4576118f2a9ec0237c9e70cb81d57e",
+      "checks": {
+        "coverage_and_meaning": "网关到业务五层、七JWT字段行、JWKS缓存、公私钥、三类退出、门户、五限制及七排障行完整对应。",
+        "technical_literals": "JwkKeyProvider连续原文不变；RS256/jti/24小时/身份头和权限字面量一致，无凭据或图片泄露。",
+        "security_and_failure_semantics": "签名不加密/公开公钥不能签发；缓存不是全轮换保证；前端退出不全局撤销；踢出jti24h不等于全用户所有令牌；真实外部未验独立保留。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-security.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "c9b1fe86ae772186a7fb2579657da51612fb6f49d2c5c1d6c01f5cb0cc687499",
+      "checks": {
+        "coverage_and_meaning": "网关到业务五层、七JWT字段行、JWKS缓存、公私钥、三类退出、门户、五限制及七排障行完整对应。",
+        "technical_literals": "JwkKeyProvider连续原文不变；RS256/jti/24小时/身份头和权限字面量一致，无凭据或图片泄露。",
+        "security_and_failure_semantics": "签名不加密/公开公钥不能签发；缓存不是全轮换保证；前端退出不全局撤销；踢出jti24h不等于全用户所有令牌；真实外部未验独立保留。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-security.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "0db06254ac8a66b9dcc0c0d7424ef2754d6f2a9cae8593db1b39b2a0672c74bf",
+      "checks": {
+        "coverage_and_meaning": "网关到业务五层、七JWT字段行、JWKS缓存、公私钥、三类退出、门户、五限制及七排障行完整对应。",
+        "technical_literals": "JwkKeyProvider连续原文不变；RS256/jti/24小时/身份头和权限字面量一致，无凭据或图片泄露。",
+        "security_and_failure_semantics": "签名不加密/公开公钥不能签发；缓存不是全轮换保证；前端退出不全局撤销；踢出jti24h不等于全用户所有令牌；真实外部未验独立保留。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": []
+    }
+  }
+}

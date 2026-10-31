@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-practice",
+  "source": "docs/wiki/observability-practice.md",
+  "source_sha256": "a465432a89ddf794371d9c60af83ceed420c31a560c27936187e4f4005422969",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current source, translation and actual-image digests",
+  "method": "本人逐篇完整复读最终中文及英日韩全文；43张本轮正式原图已逐张实际查看。此脚本仅校验阅读记录与最终摘要后登记人工智能审校，不执行自动语义盖章，不冒称真人或全部运行验收。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/observability-practice.md",
+      "image": "docs/images/zh-CN/monitor-workflow.png",
+      "sha256": "7fda8a610460aba3090aaaabfd9ceb4182b8ce3f6843f4fe3f0ce1bd948a122d",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.md",
+      "image": "docs/images/zh-CN/monitor-migrations.png",
+      "sha256": "1d42948a8c08226456201d1455b80aa4109675e49cc0e0fc1910d0e90b43e086",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.en.md",
+      "image": "docs/images/en-US/monitor-workflow.png",
+      "sha256": "c8cd3efc1acd247a59c04c725aad056663344e2d5932d96d1fb201d8027d1964",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.en.md",
+      "image": "docs/images/en-US/monitor-migrations.png",
+      "sha256": "0fb6aadf8b039d48336731f84c0be7d97a7b1ab763f4b679c4b9a1f236bbbb5c",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.jp.md",
+      "image": "docs/images/ja-JP/monitor-workflow.png",
+      "sha256": "8b2d76a5a5fb194433e7cf0f3e874ad55a256fe5b81a2e3b35cc150107ba7369",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.jp.md",
+      "image": "docs/images/ja-JP/monitor-migrations.png",
+      "sha256": "0de93b5182029791c0e46cc56be7cd889bffa66d931e588f207759bb5c1a55e8",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.kr.md",
+      "image": "docs/images/ko-KR/monitor-workflow.png",
+      "sha256": "bf4fc41804a7e9920c5b4d9e114f18d6abe1c1157871d83695efa57537f64741",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-practice.kr.md",
+      "image": "docs/images/ko-KR/monitor-migrations.png",
+      "sha256": "e03d19b18db07b69c8ae369a5110ca5c3972ac90482a5777de4f8e9243982c98",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-practice.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "74dfaf5ab3737aa676ffc4f159e43b0aaf53667d57283c0e396721f6878071ec",
+      "checks": {
+        "coverage_and_meaning": "四语完整保留从预设、采集目标、七个文件看板到单次操作、告警和新功能线索的逐层检查路径。",
+        "technical_literals": "Dashboard provider原文和allowUiUpdates=false含义一致；Workflow失败速率/积压/P95、迁移结果/耗时/版本均对照真实面板。",
+        "security_and_failure_semantics": "不为填图重跑迁移、造审批或改业务状态；绿色No data不是成功。原迁移早于Pushgateway，不凭空补历史或通知送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终英文，入站/出站、分位数、空数据与通知边界自然准确；上游界面保留英文按钮便于照图查找。",
+        "images_and_links": "四语Workflow与Migration八图逐张看过，零积压、无样本和绿色空数据与说明一致；core无Workflow不因看板存在被误报部署。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-practice.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "98ee9664c329e7936493d83d434509751d6e2367de0b08cc1c4f452e6e71e56a",
+      "checks": {
+        "coverage_and_meaning": "四语完整保留从预设、采集目标、七个文件看板到单次操作、告警和新功能线索的逐层检查路径。",
+        "technical_literals": "Dashboard provider原文和allowUiUpdates=false含义一致；Workflow失败速率/积压/P95、迁移结果/耗时/版本均对照真实面板。",
+        "security_and_failure_semantics": "不为填图重跑迁移、造审批或改业务状态；绿色No data不是成功。原迁移早于Pushgateway，不凭空补历史或通知送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终日文；自然解释専門語、収集対象、分位与追跡，原生英文字段附语境，源码注释不擅自翻译。",
+        "images_and_links": "四语Workflow与Migration八图逐张看过，零积压、无样本和绿色空数据与说明一致；core无Workflow不因看板存在被误报部署。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-practice.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "944cec09b8cfcad61751485e383bfbffb78c013313fab2edbdbe974828327ebe",
+      "checks": {
+        "coverage_and_meaning": "四语完整保留从预设、采集目标、七个文件看板到单次操作、告警和新功能线索的逐层检查路径。",
+        "technical_literals": "Dashboard provider原文和allowUiUpdates=false含义一致；Workflow失败速率/积压/P95、迁移结果/耗时/版本均对照真实面板。",
+        "security_and_failure_semantics": "不为填图重跑迁移、造审批或改业务状态；绿色No data不是成功。原迁移早于Pushgateway，不凭空补历史或通知送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终韩文；메트릭/트레이스/경보、无样本与失败语义保持一致，原生按钮和工程字面量不改写。",
+        "images_and_links": "四语Workflow与Migration八图逐张看过，零积压、无样本和绿色空数据与说明一致；core无Workflow不因看板存在被误报部署。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    }
+  }
+}

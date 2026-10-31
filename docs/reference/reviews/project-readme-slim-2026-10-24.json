@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "project-readme",
+  "source": "README.md",
+  "source_sha256": "6eaa1c9530e2064c9d22b9fe7b1631b7088c8b7ab85de3f716e4b2a195da483d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本人实际完整读取中文及三译全部内容，对照技术基线、模块裁剪标记、本次实际首页和双标签验证；仅基础信息和亮点，细节进入对应语言完整Wiki。无人工复核声称。",
+  "translations": {
+    "en-US": {
+      "path": "README.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:03:23",
+      "result": "approved",
+      "translation_sha256": "1a37e544ab8b646ad8d1a2a81daafcdb2b4134b294f8717215323266644ce3d6",
+      "checks": {
+        "coverage_and_meaning": "全部定位与九类能力逐项对应中文；删去详细目录/启动/远端配置后，完整Wiki承担阅读入口。",
+        "technical_literals": "Spring Boot 4.0.6、JDK25、Vue3、五预设原值和四组模块裁剪标记均一致，未升级依赖。",
+        "security_and_failure_semantics": "已授权应用而非全部权限；观测明确可选；无秘密/种子凭据、投递时限或已完成全部验收承诺。",
+        "language_and_terminology": "全文英语复读，standalone、optional与preset表述准确，无新增性能或交付承诺。",
+        "images_and_links": "README不包含截图或代码；语言切换、LICENSE与本语docs/wiki/index链接准确，站点与源仓链接另由真实门禁验证。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "README.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:03:23",
+      "result": "approved",
+      "translation_sha256": "2ca57ec4ad4e09e49042ab4ea528f87104087479e202df403964e54c0c2e315f",
+      "checks": {
+        "coverage_and_meaning": "全部定位与九类能力逐项对应中文；删去详细目录/启动/远端配置后，完整Wiki承担阅读入口。",
+        "technical_literals": "Spring Boot 4.0.6、JDK25、Vue3、五预设原值和四组模块裁剪标记均一致，未升级依赖。",
+        "security_and_failure_semantics": "已授权应用而非全部权限；观测明确可选；无秘密/种子凭据、投递时限或已完成全部验收承诺。",
+        "language_and_terminology": "全文日语复读，ひな形、任意、合議与同源Wiki表述一致；未把可选栈说成默认开启。",
+        "images_and_links": "README不包含截图或代码；语言切换、LICENSE与本语docs/wiki/index链接准确，站点与源仓链接另由真实门禁验证。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "README.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:03:23",
+      "result": "approved",
+      "translation_sha256": "f44d6a9bcf29c62997bc50ace66d21040c7dc90f66f59f4e9a4509c62511178f",
+      "checks": {
+        "coverage_and_meaning": "全部定位与九类能力逐项对应中文；删去详细目录/启动/远端配置后，完整Wiki承担阅读入口。",
+        "technical_literals": "Spring Boot 4.0.6、JDK25、Vue3、五预设原值和四组模块裁剪标记均一致，未升级依赖。",
+        "security_and_failure_semantics": "已授权应用而非全部权限；观测明确可选；无秘密/种子凭据、投递时限或已完成全部验收承诺。",
+        "language_and_terminology": "全文韩语复读，스캐폴드、인가、멱등消费及내 작업대用词一致，业务能力未扩大。",
+        "images_and_links": "README不包含截图或代码；语言切换、LICENSE与本语docs/wiki/index链接准确，站点与源仓链接另由真实门禁验证。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "distributed-jobs-usage",
+  "source": "docs/wiki/distributed-jobs-usage.md",
+  "source_sha256": "adf4ac7a54c7937b9ccd56f2bab65cbf1398fa80bce18c32aa671985f2aa7ad4",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Actual current article, literal source and reviewed-image digests",
+  "method": "本人逐篇实际完整读完七篇中文与21篇英日韩，日文正文自然化后复核；随后对八篇使用/恢复最终全文再读，另两处My Jobs实际界面名称改动逐项复核。12张适用原生/工作台/表单图逐张看过。脚本仅绑定既有真实审校与摘要，不产生机器语义盖章或真人签核。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/distributed-jobs-usage.md",
+      "image": "docs/images/zh-CN/platform-jobs.png",
+      "sha256": "b64bc1eaa82160d2a69097cf35580917ada108b845fa3320ab1b0db6a7c3bd60",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.md",
+      "image": "docs/images/zh-CN/xxl-job-create-form.png",
+      "sha256": "1baff71af80add46715df4b8b15fbd1e28b607c55aee81620c8dd0f162252524",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.en.md",
+      "image": "docs/images/en-US/platform-jobs.png",
+      "sha256": "32e289690bfc2f2dacde0c45b161f31cd27cd09535567514ca4629a77a420479",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.en.md",
+      "image": "docs/images/en-US/xxl-job-create-form.png",
+      "sha256": "35dc8f91b82ea1330dddaa4f92e11e9d57bb2d47a7b732900493bb5b461883ab",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.jp.md",
+      "image": "docs/images/ja-JP/platform-jobs.png",
+      "sha256": "c6d9217d7e1feb29b1cb13cfde460af496e17df902b367641ed1fbd3052cb7da",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.jp.md",
+      "image": "docs/images/ja-JP/xxl-job-create-form.png",
+      "sha256": "c78acf8d2fc6ea5253f43e213729c6476d271aad7cf8e62485cb04a86cc6f698",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.kr.md",
+      "image": "docs/images/ko-KR/platform-jobs.png",
+      "sha256": "868e588be6ecf6490577830dfeff8dee15460abf2a9f26c11e9c4a15d81974ac",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    },
+    {
+      "article": "docs/wiki/distributed-jobs-usage.kr.md",
+      "image": "docs/images/ko-KR/xxl-job-create-form.png",
+      "sha256": "6430bb1e650f426e4e525b2a36fddd695273074e5ea0b4cc4d43a66ecae1669e",
+      "evidence": "docs/reference/evidence/workspace-cockpit-tutorial-2026-10-25.json",
+      "evidence_sha256": "55ef3dbf2dd08789d98b3ce33d0599f7374888bc759634f32567dec53bb80b08",
+      "actual_view_image": true
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/distributed-jobs-usage.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "b3f856ce68bf334cefccbd59778cd2c7331b4c86893ba98c9fcc2e322ad1c1f2",
+      "checks": {
+        "coverage_and_meaning": "统一驾驶舱依次解释任务区、新建动态表单、编辑/暂停/手动/恢复、日志和删除；所有四语均无代码或命令。",
+        "technical_literals": "对照真实My Jobs/マイジョブ、Trigger Now/今すぐ実行、Frequency与已修复日韩执行周期标签；Task-00001及杯型属于实际共享配置。",
+        "security_and_failure_semantics": "测试身份与真人登录区分；表单未提交，已有任务仅读；内部横滚列不能猜值，暂停与手动、定时成功分别验证，未知注册不重复提交。",
+        "language_and_terminology": "全文逐段对照中文复读，dispatch/execute/callback和ownership不混同；按当前截图统一My Jobs与Trigger Now原生文字，代码原文不改。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/distributed-jobs-usage.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "cd09a6771880a488f18765f2bdfeddf8010b93a192eb60bd9c4208f9a764ca4e",
+      "checks": {
+        "coverage_and_meaning": "统一驾驶舱依次解释任务区、新建动态表单、编辑/暂停/手动/恢复、日志和删除；所有四语均无代码或命令。",
+        "technical_literals": "对照真实My Jobs/マイジョブ、Trigger Now/今すぐ実行、Frequency与已修复日韩执行周期标签；Task-00001及杯型属于实际共享配置。",
+        "security_and_failure_semantics": "测试身份与真人登录区分；表单未提交，已有任务仅读；内部横滚列不能猜值，暂停与手动、定时成功分别验证，未知注册不重复提交。",
+        "language_and_terminology": "全文复读后自然化概念、派发、阻塞方针与复旧用语；按当前截图统一マイジョブ/今すぐ実行/毎分，原生中文配置和值与源码注释如实保留。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/distributed-jobs-usage.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "cff25566a0e30175dfc9b95976db524ceb1c027003ab0d690ac5eac64502bfcf",
+      "checks": {
+        "coverage_and_meaning": "统一驾驶舱依次解释任务区、新建动态表单、编辑/暂停/手动/恢复、日志和删除；所有四语均无代码或命令。",
+        "technical_literals": "对照真实My Jobs/マイジョブ、Trigger Now/今すぐ実行、Frequency与已修复日韩执行周期标签；Task-00001及杯型属于实际共享配置。",
+        "security_and_failure_semantics": "测试身份与真人登录区分；表单未提交，已有任务仅读；内部横滚列不能猜值，暂停与手动、定时成功分别验证，未知注册不重复提交。",
+        "language_and_terminology": "全文逐段对照中文复读，배정/실행/콜백与소유권边界完整；新表单실행 일정/매분与实际截图一致，共享中文数据明确说明。",
+        "images_and_links": "所有适用原生中文共享图和对应四语工作台/表单图实际逐张看过，已绑定最终图片与来源摘要。原生Admin语言、测试身份、未提交和横滚限制如实说明；相关链接使用目标语言。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "英文My Tasks、日文マイタスク与实际当前界面标签不一致。",
+          "resolution": "已按实际截图统一为My Jobs/マイジョブ；使用篇手动执行按钮采用实际本语标签，改动再次审读。"
+        }
+      ]
+    }
+  }
+}

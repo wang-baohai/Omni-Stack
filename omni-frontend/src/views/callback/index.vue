@@ -11,6 +11,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { exchangeCodeForToken } from '@/api/auth'
+import { clearAppRedirect, consumeAppRedirect } from '@/utils/navigation'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,6 +60,8 @@ function handleSocialLoginCallback(): boolean {
   if (params.error) {
     ElMessage.error(decodeURIComponent(params.error))
     loading.value = false
+    // 拒绝或失败：丢弃外部往返前暂存的目标，不留下错误的旧目标
+    clearAppRedirect()
     router.replace({ name: 'Login' })
     return true
   }
@@ -82,7 +85,9 @@ function handleSocialLoginCallback(): boolean {
 
   ElMessage.success(t('login.loginSuccess'))
   loading.value = false
-  router.replace({ name: 'Dashboard' })
+  // 社交往返前暂存的站内目标优先于默认首页；取出即删除，无暂存或已失效时回控制台首页
+  const target = consumeAppRedirect()
+  router.replace(target ?? { name: 'Dashboard' })
   return true
 }
 
@@ -90,6 +95,8 @@ function handleSocialLoginCallback(): boolean {
  * 处理 OAuth2 授权码 + PKCE 回调（企业 SSO 流程）。
  */
 async function handleOAuth2CodeCallback() {
+  // 企业 SSO 按协议返回：继续用 code + PKCE 换令牌并落控制台首页，不消费普通应用回跳目标，只丢弃陈旧值
+  clearAppRedirect()
   const code = route.query.code as string
   const state = route.query.state as string
   const error = route.query.error as string

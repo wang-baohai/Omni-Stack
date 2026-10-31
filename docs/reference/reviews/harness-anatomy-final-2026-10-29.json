@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "document_id": "harness-anatomy",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/harness-anatomy.md",
+  "source_sha256": "3aaab4088fb7a83334a1f8159d22fcc1368184b22a5f8c5a63e9ed79ec64e0d8",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮Get-Content逐篇完整读取中文7篇及三译21篇（长篇分段），不是摘要/哈希/行数自动审批；修正8文件后实际读取最终8段。无栅格图片引用，不用其他站点截图冒充本章逐图审读。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-harness-actual-reading-20261029.json",
+  "actual_reading_sha256": "7c125ea2c122a4d62c4f181a2411366e35281dd6cd352091fda558a59d2aab37",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/harness-anatomy.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "d90e782744b5b5cab7809b107bc7ebf17774b3f358527e50fe9fff28b94e00b8",
+      "checks": {
+        "coverage_and_meaning": "五组成与关系逐段对应，Docker/权限/租户/金额/分页规则无译义漂移，保留成本边界，不据此新增项目要求。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/harness-anatomy.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "1252dcc31039c0e6e2b8f37d9af162bfdfd3d5636451911ad819e9080518edb0",
+      "checks": {
+        "coverage_and_meaning": "五组成与关系逐段对应，Docker/权限/租户/金额/分页规则无译义漂移，保留成本边界，不据此新增项目要求。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/harness-anatomy.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "fff3af94924522217151787dc110666ad9e57266863a5e3fdd9be26a2bc2beb0",
+      "checks": {
+        "coverage_and_meaning": "五组成与关系逐段对应，Docker/权限/租户/金额/分页规则无译义漂移，保留成本边界，不据此新增项目要求。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    }
+  },
+  "global_release_claimed": false
+}

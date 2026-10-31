@@ -1,0 +1,9 @@
+			Authentication authentication = (Authentication) request
+				.getAttribute(OAuth2AuthorizationCodeRequestAuthenticationToken.class.getName());
+			if (authentication == null) {
+				authentication = this.authenticationConverter.convert(request);
+				if (authentication instanceof AbstractAuthenticationToken authenticationToken) {
+					authenticationToken.setDetails(this.authenticationDetailsSource.buildDetails(request));
+				}
+			}
+			Authentication authenticationResult = this.authenticationManager.authenticate(authentication);

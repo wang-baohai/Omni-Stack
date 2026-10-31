@@ -212,6 +212,12 @@ function checkScreenshots() {
             fail(`${module.id}: required flow "${flow}" 无对应终端证据`)
           } else if (kind !== 'terminal' && !screenshotMap.has(key)) {
             fail(`${module.id}: required flow "${flow}" 无对应截图`)
+          } else if (kind !== 'terminal') {
+            for (const locale of coverage.locales || []) {
+              if (!screenshotMap.get(key).some((item) => item.locale === locale)) {
+                fail(`${module.id}: required flow "${flow}" 缺少 ${locale} 截图`)
+              }
+            }
           }
         }
       }
@@ -221,9 +227,11 @@ function checkScreenshots() {
           const flowScreenshots = (module.required_flows || []).flatMap(
             (flow) => (module.flow_evidence?.[flow] === 'terminal' ? terminalMap : screenshotMap).get(`${module.id}::${flow}`) || []
           )
-          const hasState = flowScreenshots.some((s) => s.step === state || s.expected === state)
-          if (!hasState && module.status !== 'exempt') {
-            fail(`${module.id}: required state "${state}" 无对应截图证据`)
+          for (const locale of coverage.locales?.length ? coverage.locales : [undefined]) {
+            const hasState = flowScreenshots.some((s) => (!locale || s.locale === locale) && (s.step === state || s.expected === state))
+            if (!hasState && module.status !== 'exempt') {
+              fail(`${module.id}: required state "${state}" 无对应截图证据${locale ? ` (${locale})` : ''}`)
+            }
           }
         }
       }
@@ -249,12 +257,9 @@ function checkReadmes() {
   const readmes = ['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md']
   const requiredFacts = [
     'Spring Boot 4.0.6',
+    'JDK 25',
+    'Vue 3',
     'tools/omni-cli',
-    'docs/guides/quick-start',
-    'docs/wiki/index',
-    'docs/architecture',
-    'docs/api-contract',
-    'AGENTS.md',
     'LICENSE',
   ]
   const retiredFacts = [
@@ -264,8 +269,10 @@ function checkReadmes() {
   ]
   for (const relativePath of readmes) {
     const content = read(relativePath)
-    const localizedAiEntry = `ai/${relativePath}`
-    for (const fact of [...requiredFacts, localizedAiEntry]) {
+    // 用户要求 README 只展示基本信息与亮点；完整教程统一指向对应语言的 Wiki。
+    const suffix = relativePath.slice('README'.length, -'.md'.length)
+    const localizedWikiEntry = `](docs/wiki/index${suffix}.md)`
+    for (const fact of [...requiredFacts, localizedWikiEntry]) {
       if (!content.includes(fact)) fail(`${relativePath}: 缺少当前事实：${fact}`)
     }
     for (const retired of retiredFacts) {

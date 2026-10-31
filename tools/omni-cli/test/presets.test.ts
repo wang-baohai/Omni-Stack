@@ -6,10 +6,22 @@ import { describe, it } from 'node:test';
 import { loadCatalog } from '../src/catalog.js';
 import { listPresetIds, resolvePreset } from '../src/presets.js';
 import { findWorkspaceRoot } from '../src/workspace.js';
+import { locales, renderReadmeSection, updateReadme } from '../src/preset-doc-format.js';
 
 const workspaceRoot = findWorkspaceRoot(resolve(import.meta.dirname, '..'));
 
 describe('presets', () => {
+  it('keeps each README preset entry compact, localized and idempotent', () => {
+    for (const text of Object.values(locales)) {
+      const section = renderReadmeSection(workspaceRoot, text);
+      assert.ok(section.includes(`](docs/wiki/index${text.suffix}.md)`));
+      assert.doesNotMatch(section, /preset-quick-selection|preset-dependency-matrix|```/);
+      for (const id of listPresetIds(workspaceRoot)) assert.ok(section.includes('`' + id + '`'));
+      const once = updateReadme('# Project\n\n' + section + '\n\nLicense\n', section);
+      assert.equal(updateReadme(once, section), once);
+      assert.ok(once.endsWith('License\n'));
+    }
+  });
   it('publishes exactly five formal presets', () => {
     assert.deepEqual(listPresetIds(workspaceRoot), ['core', 'crm', 'full', 'supply-chain', 'workflow']);
   });

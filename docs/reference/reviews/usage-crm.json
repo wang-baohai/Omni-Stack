@@ -1,0 +1,515 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "human_review": 0,
+  "document_id": "usage-crm",
+  "source": "docs/wiki/usage-crm.md",
+  "source_sha256": "2a592c9532154d5139a854b9486ca3b1c76bf16da8f252e96a1f52d7b521fbd1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree; per-file evidence digests",
+  "method": "Codex本人完整阅读中文和全部三译，对照当前相关源码/状态机与专用角色真实链路；纠错后复读；修复后的60张四语原图全部实际逐张查看。不是脚本检查或抽样，不冒称独立真人复核。",
+  "image_provenance": "docs/reference/evidence/crm-tutorial-2026-10-23.json",
+  "image_provenance_sha256": "130f950f393a755945ab81a4b5b0092600ac25dd46affc7e49364c1212782397",
+  "chinese_review": {
+    "result": "approved",
+    "note": "中文全部章节和最后宽表/主联系人/完成时间图注已实际阅读；事实修正有当前源码依据。",
+    "reviewed_at": "2026-10-23 14:49:47"
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/usage-crm.en.md",
+      "reviewer": "Codex",
+      "review_type": "AI_REVIEW",
+      "reviewed_at": "2026-10-23 14:49:47",
+      "result": "approved",
+      "translation_sha256": "72d56161ce216f71eb9e78ff233c2dc67841afb56d5c947dda3ed525be63e8de",
+      "checks": {
+        "technical_literals": "usage无代码块或必需源码跳转；[REDACTED]、系统数字标识与业务编号的区别、四语图片文件名及真实界面按钮均核对，未擅自翻译标识或发明关键词搜索。",
+        "images_and_links": "本语15张原始1440x900图均逐张实际查看；对象11/8/10/9/20前后真实关联，状态与完成时间可读，普通员工403身份正确，联系方式脱敏；每个图片引用与摘要绑定。",
+        "language_and_terminology": "English uses the actual Leads, Customers, Contacts, Opportunities, Quick Follow-up and Set as Primary labels. The wide-table and completion-time captions were reread after the actual image review.",
+        "coverage_and_meaning": "逐节审读前提、概览、线索2.1至2.5、客户3.1至3.4、联系人、商机5.1至5.5、活动、完整故事、失败恢复和边界，纠正转换关联、幂等、黑名单、删除与重开语义；修正后复读。",
+        "security_and_failure_semantics": "保留本人/部门/只读范围和分配目标校验、拒绝与脱敏、状态机前置、乐观锁刷新、级联删除影响和重复提交恢复；测试会话不冒充真人验证码，未验证外部登录不写成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "description": "原文与三译曾将客户黑名单当作全局销售拦截，且混淆主联系人删除、客户删除与商机重开规则。",
+          "resolution": "以实际Service/状态机和独立角色证据校正中文及三译，修正后逐节再读。"
+        },
+        {
+          "status": "resolved",
+          "description": "旧图存在未开弹窗、缺校验、枚举语言、身份或固定操作列遮挡，宽表说明与完成图注不准确。",
+          "resolution": "使用真实本地业务链重拍60图，修复必要UI并逐图复看；补宽表操作与按关联客户查看状态/实际完成时间的四语图注。"
+        }
+      ],
+      "images": [
+        {
+          "captured_at": "2026-10-23T06:33:51.968Z",
+          "path": "docs/images/en-US/crm-lead-converted.png",
+          "sha256": "d8d9e4391e222fb4119340632b2f7fee5ec40493390e8e1647c4861c9ed9e53a",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:34.147Z",
+          "path": "docs/images/en-US/crm-opportunity-won.png",
+          "sha256": "d547b5a604b7cb8d99ea8094a911d0b85ac7682420c46ab2816545b2805b9eae",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:46.14Z",
+          "path": "docs/images/en-US/crm-activity-completed.png",
+          "sha256": "2a09456999bfcbdff3ab08d97761ab40c684eb69a0c5da19193b51ec26f4a00d",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:12.597Z",
+          "path": "docs/images/en-US/crm-customer-360.png",
+          "sha256": "3ff4bef3c6828bdf55fb0a8344ae4767cea19373d30fb4045106118476baa8c0",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:06.702Z",
+          "path": "docs/images/en-US/crm-customers.png",
+          "sha256": "3a829be74f7d609f9506211df733eec3dfea2ff41b8c7fe0915ddd7917de5b3e",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:39.281Z",
+          "path": "docs/images/en-US/crm-activities.png",
+          "sha256": "df1feecb79af6f4427c0a942eb76e6e8109144b35da5f0c5693d22d7ff445b87",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:32:45.183Z",
+          "path": "docs/images/en-US/crm-overview.png",
+          "sha256": "d82cb5ff3aa33874f80b42028f865ef56ebfb833b9c35883556b7ad7cc054662",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:32:50.219Z",
+          "path": "docs/images/en-US/crm-leads.png",
+          "sha256": "24a917b2c5df5ca8949c3414af8771cc640a6583f7bd5863c35da4db27736871",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:32:55.494Z",
+          "path": "docs/images/en-US/crm-lead-dialog.png",
+          "sha256": "619595632bb4b81f7ca595463cb94f58e1ca2e1064ca64dba9a52cb5fbd1c7d6",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:01.566Z",
+          "path": "docs/images/en-US/crm-lead-validation.png",
+          "sha256": "b9f5900441fc6c64411016399cef80a1593bedd88f3e2cd432560c4757a45730",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:17.598Z",
+          "path": "docs/images/en-US/crm-contacts.png",
+          "sha256": "a055514d7ae97df920951c7696c2d51a7b6dfbdc7741339424f04e710ca5b7e0",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:23.077Z",
+          "path": "docs/images/en-US/crm-contacts-primary-actions.png",
+          "sha256": "ad4a49933fac7138ee1f3f119adb7e13947241f49030a194fae72122a9bbb821",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:28.195Z",
+          "path": "docs/images/en-US/crm-opportunities.png",
+          "sha256": "99baf86ed3ebb88e3b08cf456ebc545ead27ae4c533175286b618e77143d10f6",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:33:57.098Z",
+          "path": "docs/images/en-US/crm-lead-empty.png",
+          "sha256": "0fa131476c9cc78481aca5be5becab664a126bb5a967f18a8bae3f6004b98cb1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:01.794Z",
+          "path": "docs/images/en-US/crm-employee-403.png",
+          "sha256": "05a8e804d6d27bd155a2ae35bf4a957049b368a13f369092bbcb2d49a10115e7",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/usage-crm.jp.md",
+      "reviewer": "Codex",
+      "review_type": "AI_REVIEW",
+      "reviewed_at": "2026-10-23 14:49:47",
+      "result": "approved",
+      "translation_sha256": "e1b9c0293395fd9bab14eedf7726c164d779ae3429c6f98d50e1d0685d0fc36c",
+      "checks": {
+        "technical_literals": "usage无代码块或必需源码跳转；[REDACTED]、系统数字标识与业务编号的区别、四语图片文件名及真实界面按钮均核对，未擅自翻译标识或发明关键词搜索。",
+        "images_and_links": "本语15张原始1440x900图均逐张实际查看；对象11/8/10/9/20前后真实关联，状态与完成时间可读，普通员工403身份正确，联系方式脱敏；每个图片引用与摘要绑定。",
+        "language_and_terminology": "有望と判定、活動履歴、日程変更、主要に設定など実画面に沿った自然な表現を確認。「テーブル」表記と横スクロール・完了時刻の図注を修正後に再読した。",
+        "coverage_and_meaning": "逐节审读前提、概览、线索2.1至2.5、客户3.1至3.4、联系人、商机5.1至5.5、活动、完整故事、失败恢复和边界，纠正转换关联、幂等、黑名单、删除与重开语义；修正后复读。",
+        "security_and_failure_semantics": "保留本人/部门/只读范围和分配目标校验、拒绝与脱敏、状态机前置、乐观锁刷新、级联删除影响和重复提交恢复；测试会话不冒充真人验证码，未验证外部登录不写成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "description": "原文与三译曾将客户黑名单当作全局销售拦截，且混淆主联系人删除、客户删除与商机重开规则。",
+          "resolution": "以实际Service/状态机和独立角色证据校正中文及三译，修正后逐节再读。"
+        },
+        {
+          "status": "resolved",
+          "description": "旧图存在未开弹窗、缺校验、枚举语言、身份或固定操作列遮挡，宽表说明与完成图注不准确。",
+          "resolution": "使用真实本地业务链重拍60图，修复必要UI并逐图复看；补宽表操作与按关联客户查看状态/实际完成时间的四语图注。"
+        }
+      ],
+      "images": [
+        {
+          "captured_at": "2026-10-23T06:35:11.388Z",
+          "path": "docs/images/ja-JP/crm-lead-converted.png",
+          "sha256": "fb7dcdb89cfdd3d3c4bc9997df6c8a1677fba3e78b6c3b6b581d73b6560868fb",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:53.628Z",
+          "path": "docs/images/ja-JP/crm-opportunity-won.png",
+          "sha256": "d1b76d0e5158e0e4946ba9f54f4df01e9d083f57ccb7d46ecf8ebd591e764304",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:05.467Z",
+          "path": "docs/images/ja-JP/crm-activity-completed.png",
+          "sha256": "8d444544c7f0169cde01caae4558ced7d1cc4a826681bda0ca4a2d2f937af813",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:32.751Z",
+          "path": "docs/images/ja-JP/crm-customer-360.png",
+          "sha256": "a4e2dc6f14bb66d1b46c696c9852c1188789aa1582233c2c29e9d4d27e7a9b67",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:27.218Z",
+          "path": "docs/images/ja-JP/crm-customers.png",
+          "sha256": "6433397fb9dccecad7e0ae9f89caf35b468dc38376ce9921aa334adbf635e0b8",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:58.58Z",
+          "path": "docs/images/ja-JP/crm-activities.png",
+          "sha256": "9c9692a41ae7d4f35e2f5fe3e2af451af6137e480eb9f6429da8a4db25fcb453",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:06.598Z",
+          "path": "docs/images/ja-JP/crm-overview.png",
+          "sha256": "5245ebf03b399e3f62e3c4bb11faf40bf84421a33fad93103c8f24b35198470a",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:11.502Z",
+          "path": "docs/images/ja-JP/crm-leads.png",
+          "sha256": "5a0ff608a4c83053621ed95a58cba91755fa7246f264e63d6efe47d7276ac26a",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:16.577Z",
+          "path": "docs/images/ja-JP/crm-lead-dialog.png",
+          "sha256": "e518a05c8ae839f1927bd3152f70346bc7d34d88215734e0e296e20b3f683d51",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:22.312Z",
+          "path": "docs/images/ja-JP/crm-lead-validation.png",
+          "sha256": "0031ab30661de8784efe35d9da32f4a3bc46444c5f41b2876e8c811d72a5d847",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:37.536Z",
+          "path": "docs/images/ja-JP/crm-contacts.png",
+          "sha256": "c802970d6e2e1e382b633eb19bf15d67bb48b52ff330a0d45c9671997cbe714f",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:42.915Z",
+          "path": "docs/images/ja-JP/crm-contacts-primary-actions.png",
+          "sha256": "418f15707645041ef458cb7a760cb555562aec99d75bbdd1d3acd17bbe914d6c",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:34:47.865Z",
+          "path": "docs/images/ja-JP/crm-opportunities.png",
+          "sha256": "3e7d3a32f4476cc41ad6b2ea5d77dbb62f53c8d886e63fd7f8c8da500278a8d1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:16.391Z",
+          "path": "docs/images/ja-JP/crm-lead-empty.png",
+          "sha256": "6e73567dee18ea84b7db1f458c71226b907236e22349ec56af186fac92824ddf",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:20.965Z",
+          "path": "docs/images/ja-JP/crm-employee-403.png",
+          "sha256": "a7a19ca50318ca76e395823c27a39c5ef6981f6a36c7830c3ccbb93c5e7e745c",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/usage-crm.kr.md",
+      "reviewer": "Codex",
+      "review_type": "AI_REVIEW",
+      "reviewed_at": "2026-10-23 14:49:47",
+      "result": "approved",
+      "translation_sha256": "144f2ebe885b0ee53bd8cc1347db30ccf913321dcb2e0779db8d12c67e36de7f",
+      "checks": {
+        "technical_literals": "usage无代码块或必需源码跳转；[REDACTED]、系统数字标识与业务编号的区别、四语图片文件名及真实界面按钮均核对，未擅自翻译标识或发明关键词搜索。",
+        "images_and_links": "本语15张原始1440x900图均逐张实际查看；对象11/8/10/9/20前后真实关联，状态与完成时间可读，普通员工403身份正确，联系方式脱敏；每个图片引用与摘要绑定。",
+        "language_and_terminology": "적격 판정·후속 활동·주 연락처로 설정을 실제 화면과 대조했다. 가로 스크롤과 실제 완료 시각 설명을 수정한 뒤 다시 읽었으며 중국어식 표현을 그대로 쓰지 않았다。",
+        "coverage_and_meaning": "逐节审读前提、概览、线索2.1至2.5、客户3.1至3.4、联系人、商机5.1至5.5、活动、完整故事、失败恢复和边界，纠正转换关联、幂等、黑名单、删除与重开语义；修正后复读。",
+        "security_and_failure_semantics": "保留本人/部门/只读范围和分配目标校验、拒绝与脱敏、状态机前置、乐观锁刷新、级联删除影响和重复提交恢复；测试会话不冒充真人验证码，未验证外部登录不写成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "description": "原文与三译曾将客户黑名单当作全局销售拦截，且混淆主联系人删除、客户删除与商机重开规则。",
+          "resolution": "以实际Service/状态机和独立角色证据校正中文及三译，修正后逐节再读。"
+        },
+        {
+          "status": "resolved",
+          "description": "旧图存在未开弹窗、缺校验、枚举语言、身份或固定操作列遮挡，宽表说明与完成图注不准确。",
+          "resolution": "使用真实本地业务链重拍60图，修复必要UI并逐图复看；补宽表操作与按关联客户查看状态/实际完成时间的四语图注。"
+        }
+      ],
+      "images": [
+        {
+          "captured_at": "2026-10-23T06:36:31.151Z",
+          "path": "docs/images/ko-KR/crm-lead-converted.png",
+          "sha256": "ddfd599e7467747fe1a82b5f28830403fd3116fbd0dc057c88469bbc0574f4b4",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:13.927Z",
+          "path": "docs/images/ko-KR/crm-opportunity-won.png",
+          "sha256": "0276633b071e86ff1d7f51b1ac5d68249f65b0535bb216f9da4e7e5a942dbaf1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:25.38Z",
+          "path": "docs/images/ko-KR/crm-activity-completed.png",
+          "sha256": "365b6aaeeb4aa4681042281bbdc7d8d097f55ba6edb52e48d47dba50e3b8eac1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:52.191Z",
+          "path": "docs/images/ko-KR/crm-customer-360.png",
+          "sha256": "29b8c5bdb32268996edca6980ca095e30bde22b860ca4c463666e6e9d554f9c7",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:46.427Z",
+          "path": "docs/images/ko-KR/crm-customers.png",
+          "sha256": "7c1b9484d10dfd7e1ca6cef0ee4bd212ce9223142499b8498cda419ed00935c1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:18.773Z",
+          "path": "docs/images/ko-KR/crm-activities.png",
+          "sha256": "ffe067ce9b9c6c66889db12e1edc3e1e5035ab56b108e2ad74644b2b6e45da3e",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:25.706Z",
+          "path": "docs/images/ko-KR/crm-overview.png",
+          "sha256": "37236f252151fdd40f45c7d8875be679b88d96be7e1a1dbba7845cb1d9137424",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:30.608Z",
+          "path": "docs/images/ko-KR/crm-leads.png",
+          "sha256": "fcb33c3835509f18f80d2dde263f32d7935e3496319b99bcb0c72a8761ed3bf4",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:35.633Z",
+          "path": "docs/images/ko-KR/crm-lead-dialog.png",
+          "sha256": "a3387f3bba7ab5eeb085f4e4162801519555081f036100c3e56ef121f3d0fbc9",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:41.525Z",
+          "path": "docs/images/ko-KR/crm-lead-validation.png",
+          "sha256": "68a21fef3914be5e8e7c9a07ba13954a346d42c941047e3751e1875674d988f3",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:35:57.132Z",
+          "path": "docs/images/ko-KR/crm-contacts.png",
+          "sha256": "6e11223edcd92cbfba08e3d8b61266bb678676873f62c59e2ae4525f141791d6",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:02.644Z",
+          "path": "docs/images/ko-KR/crm-contacts-primary-actions.png",
+          "sha256": "d23c386aacfd57f00c66fd04f2e6c5871dd1f5798b34c7c2ae7527dfcda528a7",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:07.817Z",
+          "path": "docs/images/ko-KR/crm-opportunities.png",
+          "sha256": "cc9cd1b1f5af85c5b04db355b05ae635483e0580dadd3607c1e110c7cddb32a1",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:36.286Z",
+          "path": "docs/images/ko-KR/crm-lead-empty.png",
+          "sha256": "5d619cd933cb587391a96708545b6e9c2f96f015312051992292bc223da4a624",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        },
+        {
+          "captured_at": "2026-10-23T06:36:40.934Z",
+          "path": "docs/images/ko-KR/crm-employee-403.png",
+          "sha256": "526f50f1f7c844270d05d531f0fbd060b0054bc1b17794021a2af0bc5c6fae8e",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          }
+        }
+      ]
+    }
+  }
+}

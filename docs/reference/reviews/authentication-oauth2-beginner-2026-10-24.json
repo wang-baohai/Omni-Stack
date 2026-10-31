@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-oauth2",
+  "source": "docs/wiki/authentication-oauth2.md",
+  "source_sha256": "f3845d29829a98fc8af9981944610a3400a177b6275985ed5a263ab93e5be07d",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-oauth2.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:40:16",
+      "result": "approved",
+      "translation_sha256": "03c668ad08eb5634aec6dd9ef9bacae1f68a9806b059bfdca5c43dfa0b4b542e",
+      "checks": {
+        "coverage_and_meaning": "会话与JWT区别、完整SSO阶段、NONE/PKCE/openid/profile、三段工程代码、scope定制和四失败恢复全部对应。",
+        "technical_literals": "三段权限claim/pkce函数/session配置原文保持；64字符、S256、state/verifier、fetch与R<T>边界不变。",
+        "security_and_failure_semantics": "保留scope未按客户端请求缩减业务权限；REFRESH_TOKEN登记不代表自动续期；OAuth回调Dashboard与普通Wiki落点分开；参数消费不可重放。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-oauth2.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:40:16",
+      "result": "approved",
+      "translation_sha256": "2d009c6eb60f2942a429eb38d9486586b6b056807dab38ca93af594281b1214e",
+      "checks": {
+        "coverage_and_meaning": "会话与JWT区别、完整SSO阶段、NONE/PKCE/openid/profile、三段工程代码、scope定制和四失败恢复全部对应。",
+        "technical_literals": "三段权限claim/pkce函数/session配置原文保持；64字符、S256、state/verifier、fetch与R<T>边界不变。",
+        "security_and_failure_semantics": "保留scope未按客户端请求缩减业务权限；REFRESH_TOKEN登记不代表自动续期；OAuth回调Dashboard与普通Wiki落点分开；参数消费不可重放。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        },
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-oauth2.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:40:16",
+      "result": "approved",
+      "translation_sha256": "0bec6798718b6458972c3a0f8b1b78845f39cfcece3bee06e2996dbae592f4bc",
+      "checks": {
+        "coverage_and_meaning": "会话与JWT区别、完整SSO阶段、NONE/PKCE/openid/profile、三段工程代码、scope定制和四失败恢复全部对应。",
+        "technical_literals": "三段权限claim/pkce函数/session配置原文保持；64字符、S256、state/verifier、fetch与R<T>边界不变。",
+        "security_and_failure_semantics": "保留scope未按客户端请求缩减业务权限；REFRESH_TOKEN登记不代表自动续期；OAuth回调Dashboard与普通Wiki落点分开；参数消费不可重放。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "markdown-generic-literals",
+          "status": "resolved",
+          "description": "泛型结果名R<T>/R<Void>作为技术原文应明确标为行内代码，避免被当HTML。",
+          "resolution": "只在非代码正文补代码标记，名称、源码及响应语义不变；已复核这处排版差异。"
+        }
+      ]
+    }
+  }
+}

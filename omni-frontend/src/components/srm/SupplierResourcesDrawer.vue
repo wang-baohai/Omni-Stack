@@ -323,7 +323,11 @@ async function removeBank(row: SrmBankAccount) {
           <el-table-column prop="issuingAuthority" :label="t('srmSupplierOverview.issuingAuthority')" min-width="140" />
           <el-table-column prop="issueDate" :label="t('srmResources.issueDate')" width="110" />
           <el-table-column prop="expiryDate" :label="t('srmSupplierOverview.expiryDate')" width="110" />
-          <el-table-column prop="status" :label="t('srmSupplierOverview.status')" width="90" />
+          <el-table-column :label="t('srmSupplierOverview.status')" min-width="100">
+            <template #default="{ row }">
+              {{ row.status === 'ACTIVE' ? t('srmResources.statusActive') : row.status === 'INACTIVE' ? t('srmResources.statusInactive') : row.status }}
+            </template>
+          </el-table-column>
           <el-table-column :label="t('common.actions')" width="130" fixed="right">
             <template #default="{ row }">
               <el-button v-permission="'srm:qualification:update'" link type="primary" @click="openQualification(row)">
@@ -373,7 +377,7 @@ async function removeBank(row: SrmBankAccount) {
       width="620px"
       append-to-body
     >
-      <el-form ref="contactFormRef" :model="contactForm" :rules="contactRules" label-width="90px">
+      <el-form ref="contactFormRef" :model="contactForm" :rules="contactRules" label-width="auto">
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item :label="t('srmSupplierOverview.contactName')" prop="name">
@@ -401,7 +405,7 @@ async function removeBank(row: SrmBankAccount) {
       width="620px"
       append-to-body
     >
-      <el-form ref="qualificationFormRef" :model="qualificationForm" :rules="qualificationRules" label-width="90px">
+      <el-form ref="qualificationFormRef" :model="qualificationForm" :rules="qualificationRules" label-width="auto">
         <el-form-item :label="t('srmSupplierOverview.qualificationName')" prop="qualificationName"><el-input v-model="qualificationForm.qualificationName" maxlength="200" /></el-form-item>
         <el-form-item :label="t('srmSupplierOverview.certificateNo')" prop="certificateNo"><el-input v-model="qualificationForm.certificateNo" maxlength="100" /></el-form-item>
         <el-form-item :label="t('srmSupplierOverview.issuingAuthority')" prop="issuingAuthority"><el-input v-model="qualificationForm.issuingAuthority" maxlength="200" /></el-form-item>
@@ -422,8 +426,8 @@ async function removeBank(row: SrmBankAccount) {
       width="620px"
       append-to-body
     >
-      <el-form ref="bankFormRef" :model="bankForm" :rules="bankRules" label-width="90px">
-        <el-form-item :label="t('srmResources.accountName')" prop="accountName"><el-input v-model="bankForm.accountName" maxlength="200" /></el-form-item>
+      <el-form ref="bankFormRef" :model="bankForm" :rules="bankRules" label-width="auto">
+        <el-form-item :label="t('srmSupplierOverview.accountName')" prop="accountName"><el-input v-model="bankForm.accountName" maxlength="200" /></el-form-item>
         <el-form-item :label="t('srmSupplierOverview.accountNo')" prop="accountNo"><el-input v-model="bankForm.accountNo" maxlength="100" :placeholder="maskedBankAccount ? maskedPlaceholder : ''" /></el-form-item>
         <el-form-item :label="t('srmSupplierOverview.bankName')" prop="bankName"><el-input v-model="bankForm.bankName" maxlength="200" /></el-form-item>
         <el-form-item :label="t('srmSupplierOverview.bankBranch')" prop="bankBranch"><el-input v-model="bankForm.bankBranch" maxlength="200" /></el-form-item>

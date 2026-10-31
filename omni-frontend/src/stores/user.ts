@@ -36,6 +36,20 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('username', name)
   }
 
+  /** 仅清理本标签内存会话，不写共享存储；供跨标签同步先回收旧身份，避免反向触发 storage 回声。 */
+  function clearLocalSession() {
+    isLoggingOut.value = false
+    token.value = ''
+    username.value = ''
+  }
+
+  /** 按共享存储中的新会话更新本标签内存，不写回存储；写入方仍是发起标签，避免旧值回声覆盖。 */
+  function applyLocalSession(newToken: string, name: string) {
+    isLoggingOut.value = false
+    token.value = newToken
+    if (name !== '') username.value = name
+  }
+
   /** 登出：清除令牌和用户名；动态路由及权限由路由层统一回收。 */
   function logout(explicit = true) {
     isLoggingOut.value = explicit
@@ -45,5 +59,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('username')
   }
 
-  return { token, username, isLoggedIn, isLoggingOut, setToken, setUsername, logout }
+  return { token, username, isLoggedIn, isLoggingOut, setToken, setUsername, clearLocalSession, applyLocalSession, logout }
 })

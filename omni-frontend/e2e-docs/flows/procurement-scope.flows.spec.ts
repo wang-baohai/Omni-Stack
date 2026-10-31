@@ -18,7 +18,7 @@ interface TeachingState {
 }
 interface Capture { name: string; locale: DocsLocale; sha256: string; [key: string]: unknown }
 const enabled = Boolean(process.env.E2E_TEACHING_STATE_FILE || process.env.E2E_TEACHING_TOKENS_FILE)
-const project = 'omni-wiki-acceptance-20261009'
+const project = 'omni-stack'
 const viewport = { width: 1920, height: 1080 }
 const route = '/admin/procurement/requisition'
 const dictionaries = { 'zh-CN': zh, 'en-US': en, 'ja-JP': ja, 'ko-KR': ko }

@@ -417,6 +417,20 @@ WHERE r.tenant_id = 1 AND r.role_code = 'SUPPLIER'
       'srm:portal:evaluation', 'srm:portal:quotation'
   );
 
+-- SRM_APPROVER_WORKFLOW_PERMISSIONS_BEGIN
+-- 准入模型的三种正常审批角色需要最小待办与完成权限；不授予模型管理或其他业务权限。
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT r.id, p.id
+FROM sys_role r
+JOIN sys_permission p ON p.tenant_id = r.tenant_id
+WHERE r.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+  AND r.role_code IN ('SRM_MANAGER', 'SRM_COMPLIANCE', 'SRM_DIRECTOR')
+  AND r.status = 1 AND p.status = 1
+  AND p.permission_code IN (
+      'workflow', 'workflow:instance', 'workflow:task:todo', 'workflow:approval:complete'
+  );
+-- SRM_APPROVER_WORKFLOW_PERMISSIONS_END
+
 INSERT IGNORE INTO sys_permission
     (id, tenant_id, parent_id, permission_code, permission_name, type, path, depth, sort, status, create_by)
 VALUES
@@ -479,6 +493,7 @@ WHERE r.tenant_id = 1
       'workflow', 'workflow:instance', 'workflow:task:todo',
       'workflow:approval:complete', 'workflow:model:list'
   );
+
 
 INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
 SELECT r.id, p.id

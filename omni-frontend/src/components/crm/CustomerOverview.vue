@@ -26,6 +26,16 @@ const loading = ref(false)
 const canViewContacts = computed(() => permissionStore.hasPermission('crm:contact:list'))
 const canViewOpportunities = computed(() => permissionStore.hasPermission('crm:opportunity:list'))
 const canViewActivities = computed(() => permissionStore.hasPermission('crm:activity:list'))
+const customerStatusLabel = computed(() => {
+  const labels: Record<string, string> = {
+    POTENTIAL: t('crmCustomer.statusPotential'),
+    ACTIVE: t('crmCustomer.statusActive'),
+    DORMANT: t('crmCustomer.statusDormant'),
+    LOST: t('crmCustomer.statusLost'),
+    BLACKLISTED: t('crmCustomer.statusBlacklisted'),
+  }
+  return customer.value ? labels[customer.value.status] || customer.value.status : ''
+})
 
 async function loadData() {
   if (!props.customerId) return
@@ -74,7 +84,7 @@ watch(() => props.customerId, loadData, { immediate: true })
       <el-descriptions :title="t('crmCustomerOverview.profile')" :column="2" border>
         <el-descriptions-item :label="t('crmCustomerOverview.number')">{{ customer.customerNo }}</el-descriptions-item>
         <el-descriptions-item :label="t('crmCustomerOverview.name')">{{ customer.name }}</el-descriptions-item>
-        <el-descriptions-item :label="t('common.status')">{{ customer.status }}</el-descriptions-item>
+        <el-descriptions-item :label="t('common.status')">{{ customerStatusLabel }}</el-descriptions-item>
         <el-descriptions-item :label="t('crmContact.owner')">{{ customer.ownerName || t('crmUi.userNumber', { id: customer.ownerUserId }) }}</el-descriptions-item>
         <el-descriptions-item :label="t('crmContact.phone')">{{ customer.phone || '-' }}</el-descriptions-item>
         <el-descriptions-item :label="t('crmContact.email')">{{ customer.email || '-' }}</el-descriptions-item>

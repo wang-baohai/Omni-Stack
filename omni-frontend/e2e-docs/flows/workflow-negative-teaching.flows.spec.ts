@@ -39,7 +39,7 @@ if (enabled) {
   evidencePath = outside(process.env.E2E_TEACHING_EVIDENCE_PATH)
   outside(process.env.E2E_DOCS_IMAGE_DIR)
   const url = new URL(process.env.E2E_BASE_URL!)
-  if (teaching.schema !== 1 || teaching.project !== process.env.E2E_WORKFLOW_UI_PROJECT || teaching.project !== 'omni-wiki-acceptance-20261009'
+  if (teaching.schema !== 1 || teaching.project !== process.env.E2E_WORKFLOW_UI_PROJECT || teaching.project !== 'omni-stack'
     || url.hostname !== 'omni-frontend' || url.port !== '3000' || teaching.objects.workflowPhase.status !== 'PASS') throw new Error('目标项目或既有案例不符')
   for (const key of ['E2E_WORKFLOW_RUNTIME_IMAGE', 'E2E_WORKFLOW_BACKEND_IMAGE']) if (!/^sha256:[a-f0-9]{64}$/.test(process.env[key] || '')) throw new Error('缺少已核对运行镜像')
   journal = existsSync(journalPath) ? json<Journal>(journalPath) : { schema: 1, project: teaching.project, baseline: teaching.baseline, locales: {} }

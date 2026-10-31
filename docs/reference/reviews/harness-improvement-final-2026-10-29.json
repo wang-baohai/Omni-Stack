@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "document_id": "harness-improvement",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/harness-improvement.md",
+  "source_sha256": "bd725db14f15a61ccd46c1f2bd60b4d1d495aa47814f9e533b954075739aba42",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮Get-Content逐篇完整读取中文7篇及三译21篇（长篇分段），不是摘要/哈希/行数自动审批；修正8文件后实际读取最终8段。无栅格图片引用，不用其他站点截图冒充本章逐图审读。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-harness-actual-reading-20261029.json",
+  "actual_reading_sha256": "7c125ea2c122a4d62c4f181a2411366e35281dd6cd352091fda558a59d2aab37",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/harness-improvement.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "535a9dc59838866c351fe0e2d582fa55599f05f0610e63ca3b6c5101e67816e1",
+      "checks": {
+        "coverage_and_meaning": "五建议的收益/代价/验证/状态全保持建议性质，不实施建议，不新增任务；原取舍等个别直译可理解，不做无关润色。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/harness-improvement.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "50fe70da8c786cd9dd74f1b5139abf34ab54775c5d07db44f46410e4bd6295be",
+      "checks": {
+        "coverage_and_meaning": "五建议的收益/代价/验证/状态全保持建议性质，不实施建议，不新增任务；原取舍等个别直译可理解，不做无关润色。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/harness-improvement.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:25:03",
+      "result": "approved",
+      "translation_sha256": "d1014e07141542fbd1f61af8fb02cde79fcb631eb6b8b2f9b4d720843eac1e19",
+      "checks": {
+        "coverage_and_meaning": "五建议的收益/代价/验证/状态全保持建议性质，不实施建议，不新增任务；原取舍等个别直译可理解，不做无关润色。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": []
+    }
+  },
+  "global_release_claimed": false
+}

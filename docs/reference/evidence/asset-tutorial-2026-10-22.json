@@ -1,0 +1,100 @@
+{
+  "step": "WP-28.S02",
+  "module": "asset",
+  "verified_at": "2026-10-22",
+  "environment": "local Docker Compose project omni-stack; frontend container; MySQL; workflow",
+  "source": {
+    "purchase_order": "PO-1-1",
+    "goods_receipt": "GR-1-1",
+    "asset_cards": [
+      "AST-2113079138800381954",
+      "AST-2113079138905239553"
+    ]
+  },
+  "identity": {
+    "administrator": "admin (SUPER_ADMIN)",
+    "asset_user": "wp07asset413508 (ASSET_USER)",
+    "asset_manager": "wp28assetmgr33683775 (ASSET_MANAGER, controlled identity created through admin UI)"
+  },
+  "flows": [
+    {
+      "name": "allocate_accept_return",
+      "object": "AST-2113079138905239553",
+      "observed": [
+        "ALLOCATED v1",
+        "IN_USE v2",
+        "IN_STOCK v3"
+      ],
+      "identity": "asset user real captcha login; my assets total=2",
+      "evidence": "wiki-workspace-ux.records.local/evidence/wp28-s02/wp28-s02-owner-flow.json"
+    },
+    {
+      "name": "transfer",
+      "object": "AT-1-1",
+      "asset": "AST-2113079138800381954",
+      "observed": [
+        "PENDING_APPROVAL",
+        "APPROVED",
+        "COMPLETED v3",
+        "asset IN_USE current user 203/unit 101"
+      ],
+      "approval": "ASSET_MANAGER real login and workflow approval",
+      "evidence": "wiki-workspace-ux.records.local/evidence/wp28-s02/wp28-s02-complete.json"
+    },
+    {
+      "name": "disposal",
+      "object": "AD-1-1",
+      "asset": "AST-2113079138905239553",
+      "observed": [
+        "PENDING_APPROVAL",
+        "APPROVED",
+        "COMPLETED v3",
+        "asset DISPOSED v5"
+      ],
+      "approval": "ASSET_MANAGER real login and workflow approval",
+      "evidence": "wiki-workspace-ux.records.local/evidence/wp28-s02/wp28-s02-complete.json"
+    },
+    {
+      "name": "reject_restore",
+      "object": "AT-1-2",
+      "asset": "AST-1",
+      "observed": [
+        "PENDING_APPROVAL",
+        "REJECTED v2",
+        "asset restored IN_STOCK v2, active operation cleared"
+      ],
+      "evidence": "wiki-workspace-ux.records.local/evidence/wp28-s02/wp28-s02-reject.json"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "asset user opens transfer list",
+      "http": 403,
+      "message": "权限不足，拒绝访问"
+    },
+    {
+      "case": "asset user creates transfer",
+      "http": 403,
+      "message": "权限不足，拒绝访问"
+    },
+    {
+      "case": "allocate an IN_USE asset",
+      "http": 409,
+      "message": "资产状态不允许从 IN_USE 变更为 ALLOCATED"
+    },
+    {
+      "case": "disposal while transfer is active",
+      "http": 409,
+      "message": "资产已存在活动中的调拨或处置申请"
+    },
+    {
+      "case": "delete procurement-imported asset",
+      "http": 409,
+      "message": "仅可删除未分配且无活动操作的在库资产"
+    }
+  ],
+  "sanitization": "No tokens, cookies, passwords, private keys or raw credentials are included.",
+  "verification_status": "HISTORICAL_UNVERIFIED_SUPERSEDED_NOT_CURRENT_ACCEPTANCE",
+  "superseded_by": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+  "verification_notice": "Original author claims are retained as history; no real-human-CAPTCHA or self-review claim is inherited. Actual current images and test identities are defined by the superseding Codex record."
+}

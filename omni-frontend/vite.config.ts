@@ -8,9 +8,15 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+
+/** 生成工程不含已裁视图，构建时据此约束统计与其他非路由入口。 */
+const physicalModules = ['workflow', 'crm', 'srm', 'procurement', 'asset']
+  .filter((id) => existsSync(resolve(import.meta.dirname, 'src/views', id)))
 
 export default defineConfig({
   plugins: [vue()],
+  define: { __OMNI_PHYSICAL_MODULES__: JSON.stringify(physicalModules) },
   resolve: {
     alias: {
       /** @ 指向 src 目录，简化模块导入路径 */

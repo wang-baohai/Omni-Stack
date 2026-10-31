@@ -260,7 +260,7 @@ onMounted(loadData)
         <el-table-column type="selection" width="46" :selectable="isLeadActive" /><el-table-column prop="leadNo" :label="t('crmLead.number')" width="145" />
         <el-table-column prop="fullName" :label="t('crmLead.name')" width="110" /><el-table-column prop="companyName" :label="t('crmLead.company')" min-width="160" show-overflow-tooltip />
         <el-table-column prop="mobile" :label="t('crmContact.mobile')" width="135" /><el-table-column prop="sourceCode" :label="t('crmLead.source')" width="100" />
-        <el-table-column :label="t('common.status')" width="100"><template #default="{ row }"><el-tag>{{ statusLabel[row.status as LeadStatus] }}</el-tag></template></el-table-column>
+        <el-table-column :label="t('common.status')" min-width="140"><template #default="{ row }"><el-tag>{{ statusLabel[row.status as LeadStatus] }}</el-tag></template></el-table-column>
         <el-table-column :label="t('crmContact.owner')" width="110"><template #default="{ row }">{{ row.ownerName || t('crmUi.userNumber', { id: row.ownerUserId }) }}</template></el-table-column><el-table-column prop="nextFollowupTime" :label="t('crmCustomerOverview.nextFollowup')" width="170" />
         <el-table-column :label="t('common.actions')" fixed="right" width="400">
           <template #default="{ row }">

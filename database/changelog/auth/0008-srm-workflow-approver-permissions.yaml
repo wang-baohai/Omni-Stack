@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: auth-0008-srm-workflow-approver-permissions
+      author: omni-stack
+      labels: database:auth,srm-approver-fix
+      runInTransaction: true
+      comment: 为默认租户三种 SRM 准入候选角色补齐最小待办和完成权限，保留真实任务处理人检查
+      preConditions:
+        - onFail: MARK_RAN
+        - dbms:
+            type: mysql
+        - sqlCheck:
+            expectedResult: omni_auth
+            sql: SELECT DATABASE()
+        - tableExists:
+            tableName: sys_role_permission
+        - sqlCheck:
+            expectedResult: 3
+            sql: >-
+              SELECT COUNT(*) FROM sys_role
+              WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+              AND role_code IN ('SRM_MANAGER', 'SRM_COMPLIANCE', 'SRM_DIRECTOR') AND status = 1
+        - sqlCheck:
+            expectedResult: 4
+            sql: >-
+              SELECT COUNT(*) FROM sys_permission
+              WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+              AND permission_code IN ('workflow', 'workflow:instance', 'workflow:task:todo', 'workflow:approval:complete')
+              AND status = 1
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+              SELECT r.id, p.id
+              FROM sys_role r
+              JOIN sys_permission p ON p.tenant_id = r.tenant_id
+              WHERE r.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+                AND r.role_code IN ('SRM_MANAGER', 'SRM_COMPLIANCE', 'SRM_DIRECTOR')
+                AND r.status = 1 AND p.status = 1
+                AND p.permission_code IN (
+                    'workflow', 'workflow:instance', 'workflow:task:todo', 'workflow:approval:complete'
+                );
+      rollback:
+        - sql:
+            sql: SELECT 1;

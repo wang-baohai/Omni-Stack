@@ -1,9 +1,12 @@
 package com.omni.srm.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.omni.common.core.internal.InternalUserOptionDTO;
 import com.omni.common.core.result.BusinessException;
 import com.omni.common.core.result.R;
 import com.omni.srm.client.AuthInternalClient;
+import com.omni.srm.entity.SrmSupplierPortalUser;
+import com.omni.srm.mapper.SrmSupplierPortalUserMapper;
 import com.omni.srm.dto.SrmViews;
 import com.omni.common.service.datascope.ServiceDataScopeContext;
 import com.omni.common.service.identity.ServiceIdentityContext;
@@ -13,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** SRM 负责人候选服务实现。 */
 @Service
@@ -20,6 +25,7 @@ import java.util.List;
 public class OwnerOptionServiceImpl implements OwnerOptionService {
 
     private final AuthInternalClient authInternalClient;
+    private final SrmSupplierPortalUserMapper portalUserMapper;
 
     /** {@inheritDoc} */
     @Override
@@ -35,7 +41,18 @@ public class OwnerOptionServiceImpl implements OwnerOptionService {
             throw new BusinessException(503, "负责人目录暂时不可用");
         }
         CrmScopeAdapter scope = CrmScopeAdapter.from(ServiceDataScopeContext.require());
-        return response.getData().stream().filter(user -> allowed(scope, user)).limit(safeLimit).map(user -> {
+        List<InternalUserOptionDTO> candidates = response.getData().stream()
+                .filter(user -> allowed(scope, user)).toList();
+        if (candidates.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> portalUserIds = portalUserMapper.selectList(Wrappers.<SrmSupplierPortalUser>lambdaQuery()
+                        .select(SrmSupplierPortalUser::getUserId)
+                        .eq(SrmSupplierPortalUser::getTenantId, ServiceIdentityContext.requireTenantId())
+                        .eq(SrmSupplierPortalUser::getDeleted, 0)
+                        .in(SrmSupplierPortalUser::getUserId, candidates.stream().map(InternalUserOptionDTO::getId).toList()))
+                .stream().map(SrmSupplierPortalUser::getUserId).collect(Collectors.toSet());
+        return candidates.stream().filter(user -> !portalUserIds.contains(user.getId())).limit(safeLimit).map(user -> {
             SrmViews.OwnerOptionVO vo = new SrmViews.OwnerOptionVO();
             vo.setUserId(user.getId());
             vo.setUsername(user.getUsername());

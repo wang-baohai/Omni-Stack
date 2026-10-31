@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "document_id": "frontend-patterns",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/frontend-patterns.md",
+  "source_sha256": "e3cac58e39fee0e8273b1501952a0e30c42d2bac912072fa963092e14c33134a",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "previous_actual_review": "docs/reference/reviews/frontend-patterns-seven-amendments-2026-10-25.json",
+  "previous_actual_review_sha256": "b6d0fea66d9a0124a8c56cbaef98059d7d733ec94f65946ba95523d1ba9f8a97",
+  "method": "前版四语全文已有真实AI审读且旧源/译文/证据摘要逐一匹配；本次实际读取四语5.1新增段落，对照CLI/Compose/Dockerfile及前端真实改动。严格差量比较证明移除该段后其余正文完全相同（仅规范化CRLF比较）。只复用不变正文阅读，新段已实际逐字核对；不以哈希代替语义审读，不代签尚未完成的运行验证。",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/frontend-patterns.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-31 08:24:03",
+      "result": "approved",
+      "translation_sha256": "ece654c5d04fc63966667f917f88bd9d3aaa02296d1bde657ae6f3cf9b95cbd9",
+      "checks": {
+        "coverage_and_meaning": "保留既有全文语义结论，唯一新增段落四语逐字实读；说明部署配置与权限/物理视图同时求交，不新增业务能力。",
+        "technical_literals": "OMNI_FRONTEND_MODULES、VITE_OMNI_MODULES、workflow、SRM及deployment-modules.ts四语逐项核对；与真实代码变量和路径一致。",
+        "security_and_failure_semantics": "客户端不改JWT、数据库角色或服务端权限；缺模块不伪装请求成功，未知部署选择不能扩大可选模块；本次不冒称生产网络/运行终验已完成。",
+        "language_and_terminology": "英文完整保留依赖闭包传递、构建选择求交、缺模块不请求/挂载、缺参数全量默认及后端授权不变，未把呈现过滤译成授权。",
+        "images_and_links": "本文没有栅格图片；仅增加真实源码文件链接且文件存在。其余文内代码、图表、链接与有效前版逐字一致，未用新图片代替未完成运行。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码精简预设的前端展示范围缺少与正式模块选择求交的事实说明。",
+          "resolution": "仅新增5.1一个段落并同步三译；旧全文有效阅读保留，运行边界由原05S02/29S03实际验证。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/frontend-patterns.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-31 08:24:03",
+      "result": "approved",
+      "translation_sha256": "667e6ca992ba35dc05b99ee6b85c1866632cf8229517107b8ce703cbebe1e24c",
+      "checks": {
+        "coverage_and_meaning": "保留既有全文语义结论，唯一新增段落四语逐字实读；说明部署配置与权限/物理视图同时求交，不新增业务能力。",
+        "technical_literals": "OMNI_FRONTEND_MODULES、VITE_OMNI_MODULES、workflow、SRM及deployment-modules.ts四语逐项核对；与真实代码变量和路径一致。",
+        "security_and_failure_semantics": "客户端不改JWT、数据库角色或服务端权限；缺模块不伪装请求成功，未知部署选择不能扩大可选模块；本次不冒称生产网络/运行终验已完成。",
+        "language_and_terminology": "日本語段落を実際に読み、依存閉包・表示範囲・未選択モジュールへの要求抑止・引数なしの既定動作・サーバー認可との分離が中国語と一致することを確認。",
+        "images_and_links": "本文没有栅格图片；仅增加真实源码文件链接且文件存在。其余文内代码、图表、链接与有效前版逐字一致，未用新图片代替未完成运行。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码精简预设的前端展示范围缺少与正式模块选择求交的事实说明。",
+          "resolution": "仅新增5.1一个段落并同步三译；旧全文有效阅读保留，运行边界由原05S02/29S03实际验证。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/frontend-patterns.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-31 08:24:03",
+      "result": "approved",
+      "translation_sha256": "02ccae104fdab88c8ae531543194bab5482b174550adf00ff0cee9c5c290fb2c",
+      "checks": {
+        "coverage_and_meaning": "保留既有全文语义结论，唯一新增段落四语逐字实读；说明部署配置与权限/物理视图同时求交，不新增业务能力。",
+        "technical_literals": "OMNI_FRONTEND_MODULES、VITE_OMNI_MODULES、workflow、SRM及deployment-modules.ts四语逐项核对；与真实代码变量和路径一致。",
+        "security_and_failure_semantics": "客户端不改JWT、数据库角色或服务端权限；缺模块不伪装请求成功，未知部署选择不能扩大可选模块；本次不冒称生产网络/运行终验已完成。",
+        "language_and_terminology": "한국어 추가 단락을 실제로 읽고 의존성 집합 전달, 표시 권한 교집합, 미선택 모듈 요청 억제, 기본 전체 동작 및 서버 인가 분리가 원문과 일치함을 확인.",
+        "images_and_links": "本文没有栅格图片；仅增加真实源码文件链接且文件存在。其余文内代码、图表、链接与有效前版逐字一致，未用新图片代替未完成运行。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码精简预设的前端展示范围缺少与正式模块选择求交的事实说明。",
+          "resolution": "仅新增5.1一个段落并同步三译；旧全文有效阅读保留，运行边界由原05S02/29S03实际验证。"
+        }
+      ]
+    }
+  }
+}

@@ -29,7 +29,7 @@ README 只负责项目定位、能力、最短体验和导航。事实保留边�
 
 ## 文档发布与资产维护
 
-`docs/docs-manifest.yaml` 为正文与语言路径清单，站点仅生成四语言投影；GitHub/Gitee 原生 Wiki 可链接统一入口，不维护第二份正文。`compose.docs.yaml` 独立运行，固定 4173；`compose.tools.yaml` 为容器构建/测试工具，业务镜像仍排除 docs 与 ai。
+`docs/docs-manifest.yaml` 为正文与语言路径清单，站点仅生成四语言投影；GitHub/Gitee 原生 Wiki 可链接统一入口，不维护第二份正文。前端镜像携带同仓 Wiki 的公开静态产物，从 3000 的 `/wiki/` 提供首页阅读；原始 docs 与 ai 只用于构建，不作为源码目录公开。`compose.docs.yaml` 仍可独立运行文档站，固定 4173；`compose.tools.yaml` 为容器构建/测试工具，后端业务镜像继续排除 docs 与 ai。
 
 Wiki 变更同步四语言。项目所有者已按 [ADR-0003](adr/0003-authorized-ai-translation-review.md) 授权 Codex 逐篇语义审校；真实 `AI_REVIEW` 通过即可，不要求额外人工复核。只有实际由人完成的复核才记录为 `HUMAN_REVIEW`。两种记录均须绑定 `reviewer`、`reviewed_at`、当前 `reviewed_source_sha256` 和 `translation_sha256`；AI 模式另绑定所有者授权和 `docs/reference/reviews` 中的逐项结论及证据摘要。源、译文、授权或证据变化后相应旧记录失效。AI 记录不能冒称真人，平台 Auto-review 和内容检查不产生翻译签核。`docs:i18n:content:check` 只检查内容，正式发布必须另过严格 `docs:i18n:check`，不得用草稿开关或单独关闭人工标志跳过复核。
 

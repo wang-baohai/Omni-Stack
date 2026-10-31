@@ -53,8 +53,12 @@ describe('preset generator', () => {
       assert.doesNotMatch(readme, /^- .*\b(?:Workflow|XXL-JOB|CRM|SRM|Procurement|Asset)\b/m, 'core README 不得宣传未交付业务能力');
     }
     assert.equal(existsSync(resolve(target, 'omni-frontend/src/views/crm')), false);
+    assert.equal(existsSync(resolve(target, 'omni-frontend/src/utils/crm-activity-labels.ts')), false,
+      'CRM 缺席时不得留下依赖已裁剪语言键的专用工具');
     assert.equal(existsSync(resolve(target, 'scaffold.lock')), true);
     assert.ok(existsSync(resolve(target, 'ai/adapters/bootstrap.mjs')));
+    const generatedManifest = readFileSync(resolve(target, 'docs/docs-manifest.yaml'), 'utf8');
+    assert.match(generatedManifest, /article_kind: usage/, '生成的清单必须携带 usage 文章分类');
     assert.ok(existsSync(resolve(target, 'docs/.vitepress/config.mjs')));
     assert.equal(existsSync(resolve(target, 'docs/.vitepress/source')), false);
     assert.equal(existsSync(resolve(target, 'docs/.vitepress/.temp')), false);
@@ -92,6 +96,14 @@ describe('preset generator', () => {
     assert.equal(screenshots.screenshots.some((entry) => entry.module === 'scheduling-workspace'), false, 'XXL-JOB 未交付时不得残留其截图登记');
     const coverage = parse(readFileSync(resolve(target, 'omni-frontend/e2e-docs/screenshot-coverage.yaml'), 'utf8')) as { modules: Array<{ id: string; required_flows: string[]; status: string }> };
     assert.equal(coverage.modules.some((entry) => entry.id === 'scheduling-workspace'), false, 'XXL-JOB 未交付时不得保留调度覆盖要求');
+    for (const id of ['crm-tutorial', 'srm-tutorial', 'procurement-tutorial', 'asset-tutorial']) {
+      assert.equal(coverage.modules.some((entry) => entry.id === id), false, `${id} 应按真实领域依赖移除，不能保留空要求掩盖裁剪错误`);
+    }
+    const platformCoverage = coverage.modules.find((entry) => entry.id === 'platform-tutorial')!;
+    assert.ok(platformCoverage.required_flows.includes('workspace'), '共享工作台即使缺证据也必须保留要求');
+    for (const flow of ['portal-login', 'portal-register', 'approvals', 'workflow-models', 'workflow-instances']) {
+      assert.equal(platformCoverage.required_flows.includes(flow), false, `${flow} 的实际依赖不在 core 中`);
+    }
     const permissionCoverage = coverage.modules.find((entry) => entry.id === 'permissions-exceptions')!;
     assert.equal(permissionCoverage.required_flows.includes('procurement-admin-scope'), false);
     assert.equal(permissionCoverage.required_flows.includes('supplier-scope'), false);
@@ -116,6 +128,7 @@ describe('preset generator', () => {
     assert.doesNotMatch(coreLocale, /^  (?:workflow|portalLogin|portalRegister|portal|procurementApprovalRules): \{$/m);
     const authSeed = readFileSync(resolve(target, 'scripts/sql/seed/auth.sql'), 'utf8').replace(/\r\n?/g, '\n');
     assert.doesNotMatch(authSeed, /'(?:workflow|crm|srm|procurement|asset)(?::|')/);
+    assert.doesNotMatch(authSeed, /SRM_APPROVER_WORKFLOW_PERMISSIONS/);
     const seedManifest = parse(readFileSync(resolve(target, 'database/seed/manifest.yaml'), 'utf8')) as {
       sources: Array<{ id: string; sha256: string }>;
     };
@@ -134,6 +147,22 @@ describe('preset generator', () => {
     writeFileSync(siteConfig, originalConfig);
     writeFileSync(resolve(target, 'scaffold/catalog/modules.yaml'), '# 注入漂移\n' + readFileSync(resolve(target, 'scaffold/catalog/modules.yaml'), 'utf8'), 'utf8');
     assert.throws(() => validateGeneratedPreset(target, 'core'), /catalogDigest/);
+  });
+
+  it('preserves every applicable full screenshot obligation independently of available evidence', () => {
+    const temporaryRoot = mkdtempSync(resolve(tmpdir(), 'omni-preset-generator-'));
+    temporaryRoots.push(temporaryRoot);
+    const target = resolve(temporaryRoot, 'full-project');
+    applyPresetGeneration(workspaceRoot, planPresetGeneration(workspaceRoot, 'full', target));
+    assert.equal(readFileSync(resolve(target, 'omni-frontend/src/utils/crm-activity-labels.ts'), 'utf8'),
+      readFileSync(resolve(workspaceRoot, 'omni-frontend/src/utils/crm-activity-labels.ts'), 'utf8'),
+      '选入 CRM 时必须原样保留其专用工具');
+    const coveragePath = 'omni-frontend/e2e-docs/screenshot-coverage.yaml';
+    assert.deepEqual(
+      parse(readFileSync(resolve(target, coveragePath), 'utf8')),
+      parse(readFileSync(resolve(workspaceRoot, coveragePath), 'utf8')),
+      'full 不得因当前缺少截图/终端证据删除流程、状态或 gaps，也不得提升覆盖状态',
+    );
   });
 
   it('rejects a custom preset that omits required Compose runtime dependencies', () => {
@@ -206,7 +235,7 @@ describe('preset generator', () => {
     assert.throws(() => planPresetGeneration(workspaceRoot, 'core', target), /必须不存在或为空/);
   });
 
-  it('removes business-only approval helpers from the workflow preset', () => {
+  it('keeps workflow workspace pages and removes other business modules from the workflow preset', () => {
     const temporaryRoot = mkdtempSync(resolve(tmpdir(), 'omni-preset-generator-'));
     temporaryRoots.push(temporaryRoot);
     const target = resolve(temporaryRoot, 'workflow-project');
@@ -215,10 +244,12 @@ describe('preset generator', () => {
 
     assert.ok(existsSync(resolve(target, 'scripts/fixtures/run-workflow-scope-fixture.ps1')));
 
-    const homeWorkspace = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
-    assert.doesNotMatch(homeWorkspace, /positiveInteger/);
-    assert.doesNotMatch(homeWorkspace, /businessFormLoading/);
-    assert.match(homeWorkspace, /completeApproval/);
+    const workspaceOverview = readFileSync(resolve(target, 'omni-frontend/src/views/workspace/index.vue'), 'utf8');
+    assert.match(workspaceOverview, /const showWorkflow = computed/, '工作台必须按模块可见性守卫 workflow 入口');
+    assert.match(workspaceOverview, /<WorkspaceStatsCard card-id="workflow"/);
+    assert.ok(existsSync(resolve(target, 'omni-frontend/src/views/workspace/approvals/index.vue')));
+    const home = readFileSync(resolve(target, 'omni-frontend/src/views/home/index.vue'), 'utf8');
+    assert.match(home, /官网首页组件/, '官网首页不得再被当作工作台裁剪');
     const workflowLocale = readFileSync(resolve(target, 'omni-frontend/src/locales/zh-CN.ts'), 'utf8');
     assert.match(workflowLocale, /^  workflow: \{$/m);
     assert.doesNotMatch(workflowLocale, /^  (?:portalLogin|portalRegister|portal|procurementApprovalRules): \{$/m);
@@ -280,6 +311,10 @@ describe('preset generator', () => {
     const workflowSeed = readFileSync(resolve(target, 'scripts/sql/seed/workflow.sql'), 'utf8');
     assert.match(workflowSeed, /supplier-onboarding/);
     assert.doesNotMatch(workflowSeed, /procurement-approval|asset-transfer|asset-disposal/);
+    const supplierAuthSeed = readFileSync(resolve(target, 'scripts/sql/seed/auth.sql'), 'utf8');
+    assert.match(supplierAuthSeed, /SRM_APPROVER_WORKFLOW_PERMISSIONS_BEGIN/);
+    assert.match(supplierAuthSeed, /'SRM_MANAGER', 'SRM_COMPLIANCE', 'SRM_DIRECTOR'/);
+    assert.match(supplierAuthSeed, /'workflow:approval:complete'/);
     const seedManifest = parse(readFileSync(resolve(target, 'database/seed/manifest.yaml'), 'utf8')) as {
       assertions: Array<{ id: string; expectedRows: number; expectedSha256: string }>;
     };

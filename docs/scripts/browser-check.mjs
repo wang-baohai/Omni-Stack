@@ -4,6 +4,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import YAML from 'yaml'
+import { sitePages } from './prepare-site.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const require = createRequire(resolve(root, 'omni-frontend/package.json'))
@@ -49,6 +51,9 @@ try {
     assert.equal(response?.status(), 200, `Missing documentation page: ${url}`)
     await page.locator('.vp-doc h1').first().waitFor()
     await page.waitForFunction(() => [...document.querySelectorAll('.vp-doc img')].every((image) => image.complete && image.naturalWidth > 0))
+    await page.waitForFunction(() => document.querySelector('[data-diagram-error="true"]') || !document.querySelector('.vp-doc div.language-mermaid'))
+    assert.equal(await page.locator('[data-diagram-error="true"]').count(), 0, `Diagram rendering failed: ${url}`)
+    assert.equal(await page.locator('.vp-doc div.language-mermaid').count(), 0, `Diagram stayed as source code: ${url}`)
     const data = await page.evaluate(() => ({
       title: document.querySelector('.vp-doc h1')?.textContent,
       ids: [...document.querySelectorAll('[id]')].map((element) => element.id),
@@ -75,10 +80,27 @@ try {
   }
   evidence.checks.push({ name: 'all reachable pages, local links, anchors, images and desktop layout', status: 'pass', pages: seen.size,
     images: [...seen.values()].reduce((sum, value) => sum + value.images, 0), anchors: anchors.length })
+  const manifest = YAML.parse(readFileSync(resolve(root, 'docs/docs-manifest.yaml'), 'utf8'))
+  const published = new Set(sitePages(manifest).map((item) => item.document.id))
+  const removed = manifest.documents.filter((item) => item.source.endsWith('.md') && !published.has(item.id))
+  for (const item of removed) {
+    const route = item.source.replace(/^docs\//, '').replace(/\.md$/, '.html')
+    for (const locale of locales) {
+      const response = await context.request.get(new URL(`${locale}/${route}`, base).href)
+      assert.equal(response.status(), 404, `Removed Wiki page remains published: ${locale}/${route}`)
+    }
+  }
+  evidence.checks.push({ name: 'removed legacy pages return real 404 in every locale', status: 'pass', pages: removed.length * locales.length })
   for (const [index, locale] of locales.entries()) {
     await page.goto(new URL(`${locale}/wiki/index.html`, base).href)
     assert.equal(await page.locator('html').getAttribute('lang'), locale)
-    await screenshot('wiki-index', locale, 'Localized learning paths and navigation')
+    const labels = JSON.parse(readFileSync(resolve(root, `docs/.vitepress/locales/${locale}.json`), 'utf8'))
+    const readingOrder = ['WIKI-01', 'WIKI-03', 'WIKI-02', 'WIKI-04', 'engineering', 'WIKI-09', 'WIKI-08',
+      'WIKI-06', 'WIKI-07', 'WIKI-11', 'WIKI-12', 'WIKI-13', 'WIKI-05', 'WIKI-10']
+    assert.deepEqual((await page.locator('.VPSidebar h2').allTextContents()).map(title => title.trim()),
+      readingOrder.map(id => id === 'engineering' ? labels.truth : labels.chapters[id]), `${locale}: required sidebar reading order`)
+    assert.equal(await page.locator('.vp-doc table').first().locator('tbody tr').count(), 14)
+    await screenshot('wiki-index', locale, 'Thirteen localized content chapters and engineering reference in the required fourteen-group reading order')
     await page.getByRole('button', { name: searchLabels[index], exact: true }).click()
     await page.locator('#localsearch-input').fill('GETDEL')
     const results = page.locator('.VPLocalSearchBox .results a')
@@ -88,8 +110,8 @@ try {
     assert.ok(links.every((link) => new URL(link).pathname.startsWith(base.pathname + locale + '/')), `${locale}: search leaks other locales`)
     await screenshot('wiki-search', locale, 'Local search finds current-locale GETDEL source explanation', false)
     await page.keyboard.press('Escape')
-    await page.goto(new URL(`${locale}/guides/quick-start.html`, base).href)
-    const source = readFileSync(resolve(root, `docs/guides/quick-start${suffixes[index]}.md`), 'utf8')
+    await page.goto(new URL(`${locale}/wiki/preset-core.html`, base).href)
+    const source = readFileSync(resolve(root, `docs/wiki/preset-core${suffixes[index]}.md`), 'utf8')
     const title = /^#\s+(.+)$/m.exec(source)[1]
     const displayedTitle = await page.locator('.vp-doc h1').evaluate((element) => {
       const copy = element.cloneNode(true)
@@ -97,7 +119,7 @@ try {
       return copy.textContent.trim()
     })
     assert.equal(displayedTitle, title)
-    await screenshot('wiki-quick-start', locale, 'Current localized container quick-start with readable images')
+    await screenshot('wiki-preset-core', locale, 'Current localized core preset startup chapter')
     await page.setViewportSize({ width: 390, height: 844 })
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1), false, `${locale}: mobile overflow`)
     await screenshot('wiki-mobile', locale, 'Quick-start remains readable at 390×844', false)

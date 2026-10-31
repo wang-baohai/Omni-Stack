@@ -125,7 +125,7 @@ onMounted(() => {
         <el-table-column prop="disposalNo" :label="t('assetDisposal.disposalNo')" min-width="180" /><el-table-column prop="assetNo" :label="t('assetDisposal.assetNo')" min-width="160" /><el-table-column prop="assetName" :label="t('assetDisposal.assetName')" min-width="180" />
         <el-table-column :label="t('assetDisposal.type')" min-width="90"><template #default="{ row }"><el-tag>{{ row.disposalType === 'SCRAP' ? t('assetDisposal.scrap') : t('assetDisposal.discard') }}</el-tag></template></el-table-column>
         <el-table-column prop="residualValue" :label="t('assetDisposal.residualValue')" min-width="110" align="right"><template #default="{ row }">{{ row.residualValue || '—' }}</template></el-table-column>
-        <el-table-column :label="t('common.status')" min-width="120"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
+        <el-table-column :label="t('common.status')" min-width="180"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
         <el-table-column :label="t('common.actions')" min-width="250" fixed="right" class-name="fixed-actions-col">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">{{ t('assetDisposal.details') }}</el-button><el-button v-if="row.status === 'APPROVED'" v-permission="'asset:disposal:complete'" link type="success" @click="execute(row, 'complete')">{{ t('assetDisposal.complete') }}</el-button>

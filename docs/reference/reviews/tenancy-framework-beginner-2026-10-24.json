@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-framework",
+  "source": "docs/wiki/tenancy-framework.md",
+  "source_sha256": "25d35bcced4b10f6bcec651c758d73d1504f00863992ff0430603bec26437f98",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-framework.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "94545bafdeaf4576ce1a5f1fa8e3152ee9fb227917616c29159b4c85bc264998",
+      "checks": {
+        "coverage_and_meaning": "六节点机制图、查询改写/企业条件/默认列/数据范围委托四原文、职责表、顺序及版本/分页解释完整。",
+        "technical_literals": "四段3.5.16真实框架源码、63–70/264–270/46–48/166–174、TenantLine→DataPermission→OptimisticLock→Pagination、SHA256/版权和许可均保留。",
+        "security_and_failure_semantics": "允许忽略查询、null不加条件、未映射表和原始路径不自动保护；未将安装插件写成全隔离保证。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-framework.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "d355f8caf4a80cbf4c61fad22e5b3ea50dcbb6a0a12cd0fb6e8e556cd0a3c89b",
+      "checks": {
+        "coverage_and_meaning": "六节点机制图、查询改写/企业条件/默认列/数据范围委托四原文、职责表、顺序及版本/分页解释完整。",
+        "technical_literals": "四段3.5.16真实框架源码、63–70/264–270/46–48/166–174、TenantLine→DataPermission→OptimisticLock→Pagination、SHA256/版权和许可均保留。",
+        "security_and_failure_semantics": "允许忽略查询、null不加条件、未映射表和原始路径不自动保护；未将安装插件写成全隔离保证。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "description": "初稿存在租戸或工程側直译。",
+          "id": "japanese-tenant-project-terms",
+          "status": "resolved",
+          "resolution": "按当前文义改为テナント/プロジェクト側，原文源码不变，修正后全文复读。"
+        },
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-framework.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "f222f66d20dd83ee40f3736a04282a29fbccaef00d6b1e4eaabab528adfaf0a6",
+      "checks": {
+        "coverage_and_meaning": "六节点机制图、查询改写/企业条件/默认列/数据范围委托四原文、职责表、顺序及版本/分页解释完整。",
+        "technical_literals": "四段3.5.16真实框架源码、63–70/264–270/46–48/166–174、TenantLine→DataPermission→OptimisticLock→Pagination、SHA256/版权和许可均保留。",
+        "security_and_failure_semantics": "允许忽略查询、null不加条件、未映射表和原始路径不自动保护；未将安装插件写成全隔离保证。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "description": "韩文草稿用표指数据库表，容易误读成说明表格。",
+          "id": "korean-grammar-and-domain-words",
+          "status": "resolved",
+          "resolution": "改为数据库语境的테이블，查询参数、源码和职责不变，修正后核对差异。"
+        },
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    }
+  },
+  "publication_link_review": {
+    "at": "2026-10-24 17:12:40",
+    "original_step": "WP-09.S02",
+    "prior_review_file_sha256": "11b449bd86488857a9eb147a464ce5c3d0616e839e983390560c8d3c511ef28d",
+    "method": "保留原17/18步骤的全文实际审读证据，校验旧正文逐字不变，只对新增的本语静态出处末段进行增量实际复读；新源/译文/审校记录摘要重新绑定。"
+  }
+}

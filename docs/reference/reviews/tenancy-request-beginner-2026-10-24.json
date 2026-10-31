@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-request",
+  "source": "docs/wiki/tenancy-request.md",
+  "source_sha256": "029ccbb8aec694c0d1348868ea1a9cf14dc1aa3742b07bcff51233c95bb8003a",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-request.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "76121bbfb17278725406ddaf2c81d0c235bb6d491c5b430c510f128e2a334d08",
+      "checks": {
+        "coverage_and_meaning": "四阶段登录到数据库、五工程原文、三种服务/内部路径表、Workflow默认分支和写操作条件完整对应。",
+        "technical_literals": "tenant_id/username/status=1、JWT/claims、X-Tenant-Id/断言/上下文、crm_/srm_/proc_/ast_/wf_/ACT_*、sys_mq_message、模块块workflow保持。",
+        "security_and_failure_semantics": "客户端头不可信；签名仅四身份字段且不签权限/整个请求、无nonce；先预认证再绑定；common-service缺身份拒绝与Workflow默认1分开。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-request.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "2a08ee4183e7110921ca0c96253c415c8b875c24d7bada60f6322fd13e901eee",
+      "checks": {
+        "coverage_and_meaning": "四阶段登录到数据库、五工程原文、三种服务/内部路径表、Workflow默认分支和写操作条件完整对应。",
+        "technical_literals": "tenant_id/username/status=1、JWT/claims、X-Tenant-Id/断言/上下文、crm_/srm_/proc_/ast_/wf_/ACT_*、sys_mq_message、模块块workflow保持。",
+        "security_and_failure_semantics": "客户端头不可信；签名仅四身份字段且不签权限/整个请求、无nonce；先预认证再绑定；common-service缺身份拒绝与Workflow默认1分开。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-request.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "898ea97eb136416160fd6d7a86df63a42c42f4a56d9fec720d37a49d6e87ff29",
+      "checks": {
+        "coverage_and_meaning": "四阶段登录到数据库、五工程原文、三种服务/内部路径表、Workflow默认分支和写操作条件完整对应。",
+        "technical_literals": "tenant_id/username/status=1、JWT/claims、X-Tenant-Id/断言/上下文、crm_/srm_/proc_/ast_/wf_/ACT_*、sys_mq_message、模块块workflow保持。",
+        "security_and_failure_semantics": "客户端头不可信；签名仅四身份字段且不签权限/整个请求、无nonce；先预认证再绑定；common-service缺身份拒绝与Workflow默认1分开。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "description": "韩文草稿检查ID为正整数的谓语不够自然。",
+          "id": "korean-grammar-and-domain-words",
+          "status": "resolved",
+          "resolution": "改为ID가 양의 정수인지 확인，明确检查ID本身，原校验逻辑和失败边界不变。"
+        }
+      ]
+    }
+  }
+}

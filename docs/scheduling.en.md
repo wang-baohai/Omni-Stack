@@ -1,6 +1,6 @@
 # Scheduling constraints
 
-This document defines scheduling facts and engineering constraints. Use the [scheduling tutorial](guides/scheduling.en.md) for UI steps, screenshots and source debugging, and [Docker deployment](docker-deployment.en.md) for runtime configuration.
+This document defines scheduling facts and engineering constraints. The [standalone XXL-JOB chapter](wiki/distributed-jobs-principles.en.md) covers beginner concepts, framework excerpts, project implementation and real screens. See the existing [scheduling tutorial](guides/scheduling.en.md) for detailed operations and [Docker deployment](docker-deployment.en.md) for runtime configuration.
 
 ## 1. Boundaries and data ownership
 

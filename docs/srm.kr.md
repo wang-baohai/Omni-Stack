@@ -226,6 +226,8 @@ DomainEventEnvelope 필드는 eventId/eventType/occurredAt/tenantId/producer, ag
 
 생성/이관의 OwnerResolver는 활성·동일 테넌트 Auth 사용자, 주 조직, 할당 범위를 검사하고 다른 사용자 지정에는 transfer 권한도 필요합니다. OwnerEnricher는 중복 제거 후 사용자/조직을 따로 일괄 조회합니다. 오류 시 ID/빈 이름을 유지할 수 있지만 권한을 확대하거나 모든 Feign이 DB 트랜잭션 외부라고 보장하지 않습니다.
 
+내부 담당자에게는 현재 테넌트의 `deleted=0` 포털 연결이 없어야 하며, `ACTIVE`와 `INACTIVE`를 모두 제외합니다. `OwnerOptionServiceImpl`은 후보 수를 제한하기 전에 포털 계정을 일괄 제외합니다. `SrmOwnerResolver`는 생성/이관 대상을 다시 검사하여 포털 연결이 있으면 403, 포털 신원 조회 건수가 null이면 503을 반환합니다. 정상적인 내부 이관은 정식 업무 트랜잭션에서 공급업체와 관련 평가의 담당자를 함께 갱신합니다.
+
 `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)`는 명시적 tenantId와 기본 REQUIRED로 로컬 Outbox를 쓰고 Relay가 나중에 Broker로 전송합니다. Relay 중지는 Outbox 중지가 아닙니다. eventId는 DomainEventEnvelope 최상위로 msgKey에 전달되고 Outbox msgId는 별도 생성됩니다. 소비자는 이벤트/의도를 원자 처리해야 합니다. payload에는 명시적 ID·버전·상태·점수·금액 스냅샷을 넣을 수 있지만 전체 계좌/연락 정보/초대 토큰은 넣지 않습니다.
 
 `srm.supplier.registered.v1` · `srm.supplier.approved.v1` · `srm.supplier.rejected.v1` · `srm.supplier.suspended.v1` · `srm.supplier.blacklisted.v1` · `srm.supplier.eliminated.v1` · `srm.portal-role.assign-requested.v1` · `auth.portal-role.assigned.v1` · `auth.portal-role.assign-failed.v1` · `srm.evaluation.completed.v1` · `srm.risk.level-changed.v1` · `srm.quotation.submitted.v1`
@@ -274,7 +276,7 @@ ApiResponse/PageResult는 src/types/api.ts에서만 가져옵니다. 버튼은 �
 
 ## 10. 검증 경계
 
-개별 해시가 일치하는 기존 Docker Reactor 산출물은 SRM JUnit 보고 27개, 119개 통과, 실패/오류/건너뜀 0입니다. 상태/점수, 권한/격리, 초대/역할 결과, 견적 재실행/버전/금액의 각 실제 단언 범위를 증명합니다. 과거 최고 색상 도우미 테스트를 현재 리스크 서비스 알고리즘 검증으로 보지 않습니다.
+2026-10-24에 보관하고 개별 해시를 대조한 Docker Reactor 산출물은 SRM JUnit 보고 29개, 135개 통과, 실패/오류/건너뜀 0입니다. 상태/점수, 권한/격리, 초대/역할 결과, 견적 재실행/버전/금액의 각 실제 단언 범위를 증명합니다. 과거 최고 색상 도우미 테스트를 현재 리스크 서비스 알고리즘 검증으로 보지 않습니다.
 
 실제 CAPTCHA 등록, 외부 계정, 실시간 Workflow/MQ, MySQL 동시성, 안내 절차 실행은 이 보고로 증명하지 않으며 별도 실행 증거가 필요합니다. 언어 검토는 승인된 AI_REVIEW로 기록하고 HUMAN_REVIEW로 위장하지 않으며 실행/이미지 증거는 각각의 실제 범위를 유지합니다.
 

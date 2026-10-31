@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "document_id": "presets-overview",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/presets-overview.md",
+  "source_sha256": "8a7615ca264d2d998af8e75125db95fe5396bd8a86e23a6564f11012526a4f60",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "两篇中文和六译均实际读取全文；截断部分单独补读，最终修改段落实际复读。历史记录作快照，不能机械继承失效G7。本文无栅格图；源门和最终渲染分开执行。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-preset-core-actual-reading-20261029.json",
+  "actual_reading_sha256": "da36a229a3a02d36e8d78feb9bbc5250408474bffdc478ace91fe7e63e4acf69",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/presets-overview.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:11:14",
+      "result": "approved",
+      "translation_sha256": "3630615774e14fdfe68238eb5a4f0708bd492a989e94a7019c604d8a95435321",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照预设定义、5显式→7闭包、source/generated区别、资源提示非实测、五预设定位；完整保留历史十格及未测空库边界，修正旧G7/交付绿灯与当前完整覆盖验收的混淆。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "PRESET-HISTORICAL-COVERAGE",
+          "status": "resolved",
+          "description": "明确旧生成器因证据不足裁剪覆盖要求导致旧G7及交付绿灯不能继承；保留历史构建/运行/隔离证据，当前G6/G7及必要G11仍必须实跑。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/presets-overview.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:11:14",
+      "result": "approved",
+      "translation_sha256": "8769158c79c12726dc8eee9f7631f7532ef7c2b88cd2f65fca812df61dcfe318",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照预设定义、5显式→7闭包、source/generated区别、资源提示非实测、五预设定位；完整保留历史十格及未测空库边界，修正旧G7/交付绿灯与当前完整覆盖验收的混淆。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "PRESET-HISTORICAL-COVERAGE",
+          "status": "resolved",
+          "description": "明确旧生成器因证据不足裁剪覆盖要求导致旧G7及交付绿灯不能继承；保留历史构建/运行/隔离证据，当前G6/G7及必要G11仍必须实跑。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/presets-overview.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:11:14",
+      "result": "approved",
+      "translation_sha256": "14b76263bb4fef24740bfb900e88ebd732b81d5091444104a4f70f1fc9a6a988",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照预设定义、5显式→7闭包、source/generated区别、资源提示非实测、五预设定位；完整保留历史十格及未测空库边界，修正旧G7/交付绿灯与当前完整覆盖验收的混淆。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "PRESET-HISTORICAL-COVERAGE",
+          "status": "resolved",
+          "description": "明确旧生成器因证据不足裁剪覆盖要求导致旧G7及交付绿灯不能继承；保留历史构建/运行/隔离证据，当前G6/G7及必要G11仍必须实跑。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

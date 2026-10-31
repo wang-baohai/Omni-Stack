@@ -58,6 +58,41 @@ class AuthFilterTest {
         assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
+    /** 精确会话探针透传 Cookie，但仍清除客户端伪造身份。 */
+    @Test
+    void shouldForwardOnlyExactSessionProbeWithoutJwtIdentity() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/api/auth/session-check")
+                        .header("Cookie", "JSESSIONID=controlled-test-session")
+                        .header("X-User-Id", "999")
+                        .header("Authorization", "Bearer forged"));
+        AtomicReference<ServerWebExchange> forwarded = new AtomicReference<>();
+
+        filter().filter(exchange, current -> {
+            forwarded.set(current);
+            return Mono.empty();
+        }).block();
+
+        assertThat(forwarded.get()).isNotNull();
+        assertThat(forwarded.get().getRequest().getHeaders().getFirst("Cookie"))
+                .isEqualTo("JSESSIONID=controlled-test-session");
+        assertThat(forwarded.get().getRequest().getHeaders().getFirst("X-User-Id")).isNull();
+        assertThat(forwarded.get().getRequest().getHeaders().getFirst("Authorization")).isNull();
+    }
+
+    /** Cookie 不能授权普通业务路径，也不能将探针扩为公开前缀。 */
+    @Test
+    void shouldRejectCookieOnlyBusinessRequestsAndProbeSuffix() {
+        for (String path : new String[]{"/api/auth/user/list", "/api/auth/session-check/extra"}) {
+            MockServerWebExchange exchange = MockServerWebExchange.from(
+                    MockServerHttpRequest.get(path).header("Cookie", "JSESSIONID=controlled-test-session"));
+
+            filter().filter(exchange, current -> Mono.error(new AssertionError("不得放行"))).block();
+
+            assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
     /** AD-02：公开路径(/oauth2/token)携带 client_secret_basic 的 Basic 头必须透传到下游，不能被无条件剥离。 */
     @Test
     void shouldPreserveBasicAuthHeaderOnOAuth2PublicPath() {

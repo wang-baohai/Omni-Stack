@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-principles",
+  "source": "docs/wiki/observability-principles.md",
+  "source_sha256": "0a8ad30b7de09096c3e21bf980670c85f65e9b0b8d98733e6c4b687e6523ff61",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整审读六篇中文和全部18篇三译；对照当前完整事实文档、Java/Compose及收集存储配置；修正后逐段复核。13段原文在四语共52处另由Docker严格匹配。本记录不是机械QA或抽样签核，不冒称HUMAN_REVIEW/观测运行/图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "af960e554763b524dce30137d4eb7a3ec8b2daf2b4262ebbed36167fbdff5a40",
+      "checks": {
+        "coverage_and_meaning": "三信号的用途与联合排障、HTTP和业务成功的区别、Counter/Gauge/P95和六页入口完整。",
+        "technical_literals": "无源码块；两幅机制图中的本语文本与同语链接逐项核对。",
+        "security_and_failure_semantics": "教学时间与数字不冒充实测；数据为空、零和失败分开，关联号不保证保存。",
+        "language_and_terminology": "已逐篇完整实际复读英文；信号/指标/日志/链路/告警术语及叙述自然，无新增运行结论。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "e256b79806412a1840d7dd15945bde656889f9cc16ae5f989326b6928f535e25",
+      "checks": {
+        "coverage_and_meaning": "三信号的用途与联合排障、HTTP和业务成功的区别、Counter/Gauge/P95和六页入口完整。",
+        "technical_literals": "无源码块；两幅机制图中的本语文本与同语链接逐项核对。",
+        "security_and_failure_semantics": "教学时间与数字不冒充实测；数据为空、零和失败分开，关联号不保证保存。",
+        "language_and_terminology": "全文复读，概念顺序和比喻自然。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "d970d9c6cc2cfd76e15dae1b591103ce420f365398b7030269c0f70775a87e8b",
+      "checks": {
+        "coverage_and_meaning": "三信号的用途与联合排障、HTTP和业务成功的区别、Counter/Gauge/P95和六页入口完整。",
+        "technical_literals": "无源码块；两幅机制图中的本语文本与同语链接逐项核对。",
+        "security_and_failure_semantics": "教学时间与数字不冒充实测；数据为空、零和失败分开，关联号不保证保存。",
+        "language_and_terminology": "全文复读，业务单据改为업무 전표，告警统一경보，避免被读成Wiki文档更新。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    }
+  }
+}

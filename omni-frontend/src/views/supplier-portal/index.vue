@@ -335,6 +335,14 @@ const quotationForm = reactive<SubmitQuotationRequest>({
 })
 
 const POSITIVE_PRICE_PATTERN = /^(?:0|[1-9]\d{0,12})(?:\.\d{1,6})?$/
+const rfqStatuses = new Set(['DRAFT', 'SENT', 'CLOSED', 'AWARDED', 'CANCELLED'])
+const invitationStatuses = new Set(['INVITED', 'QUOTED', 'AWARDED', 'REJECTED', 'CANCELLED', 'EXPIRED'])
+
+/** 只翻译既有协议状态，未知服务端状态保留原文。 */
+function quotationStatusLabel(value: string, invitation = false) {
+  const statuses = invitation ? invitationStatuses : rfqStatuses
+  return statuses.has(value) ? t(`portal.quotation.${invitation ? 'invitationStates' : 'rfqStates'}.${value}`) : value
+}
 
 function parseDateTime(value: string): number {
   return Date.parse(value.replace(' ', 'T'))
@@ -683,7 +691,7 @@ onUnmounted(() => {
               <el-table-column prop="quotationDeadline" :label="t('portal.quotation.deadline')" width="170" />
               <el-table-column prop="currencyCode" :label="t('portal.quotation.currency')" width="90" align="center" />
               <el-table-column prop="invitationStatus" :label="t('portal.quotation.invitationStatus')" width="110" align="center">
-                <template #default="{ row }"><el-tag size="small">{{ row.invitationStatus }}</el-tag></template>
+                <template #default="{ row }"><el-tag size="small">{{ quotationStatusLabel(row.invitationStatus, true) }}</el-tag></template>
               </el-table-column>
               <el-table-column :label="t('portal.quotation.currentQuotation')" min-width="150" align="right">
                 <template #default="{ row }">
@@ -691,7 +699,7 @@ onUnmounted(() => {
                   <el-tag v-else type="warning" size="small">{{ t('portal.quotation.notQuoted') }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column :label="t('common.actions')" width="110" fixed="right" align="center">
+              <el-table-column :label="t('common.actions')" width="160" fixed="right" align="center">
                 <template #default="{ row }">
                   <el-button
                     v-permission="'srm:portal:quotation'"
@@ -764,10 +772,10 @@ onUnmounted(() => {
             <el-descriptions-item :label="t('portal.quotation.title')" :span="2">{{ quotationDetail.title }}</el-descriptions-item>
             <el-descriptions-item :label="t('portal.quotation.currency')">{{ quotationDetail.currencyCode }}</el-descriptions-item>
             <el-descriptions-item :label="t('portal.quotation.deadline')">{{ quotationDetail.quotationDeadline }}</el-descriptions-item>
-            <el-descriptions-item :label="t('portal.quotation.rfqStatus')">{{ quotationDetail.status }}</el-descriptions-item>
+            <el-descriptions-item :label="t('portal.quotation.rfqStatus')">{{ quotationStatusLabel(quotationDetail.status) }}</el-descriptions-item>
             <el-descriptions-item :label="t('portal.quotation.version')">{{ quotationForm.version }}</el-descriptions-item>
           </el-descriptions>
-          <el-form label-width="100px" class="quotation-form">
+          <el-form label-width="140px" class="quotation-form">
             <el-form-item :label="t('portal.quotation.validUntil')" required>
               <el-date-picker
                 v-model="quotationForm.validUntil"

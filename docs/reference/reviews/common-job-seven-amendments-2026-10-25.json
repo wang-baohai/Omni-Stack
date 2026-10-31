@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "common-job",
+  "source": "docs/wiki/common-job.md",
+  "source_sha256": "d0b55ac1932d2bc9d0969b2f88b8e31b52ff08b998056404b252844c6be2ff8f",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source and translation contents",
+  "method": "本人实际完整读完四语正文/JSON，按中文逐段对照；common-job日韩补漏与日文术语修正后逐项复核。此脚本只登记这些具体审校及校验摘要，不审签未读的前端事实、平台教程或其他文章。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-job.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "cfd4439777490fea57dd47590c5a86a5a8284cca372b6853cc23541bcded422f",
+      "checks": {
+        "coverage_and_meaning": "四语完整复读执行器、系统/个人两轨、Admin客户端、失败补偿、参数元数据与指标、扩展和验证入口；新增独立章节链接完整。",
+        "technical_literals": "Java三块保持原文字面量；共享UserJobExecuteHandler仅执行注解，系统目录需双注解。五次十秒耗尽返回而非该分支终止应用；图中I到F清理确定分支正确。",
+        "security_and_failure_semantics": "按可信关联/精确ID补偿，未知清理保留本地；名称不能代替归属，默认注解不覆盖远端既有配置，ParamDef/JobMetrics不夸称自动全校验或必留结果。",
+        "language_and_terminology": "全文逐段对照中文实际审读，事实、限制和恢复语气自然准确；保留协议、代码、接口和目录原文，不用术语代替解释。",
+        "images_and_links": "本篇没有栅格图片；Mermaid流程和前后common及独立XXL章节本语链接对照。截图、受理与运行成功分开，源码说明不冒称实际任务已执行。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-job.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "67656d7d5df347c20859ebf86b37b2d5a8a63efd1db0051c065ea616ff583d07",
+      "checks": {
+        "coverage_and_meaning": "四语完整复读执行器、系统/个人两轨、Admin客户端、失败补偿、参数元数据与指标、扩展和验证入口；新增独立章节链接完整。",
+        "technical_literals": "Java三块保持原文字面量；共享UserJobExecuteHandler仅执行注解，系统目录需双注解。五次十秒耗尽返回而非该分支终止应用；图中I到F清理确定分支正确。",
+        "security_and_failure_semantics": "按可信关联/精确ID补偿，未知清理保留本地；名称不能代替归属，默认注解不覆盖远端既有配置，ParamDef/JobMetrics不夸称自动全校验或必留结果。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job修正執行器/工程/定点整理等直译并补代理父类接口与private说明，最后变更再次核对。其他文档术语与索引语义一致。",
+        "images_and_links": "本篇没有栅格图片；Mermaid流程和前后common及独立XXL章节本语链接对照。截图、受理与运行成功分开，源码说明不冒称实际任务已执行。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "日韩省略AnnotationUtils父类/接口与private限制，韩文源码块缺说明，日文有中文直译术语。",
+          "resolution": "已补齐并复读最终差异；代码块保持中文源字面量不变。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-job.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "cdbd89769aa44cfb52b15ece8e00c67b53cb3a0027c541e199aff193d20ea906",
+      "checks": {
+        "coverage_and_meaning": "四语完整复读执行器、系统/个人两轨、Admin客户端、失败补偿、参数元数据与指标、扩展和验证入口；新增独立章节链接完整。",
+        "technical_literals": "Java三块保持原文字面量；共享UserJobExecuteHandler仅执行注解，系统目录需双注解。五次十秒耗尽返回而非该分支终止应用；图中I到F清理确定分支正确。",
+        "security_and_failure_semantics": "按可信关联/精确ID补偿，未知清理保留本地；名称不能代替归属，默认注解不覆盖远端既有配置，ParamDef/JobMetrics不夸称自动全校验或必留结果。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job补齐Bean条件/扫描两段引导和代理父类接口/private注意项，日期、权限、失败与归属限制未省略。",
+        "images_and_links": "本篇没有栅格图片；Mermaid流程和前后common及独立XXL章节本语链接对照。截图、受理与运行成功分开，源码说明不冒称实际任务已执行。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "日韩省略AnnotationUtils父类/接口与private限制，韩文源码块缺说明，日文有中文直译术语。",
+          "resolution": "已补齐并复读最终差异；代码块保持中文源字面量不变。"
+        }
+      ]
+    }
+  }
+}

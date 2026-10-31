@@ -162,7 +162,7 @@ onMounted(() => {
         <el-table-column prop="fromUnitId" :label="t('assetTransfer.fromUnit')" min-width="100"><template #default="{ row }">{{ row.fromUnitId || '—' }}</template></el-table-column>
         <el-table-column prop="toUnitId" :label="t('assetTransfer.toUnit')" min-width="100" />
         <el-table-column prop="toUserId" :label="t('assetTransfer.toUser')" min-width="100" />
-        <el-table-column :label="t('common.status')" min-width="120"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
+        <el-table-column :label="t('common.status')" min-width="180"><template #default="{ row }"><el-tag :type="statusInfo(row.status).type">{{ statusInfo(row.status).label }}</el-tag></template></el-table-column>
         <el-table-column :label="t('common.actions')" min-width="250" fixed="right" class-name="fixed-actions-col">
           <template #default="{ row }">
             <el-button link type="primary" @click="openDetail(row)">{{ t('assetDisposal.details') }}</el-button>

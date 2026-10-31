@@ -347,6 +347,72 @@ class SupplierServiceImplTest {
         verify(supplierMapper, never()).update(ArgumentMatchers.isNull(), ArgumentMatchers.any());
     }
 
+    /** 黑名单对象不能借普通恢复入口跳过专用恢复命令，拒绝前不得写库或发消息。 */
+    @Test
+    void shouldRejectOrdinaryResumeForBlacklistedSupplierBeforeWrites() {
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
+        SrmSupplier current = supplier("BLACKLISTED", 0);
+        when(accessGuard.requireSupplier(10L)).thenReturn(current);
+        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
+        request.setVersion(0);
+
+        assertThatThrownBy(() -> service.resume(10L, request))
+                .isInstanceOf(BusinessException.class).extracting("code").isEqualTo(409);
+        verifyNoInteractions(supplierMapper, reliableMessageRelay, workflowCoordinator);
+        assertThat(current.getStatus()).isEqualTo("BLACKLISTED");
+    }
+
+    /** 黑名单恢复入口也不能接收暂停对象，两个命令的来源状态应分别校验。 */
+    @Test
+    void shouldRejectBlacklistRestoreForSuspendedSupplierBeforeWrites() {
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
+        SrmSupplier current = supplier("SUSPENDED", 0);
+        when(accessGuard.requireSupplier(10L)).thenReturn(current);
+        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
+        request.setVersion(0);
+
+        assertThatThrownBy(() -> service.restoreFromBlacklist(10L, request))
+                .isInstanceOf(BusinessException.class).extracting("code").isEqualTo(409);
+        verifyNoInteractions(supplierMapper, reliableMessageRelay, workflowCoordinator);
+        assertThat(current.getStatus()).isEqualTo("SUSPENDED");
+    }
+
+    /** 暂停对象的正常恢复仍应成功，并保持负责人及正常版本推进。 */
+    @Test
+    void shouldResumeSuspendedSupplierThroughOrdinaryCommand() {
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
+        SrmSupplier current = supplier("SUSPENDED", 0);
+        when(accessGuard.requireSupplier(10L)).thenReturn(current);
+        when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any())).thenReturn(1);
+        when(ownerEnricher.enrichOne(ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
+        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
+        request.setVersion(0);
+
+        var result = service.resume(10L, request);
+        assertThat(result.getStatus()).isEqualTo("APPROVED");
+        assertThat(result.getVersion()).isEqualTo(1);
+        assertThat(result.getOwnerUserId()).isEqualTo(7L);
+        verify(supplierMapper).update(ArgumentMatchers.isNull(), ArgumentMatchers.any());
+    }
+
+    /** 黑名单对象必须仍能通过专用恢复命令成功恢复。 */
+    @Test
+    void shouldRestoreBlacklistedSupplierThroughDedicatedCommand() {
+        ServiceIdentityContext.set(new ServiceRequestIdentity(7L, 3L, "buyer"));
+        SrmSupplier current = supplier("BLACKLISTED", 0);
+        when(accessGuard.requireSupplier(10L)).thenReturn(current);
+        when(supplierMapper.update(ArgumentMatchers.isNull(), ArgumentMatchers.any())).thenReturn(1);
+        when(ownerEnricher.enrichOne(ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
+        SrmRequests.StatusRequest request = new SrmRequests.StatusRequest();
+        request.setVersion(0);
+
+        var result = service.restoreFromBlacklist(10L, request);
+        assertThat(result.getStatus()).isEqualTo("APPROVED");
+        assertThat(result.getVersion()).isEqualTo(1);
+        assertThat(result.getOwnerUserId()).isEqualTo(7L);
+        verify(supplierMapper).update(ArgumentMatchers.isNull(), ArgumentMatchers.any());
+    }
+
     private SrmSupplier supplier(Long id, String status, Long ownerUserId, Long ownerUnitId) {
         SrmSupplier supplier = new SrmSupplier();
         supplier.setId(id);

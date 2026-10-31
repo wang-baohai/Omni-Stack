@@ -1,0 +1,3 @@
+    default String getTenantIdColumn() {
+        return "tenant_id";
+    }

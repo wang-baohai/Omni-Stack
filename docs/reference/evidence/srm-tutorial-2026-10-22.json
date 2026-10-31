@@ -1,0 +1,32 @@
+{
+  "step": "WP-26.S02 / WP-26.S04",
+  "object": "srm_and_portal_tutorial_four_language_images",
+  "generated_at": "2026-10-22T00:30:00Z",
+  "environment": {
+    "project": "omni-stack",
+    "frontend": "omni-stack-omni-frontend-1:3000",
+    "verifier": "omni-stack-verifier",
+    "image": "omni-frontend:latest sha256:1d634d3c16df"
+  },
+  "capture": {
+    "scenes": 12,
+    "locales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "images": 48,
+    "identity": "admin real CAPTCHA; supplier via formal invite/enrollment Saga; employee real CAPTCHA for 403",
+    "not_captured": [
+      "supplier lifecycle write actions (shared-state safety)",
+      "procurement manager/staff scoped visibility (no seeded staff)"
+    ]
+  },
+  "desensitization": {
+    "phones_masked": true,
+    "emails_masked": true,
+    "credit_code_is_test_data": true,
+    "tokens_or_passwords_present": false
+  }
+}

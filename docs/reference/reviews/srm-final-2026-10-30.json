@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "document_id": "srm",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/srm.md",
+  "source_sha256": "6e1b0dea2181e6ce43e62edd2d9622716a91bb42c01217963dca85590b391861",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "8篇四语全文实际语义审读；SRM及核心流程中文读取原始全文。核心流程三译在显示时仅去掉Markdown链接URL，保留标签、全部正文、代码及Mermaid；分段读取，遇截断重新读取缺段。链接URL另行与中文目标、文件存在性及发布链接门核对。最终8篇改动段已实际复读，不能以哈希或此收据代替语义审读；Mermaid最终视觉渲染仍待本S。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-final-facts-actual-reading-20261030.json",
+  "actual_reading_sha256": "cafc2a3b0dfa9fd0f1e795bc0fa4eac1ad8a6f2e9c5a9b7738144fc90b13a931",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/srm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "f0b6fe6a3f928ba7d296a39c50bf4bdd57b93e6e3172b86ff89880d9f9f1d670",
+      "checks": {
+        "coverage_and_meaning": "实际逐篇全读11节，核对聚合/租户/owner和Portal身份、生命周期、评估/风险、邀请角色Saga、报价重放与金额；保留跨服务提交和安全失败边界。最终29份135例历史报告段已四语复读，不冒称新业务验收。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "Full English prose, code and Mermaid text actually read against Chinese; implementation limits, failures and independent-transaction boundaries retain their meaning.",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-SRM-RETAINED-TEST-COUNT",
+          "topics": [
+            "srm"
+          ],
+          "status": "resolved",
+          "description": "实际核对2026-10-24 Reactor退出码0与29份XML摘要全部一致，135例0失败/错误/跳过；四语修正旧27/119且明确留存日期。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/srm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "52a8a044872e95f279f419e3955311c7c078dc0e999df04fa8f0e716692f5160",
+      "checks": {
+        "coverage_and_meaning": "实际逐篇全读11节，核对聚合/租户/owner和Portal身份、生命周期、评估/风险、邀请角色Saga、报价重放与金额；保留跨服务提交和安全失败边界。最终29份135例历史报告段已四语复读，不冒称新业务验收。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "全文を実際に読み、中国語の事実と照合した。権限、失敗、別トランザクションと既存テストの証拠範囲を維持している。",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-SRM-RETAINED-TEST-COUNT",
+          "topics": [
+            "srm"
+          ],
+          "status": "resolved",
+          "description": "实际核对2026-10-24 Reactor退出码0与29份XML摘要全部一致，135例0失败/错误/跳过；四语修正旧27/119且明确留存日期。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/srm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 06:50:01",
+      "result": "approved",
+      "translation_sha256": "37c81aa136cb62cfe62b5e583047da717bc17c920f22cdbbb51b47787ab771d7",
+      "checks": {
+        "coverage_and_meaning": "实际逐篇全读11节，核对聚合/租户/owner和Portal身份、生命周期、评估/风险、邀请角色Saga、报价重放与金额；保留跨服务提交和安全失败边界。最终29份135例历史报告段已四语复读，不冒称新业务验收。",
+        "technical_literals": "实际对照 API、权限、状态、事务传播、代码片段与数字；译文中的示例按钮和 Mermaid 标签允许对应语言表述。保留当前导航与历史测试的证据范围。",
+        "security_and_failure_semantics": "保留租户、功能权限、数据范围、Portal 身份、幂等与失败恢复约束；UNKNOWN 不写成 START_FAILED，独立服务提交不写成跨库原子回滚，留存报告不写成新实时业务验证。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한, 실패, 독립 트랜잭션과 기존 테스트의 증거 범위를 유지한다.",
+        "images_and_links": "本文没有栅格图片；所有 Mermaid 定义已随全文审读，最终图形渲染仍归本 S。链接目标机械核对与实际链接阅读分开记录；原始源码目标及对应语言入口一致，锚点交由真实发布链接门。"
+      },
+      "findings": [
+        {
+          "id": "FACTS-SRM-RETAINED-TEST-COUNT",
+          "topics": [
+            "srm"
+          ],
+          "status": "resolved",
+          "description": "实际核对2026-10-24 Reactor退出码0与29份XML摘要全部一致，135例0失败/错误/跳过；四语修正旧27/119且明确留存日期。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

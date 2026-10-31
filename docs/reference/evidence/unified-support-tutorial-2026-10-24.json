@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "reviewed_at": "2026-10-24T23:22:23.2232691+08:00",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "runtime_image": "sha256:2007da905a5888015c83a2a99ced78cbccd2a410a8a20f7321b0a35c41173cec",
+  "identity_source": "test-fixture",
+  "role": "existing-local-admin",
+  "test": "scripts/fixtures/capture-unified-support.mjs",
+  "test_sha256": "a90bb57df3000f5068ffdfa996e62412ffc73daa50fbc35439d3812bc9c4c4b6",
+  "result": "PASS_SCOPED_EIGHT_READONLY_TUTORIAL_IMAGES",
+  "scope": "本人逐张实际查看四语操作日志与MQ列表共8图，页面只读实际HTTP200/code200，不冒称新投递/重发/消费与观测栈运行。",
+  "images": [
+    {
+      "image": "docs/images/zh-CN/unified-logging-operlog.png",
+      "sha256": "9026cde186006f93bf185c17fa7058e1dbe2c65f67407a31c560310200306b7c",
+      "locale": "zh-CN",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:39.163Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/zh-CN/unified-mq-records.png",
+      "sha256": "24f669120a06149d84e21961525a069723f41a7cc910726a01181de038b915d7",
+      "locale": "zh-CN",
+      "route": "/admin/base/mqmessage",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:40.944Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/en-US/unified-logging-operlog.png",
+      "sha256": "3164646084a7d69b313276b6a5e614deabecdf14b1c457450160002d52c01756",
+      "locale": "en-US",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:43.014Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/en-US/unified-mq-records.png",
+      "sha256": "0d8389add91e6b7818ca2d767198d477b69fb0d9ae1c7cd012bef6b3c29d8bef",
+      "locale": "en-US",
+      "route": "/admin/base/mqmessage",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:44.193Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/ja-JP/unified-logging-operlog.png",
+      "sha256": "aab8d2017a28c295cf317b86ba1817c00a311a4c4933b43b94a95ca5320f6506",
+      "locale": "ja-JP",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:46.246Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/ja-JP/unified-mq-records.png",
+      "sha256": "d9f5d20664fb4c95e42c40d685678e9af93d16ae6858535b9dacfc3e4d6bffe5",
+      "locale": "ja-JP",
+      "route": "/admin/base/mqmessage",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:47.446Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/ko-KR/unified-logging-operlog.png",
+      "sha256": "c28d62307f97d93cf893f80f42cbd8b52966fc98614fc11712d94acdfef2dafa",
+      "locale": "ko-KR",
+      "route": "/admin/base/operlog",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:49.544Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    },
+    {
+      "image": "docs/images/ko-KR/unified-mq-records.png",
+      "sha256": "ff33976530e0eff002276135b29056841bdc4c07b53c72315af7e3c2e3aab89d",
+      "locale": "ko-KR",
+      "route": "/admin/base/mqmessage",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-24T15:07:50.711Z",
+      "result": "approved-with-documented-limits",
+      "notes": "本语导航、筛选、状态与按钮可读。操作模块名是原中文事件数据，非UI翻译；MQ显示已有SENT，时间和长编号列局部截断需原表横向滚动/详情，本图不宣称完整字段或写动作验收。仅本地测试用户与内部地址，无凭据或消息正文。",
+      "preset": "full"
+    }
+  ],
+  "project": "omni-stack",
+  "preset": "full",
+  "provenance_addendum": {
+    "at": "2026-10-25T00:04:16.5828270+08:00",
+    "reason": "补齐当时同一full环境的预设字段；原八张像素、采集时刻、采集脚本摘要、旧镜像来源与真实图审结果均不改",
+    "basis": "正式同一omni-stack full部署、原同一服务/网络/数据指纹；不是重新采集"
+  }
+}

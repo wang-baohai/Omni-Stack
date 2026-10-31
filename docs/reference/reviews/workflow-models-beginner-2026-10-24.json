@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "workflow-models",
+  "source": "docs/wiki/workflow-models.md",
+  "source_sha256": "9db64d09d78cc27716bbffcaeac2d3e3e8fa323e26bcecff11fd861f09d8b739",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人完整复读七篇中文，再逐篇完整复读全部21篇英日韩，修改后检查差异；框架/工程源码已实际阅读，三译原文另作逐字绑定。不是抽样/机械QA盖章，不冒称真人、运行或图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/workflow-models.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "9060596a9d277cc9c7956cd55c1ae6a92764e8e66f038358127eba1353f63b35",
+      "checks": {
+        "coverage_and_meaning": "modelKey/初稿0/双输入、两类版本、发布行锁与部署、XML校验、发布指针、失败恢复完整。",
+        "technical_literals": "两处工程原文不变；DRAFT/PUBLISHED/modelVersion/targetNamespace等技术字面量和发布次序准确。",
+        "security_and_failure_semantics": "FAILED不能保证持久化、锁不等于授权、结构校验不是脚本全白名单、原始定义ID操作缺统一租户守卫均未误译。",
+        "language_and_terminology": "全文对照中文实际复读；术语、句式和段落自然，events修正standalone与internal API歧义。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/workflow-models.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "c0600919f5fbeb03fba8da98c5a01d097d8cb1cafe34a2886430fcf8d451cf67",
+      "checks": {
+        "coverage_and_meaning": "modelKey/初稿0/双输入、两类版本、发布行锁与部署、XML校验、发布指针、失败恢复完整。",
+        "technical_literals": "两处工程原文不变；DRAFT/PUBLISHED/modelVersion/targetNamespace等技术字面量和发布次序准确。",
+        "security_and_failure_semantics": "FAILED不能保证持久化、锁不等于授权、结构校验不是脚本全白名单、原始定义ID操作缺统一租户守卫均未误译。",
+        "language_and_terminology": "全文复读并修正claim/摘要/跨服务/设计器/组织关系等直译；保留源码注释原文，最终改动段落再次核对。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/workflow-models.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "5b16a68786d28f62d2c4df62a591109ba78589f8392f1f0dac77dc9dd22ab895",
+      "checks": {
+        "coverage_and_meaning": "modelKey/初稿0/双输入、两类版本、发布行锁与部署、XML校验、发布指针、失败恢复完整。",
+        "technical_literals": "两处工程原文不变；DRAFT/PUBLISHED/modelVersion/targetNamespace等技术字面量和发布次序准确。",
+        "security_and_failure_semantics": "FAILED不能保证持久化、锁不等于授权、结构校验不是脚本全白名单、原始定义ID操作缺统一租户守卫均未误译。",
+        "language_and_terminology": "全文复读并修正启用主组织修饰、设计画面用词及助词、兼容处理器与任务委派混淆、终止权限句式，最终差异复核。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    }
+  }
+}

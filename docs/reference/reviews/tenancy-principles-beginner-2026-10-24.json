@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-principles",
+  "source": "docs/wiki/tenancy-principles.md",
+  "source_sha256": "ed8ad4f4172a3dd5858444eacc4576e05b93af49dd538684aa0cc56f2bad1693",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "e6caf286a9096f123a77039980d9b3abc2e8746647009e622901c5a5293c2dff",
+      "checks": {
+        "coverage_and_meaning": "两公司同名员工故事、四问题、界面/服务端保护、ALL例外提示和六篇阅读入口完整对应中文。",
+        "technical_literals": "无源码块；五个相邻篇均使用对应语言后缀，SELF/ALL等技术名没有改写。",
+        "security_and_failure_semantics": "保留登录不等于企业/范围授权、菜单不代替接口保护、超级管理员不是所有接口同义；故事不冒充种子账号。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "efac3321c9be85f8549ad55acb4bbc23cda8af303f11a39b7f131ae0c3b2ceca",
+      "checks": {
+        "coverage_and_meaning": "两公司同名员工故事、四问题、界面/服务端保护、ALL例外提示和六篇阅读入口完整对应中文。",
+        "technical_literals": "无源码块；五个相邻篇均使用对应语言后缀，SELF/ALL等技术名没有改写。",
+        "security_and_failure_semantics": "保留登录不等于企业/范围授权、菜单不代替接口保护、超级管理员不是所有接口同义；故事不冒充种子账号。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "ca3413a1253136a31032f5edbccc9e8649944e609e20a12ef4feca99cdc8648a",
+      "checks": {
+        "coverage_and_meaning": "两公司同名员工故事、四问题、界面/服务端保护、ALL例外提示和六篇阅读入口完整对应中文。",
+        "technical_literals": "无源码块；五个相邻篇均使用对应语言后缀，SELF/ALL等技术名没有改写。",
+        "security_and_failure_semantics": "保留登录不等于企业/范围授权、菜单不代替接口保护、超级管理员不是所有接口同义；故事不冒充种子账号。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    }
+  }
+}

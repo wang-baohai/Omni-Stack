@@ -19,6 +19,9 @@
 - `run-mq-teaching-browser.mjs`：Docker 内的真实页面阶段入口，读取仓库外短期 token JSON；要求新阶段登记，不覆盖已有结果。只有 `--list` 可选，不能用参数绕过断言；调用前准备当前运行时白名单快照和浏览器依赖卷。
 - `run-backup-rehearsal.ps1`：PowerShell 7.4+ 的 Docker 包装器，只读备份已核实的独立教学 MySQL，在新内网、新卷恢复九库并重放正式迁移器。比较八库稳定数据摘要、九库表清单与迁移历史；动态 XXL 记录仍备份，但不纳入跨时间摘要。可用 `-MigratorImage` 指定已构建的本机镜像。成功只清理本次恢复资源；失败保留副作用供核对，禁止直接重跑。SQL、私密 env 和日志保存在仓库外。应用、会话与 MQ 恢复另行验收，见[运维指南](../../docs/guides/operations-upgrade.md)。
 
+- `capture-wiki-home.mjs`：只读采集同一 `omni-stack` full 环境前端的四语公开 Wiki 首页，无账号、令牌或验证码前置。仅接受无 Docker socket 的容器页面验证角色、标准前端地址和固定 `/validation/evidence/` 输出；校验十二章正文、语言与匿名状态，原图及回执不覆盖。回执只证明实际采集，逐张 AI 图审另留证据。
+- `capture-unified-support.mjs`：在同一环境使用已登记的专用测试身份，只读采集操作日志和 MQ 记录的四语页面；保留原图、真实接口结果与身份来源。已有发送记录不证明本次重发、消费或集中日志系统运行，图片另行实际 AI 审读。
+
 所有验证工具、服务和应用在本机 Docker 内运行，输出写到仓库外的受限目录。使用 fixture 前先核实目标容器、数据库、租户和业务键；不得仅根据旧环境名称复用运行数据。
 
 测试身份入口要求全部九个 `E2E_FIXTURE_*` 连接/输出变量与显式 `E2E_FIXTURE_DOCKER_NETWORK`。DB URL 和 Redis host 使用该网络内的容器服务名；不依赖宿主 JDK 路径。调用方先建立受限输出目录并注入环境，再运行 `./scripts/fixtures/run-token-fixture.ps1`。脚本只显示缺失变量名和结果路径，不显示秘密。构建 fixture 时跳过测试不是正式后端验收通过；完整后端修改仍执行 `clean install`。

@@ -157,9 +157,11 @@ export function developmentCommandEnvironment(
   run: DevelopmentRunOptions = {},
 ): NodeJS.ProcessEnv {
   const overrides = parseOverrideAssignments(run.overrides ?? [], workspaceRoot);
-  const environment = {
+  const environment: NodeJS.ProcessEnv = {
     ...developmentEnvironment(selection),
     ...(observability ? observabilityEnvironment() : {}),
+    // 前端源码目录未裁剪时，也必须与 catalog 已解析的部署闭包一致。
+    ...(!isFrontendOnly(selection) ? { OMNI_FRONTEND_MODULES: selection.moduleIds.join(',') } : {}),
     ...overrides,
   };
   if (!isFrontendOnly(selection)) return environment;

@@ -1,0 +1,7 @@
+    @Override
+    public Expression buildTableExpression(final Table table, final Expression where, final String whereSegment) {
+        if (tenantLineHandler.ignoreTable(table.getName())) {
+            return null;
+        }
+        return new EqualsTo(getAliasColumn(table), tenantLineHandler.getTenantId());
+    }

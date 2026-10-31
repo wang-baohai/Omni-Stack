@@ -1,4 +1,4 @@
-version: "1.0.0-bootstrap"
+version: "1.0.1-bootstrap"
 digestAlgorithm: "SHA-256"
 
 # 正式种子文件摘要是迁移输入契约；任何变更必须新增 changeSet 并同步版本和摘要。
@@ -8,7 +8,7 @@ sources:
   - id: auth-bootstrap
     module: auth
     resource: scripts/sql/seed/auth.sql
-    sha256: "131d495c9b1eed92d4d2a7f0aaf92026117c25c6d8d13b8773fdc00fb94c357c"
+    sha256: "4ad938a71751267992f1420f4e9570bff264592d308e6d41d6d6cbadc79c7cdf"
   - id: base-bootstrap
     module: base
     resource: scripts/sql/seed/base.sql
@@ -237,11 +237,16 @@ assertions:
       roleCodes: [SRM_ADMIN, SRM_COMPLIANCE, SRM_DIRECTOR, SRM_MANAGER, SUPPLIER]
     database: omni_auth
     query: >-
-      SELECT role_code AS seed_key
-      FROM sys_role WHERE tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
-      AND role_code IN ('SRM_ADMIN', 'SRM_COMPLIANCE', 'SRM_DIRECTOR', 'SRM_MANAGER', 'SUPPLIER')
+      SELECT CONCAT_WS('|', r.role_code,
+      CASE WHEN r.role_code IN ('SRM_MANAGER', 'SRM_COMPLIANCE', 'SRM_DIRECTOR') THEN
+      (SELECT COUNT(DISTINCT p.permission_code) FROM sys_role_permission rp
+      JOIN sys_permission p ON p.id = rp.permission_id AND p.tenant_id = r.tenant_id
+      WHERE rp.role_id = r.id AND p.permission_code IN
+      ('workflow', 'workflow:instance', 'workflow:task:todo', 'workflow:approval:complete')) ELSE 0 END) AS seed_key
+      FROM sys_role r WHERE r.tenant_id = (SELECT id FROM sys_tenant WHERE tenant_code = 'default')
+      AND r.role_code IN ('SRM_ADMIN', 'SRM_COMPLIANCE', 'SRM_DIRECTOR', 'SRM_MANAGER', 'SUPPLIER')
     expectedRows: 5
-    expectedSha256: "7f7590430844f970bf04a8edb137bece15dbcaa191e344963e02afacc96ca943"
+    expectedSha256: "465cd6331240cfd37fc629cc60e085ade68d625ab7ec175df1fb8723084aa2f7"
 
   - id: srm-permission-catalog
     module: srm

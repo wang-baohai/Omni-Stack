@@ -262,6 +262,7 @@ public class AuthorizationServerConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/session-login",
+                                "/api/auth/session-check",
                                 "/api/auth/register",
                                 "/api/auth/captcha",
                                 "/api/auth/tenants",

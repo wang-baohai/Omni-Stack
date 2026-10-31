@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-practice",
+  "source": "docs/wiki/observability-practice.md",
+  "source_sha256": "e35799ea0da8dd8cdaa3aa35210efbd27ae7e10d1bf128ef47b3692df0babf13",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整审读六篇中文和全部18篇三译；对照当前完整事实文档、Java/Compose及收集存储配置；修正后逐段复核。13段原文在四语共52处另由Docker严格匹配。本记录不是机械QA或抽样签核，不冒称HUMAN_REVIEW/观测运行/图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-practice.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "b7ce4ca820aabd0b4780b65f463696b1f98a2ed1cc4236a55999cfc7c0987500",
+      "checks": {
+        "coverage_and_meaning": "从预设范围、采集目标、文件看板、单次关联到告警验证五步，含二开有限标签和排障顺序。",
+        "technical_literals": "Grafana provider原文完整保留，allowUiUpdates=false只针对文件提供的看板。",
+        "security_and_failure_semantics": "未启动观测栈不伪造成功图；固定同套环境；运行、送达、性能与配置分开。",
+        "language_and_terminology": "已逐篇完整实际复读英文；信号/指标/日志/链路/告警术语及叙述自然，无新增运行结论。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-practice.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "84d6237378f218cc56165dc2f9f7c6838f4908fa1e82e4d2c9f1a9ff3974eecc",
+      "checks": {
+        "coverage_and_meaning": "从预设范围、采集目标、文件看板、单次关联到告警验证五步，含二开有限标签和排障顺序。",
+        "technical_literals": "Grafana provider原文完整保留，allowUiUpdates=false只针对文件提供的看板。",
+        "security_and_failure_semantics": "未启动观测栈不伪造成功图；固定同套环境；运行、送达、性能与配置分开。",
+        "language_and_terminology": "全文复读，工程/看板/装配条件改为プロジェクト/ダッシュボード/有効化条件，管理エンドポイント一致。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-practice.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "256b0bc9f28adbea9e1cb1dfceb5ff49bdae2467cd3513d52a24ca64645d3c8a",
+      "checks": {
+        "coverage_and_meaning": "从预设范围、采集目标、文件看板、单次关联到告警验证五步，含二开有限标签和排障顺序。",
+        "technical_literals": "Grafana provider原文完整保留，allowUiUpdates=false只针对文件提供的看板。",
+        "security_and_failure_semantics": "未启动观测栈不伪造成功图；固定同套环境；运行、送达、性能与配置分开。",
+        "language_and_terminology": "全文复读，管理文件、可选服务与真实业务操作/日志/Trace的关系明确。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -148,11 +148,19 @@ export function useApprovalRules(t: ComposerTranslation) {
 
   async function confirmImpact(route: ProcurementApprovalRoute, actionMessage: string) {
     const impactResponse = await getApprovalRouteImpact(route.id)
+    const impact = impactResponse.data.data
+    const risky = impact.gapSegmentCount > 0 || impact.ambiguousSegmentCount > 0
+    const impactMessage = risky
+      ? t('procurementApprovalRules.impactRiskHint', {
+        gaps: impact.gapSegmentCount,
+        conflicts: impact.ambiguousSegmentCount,
+      })
+      : t('procurementApprovalRules.impactSafeHint')
     try {
       await ElMessageBox.confirm(
-        `${actionMessage}\n\n${impactResponse.data.data.actionMessage}`,
+        `${actionMessage}\n\n${impactMessage}`,
         t('procurementApprovalRules.impactTitle'),
-        { type: impactResponse.data.data.gapSegmentCount > 0 ? 'warning' : 'info' },
+        { type: risky ? 'warning' : 'info' },
       )
       return true
     } catch {

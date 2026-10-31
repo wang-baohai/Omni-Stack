@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-background",
+  "source": "docs/wiki/tenancy-background.md",
+  "source_sha256": "c4c1a2ceed3763e2db7f76c4e4c5510a2feb605ccdd6a1c1a16eac24c9ebfea9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-background.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "9212656fb0438e7a1874b95ed076a5808cb8a844b7e909b46a054840c3018165",
+      "checks": {
+        "coverage_and_meaning": "字典/XSS键、online和jti、ThreadLocal、Outbox/个人任务/Inbox、共享六行、接入七步及失败恢复六行完整。",
+        "technical_literals": "三段DictDataServiceImpl/Relay/UserJobMessage原文，dict:type/xss/online等键及tenantId/jti/403/503、sys目录与ACT_*原值保留。",
+        "security_and_failure_semantics": "显式tenantId不依赖线程自动继承；只加DTO字段不等于隔离；MQ中继后台例外不授普通接口跨租户；finally/版本/行归属保留且不冒称所有实测。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-background.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "7860a9310a502e1954112604c4b5a168be5dd9e1376d6fbab5a8c3850a77643f",
+      "checks": {
+        "coverage_and_meaning": "字典/XSS键、online和jti、ThreadLocal、Outbox/个人任务/Inbox、共享六行、接入七步及失败恢复六行完整。",
+        "technical_literals": "三段DictDataServiceImpl/Relay/UserJobMessage原文，dict:type/xss/online等键及tenantId/jti/403/503、sys目录与ACT_*原值保留。",
+        "security_and_failure_semantics": "显式tenantId不依赖线程自动继承；只加DTO字段不等于隔离；MQ中继后台例外不授普通接口跨租户；finally/版本/行归属保留且不冒称所有实测。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "description": "初稿有投递错字、回源直译和HTTP/任务实例表达不清。",
+          "id": "japanese-background-wording",
+          "status": "resolved",
+          "resolution": "明确配信、缓存缺失时DB照会、HTTPリクエスト和每个个人任务归属，已再核对差异。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-background.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "20e456b94fb01da05e09464478b42817389d98393a57c485ec105eb44ee2fd29",
+      "checks": {
+        "coverage_and_meaning": "字典/XSS键、online和jti、ThreadLocal、Outbox/个人任务/Inbox、共享六行、接入七步及失败恢复六行完整。",
+        "technical_literals": "三段DictDataServiceImpl/Relay/UserJobMessage原文，dict:type/xss/online等键及tenantId/jti/403/503、sys目录与ACT_*原值保留。",
+        "security_and_failure_semantics": "显式tenantId不依赖线程自动继承；只加DTO字段不等于隔离；MQ中继后台例外不授普通接口跨租户；finally/版本/行归属保留且不冒称所有实测。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "description": "韩文个人任务类型表中的实例说法容易混为每次执行。",
+          "id": "korean-grammar-and-domain-words",
+          "status": "resolved",
+          "resolution": "改为각 작업，说明每个创建的个人任务保留租户和创建人，与任务消息字段一致。"
+        }
+      ]
+    }
+  }
+}

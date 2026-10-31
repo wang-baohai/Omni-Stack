@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "mq-design",
+  "source": "docs/wiki/mq-design.md",
+  "source_sha256": "38f1f971713335cd549a43b0d0e9923457e94bcc390716b1182fcb6564c69da6",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/mq-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "0c3fe51f98b911ce672dc5f7ac8f7efddd051a9589aacd7a291f057fddbefaf7",
+      "checks": {
+        "coverage_and_meaning": "各工具职责、binding/destination/topic差异和扩展成本逐段一致。",
+        "technical_literals": "RocketMqMessageSender完整方法与代码逐字对应；两关联头及false异常流程不改义。",
+        "security_and_failure_semantics": "SENT只发送成功；头不是授权/去重；新增Broker还需改入队契约，未误称只加策略即可。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/mq-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "afb589189805ee2ef38cee66192d3d78e1eacb906d35fd65245afd16ba597b93",
+      "checks": {
+        "coverage_and_meaning": "各工具职责、binding/destination/topic差异和扩展成本逐段一致。",
+        "technical_literals": "RocketMqMessageSender完整方法与代码逐字对应；两关联头及false异常流程不改义。",
+        "security_and_failure_semantics": "SENT只发送成功；头不是授权/去重；新增Broker还需改入队契约，未误称只加策略即可。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/mq-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "9206e15198d5c44c211aab120041250d7d7c7ebf962a87975f9ea48f654352a8",
+      "checks": {
+        "coverage_and_meaning": "各工具职责、binding/destination/topic差异和扩展成本逐段一致。",
+        "technical_literals": "RocketMqMessageSender完整方法与代码逐字对应；两关联头及false异常流程不改义。",
+        "security_and_failure_semantics": "SENT只发送成功；头不是授权/去重；新增Broker还需改入队契约，未误称只加策略即可。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -21,6 +21,23 @@ const dimensionOptions = computed<Array<{ label: string; value: AssetDistributio
   { label: t('assetOverviewPage.department'), value: 'DEPARTMENT' },
   { label: t('assetOverviewPage.location'), value: 'LOCATION' },
 ])
+const statusLabels = computed<Record<string, string>>(() => ({
+  IN_STOCK: t('assetLedger.statusInStock'),
+  ALLOCATED: t('assetLedger.statusAllocated'),
+  IN_USE: t('assetLedger.statusInUse'),
+  MAINTENANCE: t('assetLedger.statusMaintenance'),
+  TRANSFER: t('assetLedger.statusTransfer'),
+  DISPOSAL_PENDING: t('assetLedger.statusDisposalPending'),
+  DISPOSED: t('assetLedger.statusDisposed'),
+  SCRAPPED: t('assetLedger.statusScrapped'),
+}))
+
+/** 状态维度使用既有译文，其他维度保留服务返回的业务名称。 */
+function distributionLabel(item: AssetDistributionItem): string {
+  return item.dimension === 'STATUS'
+    ? statusLabels.value[item.status ?? item.dimensionKey] ?? item.dimensionName
+    : item.dimensionName
+}
 
 async function load() {
   loading.value = true
@@ -73,7 +90,9 @@ onMounted(load)
         </div>
       </template>
       <el-table :data="distribution" stripe>
-        <el-table-column prop="dimensionName" :label="t('assetOverviewPage.dimensionItem')" min-width="200" />
+        <el-table-column prop="dimensionName" :label="t('assetOverviewPage.dimensionItem')" min-width="200">
+          <template #default="{ row }">{{ distributionLabel(row) }}</template>
+        </el-table-column>
         <el-table-column prop="count" :label="t('assetOverviewPage.assetCount')" min-width="120" align="right" />
         <el-table-column prop="currencyCode" :label="t('assetOverviewPage.currency')" min-width="100">
           <template #default="{ row }">{{ row.currencyCode || '—' }}</template>

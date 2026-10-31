@@ -21,6 +21,7 @@ import {
 } from '@/api/auth'
 import type { TenantOption } from '@/api/auth'
 import { generateCodeVerifier, generateCodeChallenge, generateState } from '@/utils/pkce'
+import { clearAppRedirect, safeAppRedirect, stageAppRedirect } from '@/utils/navigation'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -184,6 +185,8 @@ async function handleLogin() {
  * 用户在登录页输入凭证后，自动完成 session-login 并重定向到授权端点。
  */
 async function initiateOAuth2Flow() {
+  // 企业 SSO 走 OAuth 协议返回：回调后继续换取令牌，不消费普通应用回跳目标，先丢弃上一趟的旧值
+  clearAppRedirect()
   const codeVerifier = generateCodeVerifier()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
   const state = generateState()
@@ -220,14 +223,30 @@ async function handleSsoLogin() {
 /**
  * 处理第三方 OAuth2 登录。
  *
+ * 跳转到提供方前只暂存已校验的站内回跳目标：外部往返会丢掉当前 query，回调成功后由 /callback 一次性消费。
+ *
  * @param provider 第三方登录提供商标识
  */
 function handleThirdPartyLogin(provider: string) {
+  stageAppRedirect(route.query.redirect)
   window.location.href = getThirdPartyLoginUrl(provider, form.tenantId ?? 0)
+}
+
+/**
+ * 进入设备码授权页。
+ *
+ * 只有已校验的站内路径才作为 redirect 参数随路由传递，伪造目标不带入设备流程。
+ */
+function goDeviceAuth() {
+  const redirect = safeAppRedirect(route.query.redirect)
+  router.push(redirect ? { name: 'DeviceAuth', query: { redirect } } : { name: 'DeviceAuth' })
 }
 
 /** 组件挂载后加载验证码和租户列表，并检查第三方登录错误 */
 onMounted(() => {
+  // 进入凭证页即开始一次新的认证尝试：丢弃上一趟未完成外部往返暂存的旧目标
+  clearAppRedirect()
+
   // 检查第三方登录重定向带回的错误信息
   const error = route.query.error as string
   if (error) {
@@ -346,7 +365,7 @@ onMounted(() => {
 
     <!-- 设备授权登录（仅在非 OAuth2 且非精简模式下显示） -->
     <div v-if="!isOAuth2Mode && !props.simple" class="login-device-section">
-      <el-button class="device-btn" @click="router.push({ name: 'DeviceAuth' })">
+      <el-button class="device-btn" @click="goDeviceAuth">
         <el-icon><Monitor /></el-icon>
         {{ t('login.deviceAuth') }}
       </el-button>

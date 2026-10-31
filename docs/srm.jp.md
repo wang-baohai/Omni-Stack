@@ -226,6 +226,8 @@ DomainEventEnvelope は eventId/eventType/occurredAt/tenantId/producer、aggrega
 
 作成/移管の OwnerResolver は Auth の有効な同テナントユーザー、主組織、割当範囲を確認し、他者指定には transfer 権限も必要です。OwnerEnricher は重複除去後ユーザー/組織を別バッチで照会します。例外時は ID/空名称を保ち得ますが権限を広げず、全 Feign が DB トランザクション外とは保証しません。
 
+内部担当者には、現在のテナントで `deleted=0` のポータル関連付けがあってはなりません。`ACTIVE` / `INACTIVE` の両方を除外します。`OwnerOptionServiceImpl` は候補数を制限する前にポータルアカウントを一括除外します。`SrmOwnerResolver` は作成/移管の対象を再確認し、関連付けがあれば 403、ポータル身元の件数が null なら 503 を返します。正当な内部移管では、正式な業務トランザクションでサプライヤーと関連評価の担当者を同期します。
+
 `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` は明示的 tenantId と既定 REQUIRED でローカル Outbox を書き、Relay が後から Broker に送ります。Relay 停止は Outbox 停止ではありません。eventId は DomainEventEnvelope 最上位の msgKey、Outbox msgId は別生成です。消費者はイベント/意図を原子的に処理します。payload は明示的 ID、版、状態、点数、金額スナップショットを含められますが、完全口座/連絡情報/招待トークンは含めません。
 
 `srm.supplier.registered.v1` · `srm.supplier.approved.v1` · `srm.supplier.rejected.v1` · `srm.supplier.suspended.v1` · `srm.supplier.blacklisted.v1` · `srm.supplier.eliminated.v1` · `srm.portal-role.assign-requested.v1` · `auth.portal-role.assigned.v1` · `auth.portal-role.assign-failed.v1` · `srm.evaluation.completed.v1` · `srm.risk.level-changed.v1` · `srm.quotation.submitted.v1`
@@ -274,7 +276,7 @@ ApiResponse/PageResult は src/types/api.ts のみから取得します。ボタ
 
 ## 10. 検証範囲
 
-個別摘要が一致した既存 Docker Reactor 産物は SRM JUnit 報告 27、成功 119、失敗/エラー/スキップ 0 です。各状態/点数、権限/分離、招待/ロール結果、見積再実行/版/金額の実際のアサーション範囲を証明します。旧最高色ヘルパーのテストは現行リスクサービス算法の検証ではありません。
+2026-10-24 に保存され、各ハッシュを照合した Docker Reactor 産物は SRM JUnit 報告 29、成功 135、失敗/エラー/スキップ 0 です。各状態/点数、権限/分離、招待/ロール結果、見積再実行/版/金額の実際のアサーション範囲を証明します。旧最高色ヘルパーのテストは現行リスクサービス算法の検証ではありません。
 
 実 CAPTCHA 登録、外部アカウント、実時間 Workflow/MQ、MySQL 並行性、教程実行はこの報告で証明せず、個別の実行証拠が必要です。言語は承認済み AI_REVIEW として記録し HUMAN_REVIEW と偽称せず、実行/画像証拠は固有範囲を保ちます。
 

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'vitepress'
 import { markdownSlug } from '../scripts/markdown-anchors.mjs'
+import { buildWikiSidebar } from '../scripts/prepare-site.mjs'
 
 const navigation = JSON.parse(readFileSync(new URL('./navigation.json', import.meta.url), 'utf8'))
 const labels = Object.fromEntries(['zh-CN', 'en-US', 'ja-JP', 'ko-KR'].map((locale) =>
@@ -19,12 +20,7 @@ export default defineConfig({
     label: text.label, lang: locale, link: `/${locale}/`,
     themeConfig: {
       nav: [{ text: text.wiki, link: `/${locale}/wiki/index` }],
-      sidebar: [
-        { text: text.wiki, items: navigation[locale].filter((page) => page.id.startsWith('wiki-')) },
-        { text: text.guides, items: navigation[locale].filter((page) => page.type === 'user-guide') },
-        { text: text.truth, items: navigation[locale].filter((page) => ['system-truth', 'development-guide', 'module-guide'].includes(page.type)) },
-        { text: text.design, items: navigation[locale].filter((page) => !page.id.startsWith('wiki-') && !['user-guide', 'system-truth', 'development-guide', 'module-guide'].includes(page.type)) },
-      ].filter((group) => group.items.length),
+      sidebar: buildWikiSidebar(navigation[locale], text),
       outline: { label: text.outline }, sidebarMenuLabel: text.menu, returnToTopLabel: text.back,
       langMenuLabel: interfaceText[locale].language, darkModeSwitchLabel: interfaceText[locale].appearance,
       lightModeSwitchTitle: interfaceText[locale].light, darkModeSwitchTitle: interfaceText[locale].dark,

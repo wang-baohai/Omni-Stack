@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "logging-design",
+  "source": "docs/wiki/logging-design.md",
+  "source_sha256": "871b5de0b1c54ed4d252ba9aa6890ed5fde26068d0ed705e738b548418d0273e",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/logging-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "c88a768963608d867ebcf5a8cb80638291a138b5dc2b499862cd63a22e8ccf30",
+      "checks": {
+        "coverage_and_meaning": "工具职责、标准输出方案、数据库区分、维护成本逐段对应中文，没有新增产品能力。",
+        "technical_literals": "ECS环境变量原文对应compose.apps.yaml；默认值与仅此Compose运行入口的边界正确。",
+        "security_and_failure_semantics": "结构化不是自动脱敏；标签基数、生产访问控制/容量条件明确，不承诺生产完备。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/logging-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "313cc1db90c414d2352471336672c10314cce40f99fc35a691fad647bbb2b22b",
+      "checks": {
+        "coverage_and_meaning": "工具职责、标准输出方案、数据库区分、维护成本逐段对应中文，没有新增产品能力。",
+        "technical_literals": "ECS环境变量原文对应compose.apps.yaml；默认值与仅此Compose运行入口的边界正确。",
+        "security_and_failure_semantics": "结构化不是自动脱敏；标签基数、生产访问控制/容量条件明确，不承诺生产完备。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/logging-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "9ff5e6247dfbf5aec1a5f1e093f6f67b33798fdba6a19fd63901925d9e4a3645",
+      "checks": {
+        "coverage_and_meaning": "工具职责、标准输出方案、数据库区分、维护成本逐段对应中文，没有新增产品能力。",
+        "technical_literals": "ECS环境变量原文对应compose.apps.yaml；默认值与仅此Compose运行入口的边界正确。",
+        "security_and_failure_semantics": "结构化不是自动脱敏；标签基数、生产访问控制/容量条件明确，不承诺生产完备。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

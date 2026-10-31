@@ -3,24 +3,69 @@ import { dirname, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 import { reviewErrors, translationLocales } from '../../tools/omni-cli/scripts/translation-review.mjs'
+import { copyReferencedUpstreamAssets, upstreamAssetRoute } from './publish-upstream.mjs'
 
 export const locales = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR']
+
+/** 章节标识保持稳定；XXL-JOB 使用用户追加的第十三个内容标识。 */
+export const WIKI_SECTIONS = ['WIKI-01', 'WIKI-02', 'WIKI-03', 'WIKI-04', 'WIKI-05', 'WIKI-06', 'WIKI-07', 'WIKI-08', 'WIKI-09', 'WIKI-10', 'WIKI-11', 'WIKI-12', 'WIKI-13']
+/** 阅读顺序只组织现有条目，不改变 WP/S 或原章节标识；工程事实穿插在启动之后。 */
+export const WIKI_DISPLAY_ORDER = ['WIKI-01', 'WIKI-03', 'WIKI-02', 'WIKI-04', 'engineering', 'WIKI-09', 'WIKI-08', 'WIKI-06', 'WIKI-07', 'WIKI-11', 'WIKI-12', 'WIKI-13', 'WIKI-05', 'WIKI-10']
+
+/** 校验登记的章节元数据；工程事实可以不标章节。 */
+export function validateWikiMetadata(document) {
+  if (document.wiki_section !== undefined && !WIKI_SECTIONS.includes(document.wiki_section)) {
+    throw new Error(`${document.id}: invalid wiki_section ${document.wiki_section}`)
+  }
+  if (document.wiki_order !== undefined && (!Number.isInteger(document.wiki_order) || document.wiki_order < 0)) {
+    throw new Error(`${document.id}: invalid wiki_order ${document.wiki_order}`)
+  }
+}
+
+/** 按用户阅读顺序分组；空章节不输出，未标章节条目仍保持工程事实分类。 */
+export function groupWikiSections(entries, labels = {}) {
+  const chapters = WIKI_DISPLAY_ORDER.filter(id => id !== 'engineering').map((id) => ({
+    id,
+    text: labels[id] ?? id,
+    items: entries.filter((entry) => entry.section === id).sort((left, right) => (left.order ?? 0) - (right.order ?? 0)),
+  })).filter((group) => group.items.length > 0)
+  return { chapters, engineering: entries.filter((entry) => !entry.section) }
+}
+
+/** VitePress 使用同一份分类结果；未登记四语正文的空组不产生占位入口。 */
+export function buildWikiSidebar(entries, text) {
+  const { chapters, engineering } = groupWikiSections(entries, text.chapters)
+  const groups = new Map(chapters.map(group => [group.id, { text: group.text, items: group.items }]))
+  groups.set('engineering', { text: text.truth, items: engineering })
+  return WIKI_DISPLAY_ORDER.map(id => groups.get(id)).filter(group => group?.items.length > 0)
+}
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 
-/** 从规范清单构造站点路径；正文仍只维护在仓库 Markdown 中。 */
+/** 只发布登记章节与工程事实；旧学习路径、操作指南和设计历史不再生成 Wiki 页面。 */
+export function isWikiPagePublished(document) {
+  return Boolean(document.wiki_section) || (!document.id.startsWith('wiki-') &&
+    ['system-truth', 'development-guide', 'module-guide'].includes(document.type))
+}
+
+/** 从规范清单构造实际发布的路径；正文仍只维护在仓库 Markdown 中。 */
 export function sitePages(manifest) {
   return manifest.documents.filter((document) => document.source.endsWith('.md')).flatMap((document) => {
+    validateWikiMetadata(document)
+    if (!isWikiPagePublished(document)) return []
     const sourceRoute = document.source.replace(/^docs\//, '').replace(/\.md$/, '')
-    const pages = [{ source: document.source, route: `zh-CN/${sourceRoute}`, locale: 'zh-CN', document }]
+    const section = document.wiki_section ?? null
+    const order = document.wiki_order ?? 0
+    const pages = [{ source: document.source, route: `zh-CN/${sourceRoute}`, locale: 'zh-CN', document, section, order }]
     if ((document.language_scope || 'full') === 'full') {
       for (const locale of locales.slice(1)) {
         const translation = document.translations?.[locale]
         if (!translation?.path || translation.status === 'missing') throw new Error(`${document.id}: missing ${locale}`)
-        pages.push({ source: translation.path, route: `${locale}/${sourceRoute}`, locale, document })
+        pages.push({ source: translation.path, route: `${locale}/${sourceRoute}`, locale, document, section, order })
       }
     } else {
       // 豁免文档保留中文正文；其他语言提供说明与规范源入口，避免语言切换静默 404。
-      for (const locale of locales.slice(1)) pages.push({ source: document.source, route: `${locale}/${sourceRoute}`, locale, document, sourceOnly: true })
+      for (const locale of locales.slice(1)) pages.push({ source: document.source, route: `${locale}/${sourceRoute}`, locale, document, sourceOnly: true, section, order })
     }
     return pages
   })
@@ -53,6 +98,8 @@ export function rewriteLinks(content, source, pages, repositoryUrl, { repository
       if (/^docs\/reference\/evidence\/[a-z0-9][a-z0-9.-]*\.json$/.test(repoPath)) {
         return `${prefix}/${repoPath.slice(5)}${fragment}${end}`
       }
+      const upstreamRoute = upstreamAssetRoute(repoPath)
+      if (upstreamRoute) return `${prefix}${upstreamRoute}${fragment}${end}`
       const encoded = repoPath.split('/').map(encodeURIComponent).join('/')
       return `${prefix}${repositoryUrl}/blob/${encodeURIComponent(sourceRef)}/${encoded}${fragment}${end}`
     })
@@ -115,9 +162,10 @@ export function prepareSite(repositoryRoot = root) {
       ? `# ${interfaceCopy.sourceOnlyTitle}: ${title}\n\n${interfaceCopy.sourceOnlyNotice}\n\n[${interfaceCopy.sourceOnlyLink}](/${originalRoute}.md)\n`
       : rewriteLinks(content, page.source, pages, repositoryUrl.replace(/\/$/, ''), { repositoryRoot, sourceRef })
     writeFileSync(destination, `---\noutline: [2, 3]\n---\n\n${banner}<div v-pre>\n\n${body}\n\n</div>\n`)
-    if (!page.sourceOnly) navigation[page.locale].push({ text: title, link: `/${page.route}`, type: page.document.type, id: page.document.id })
+    if (!page.sourceOnly) navigation[page.locale].push({ text: title, link: `/${page.route}`, type: page.document.type, id: page.document.id, section: page.section, order: page.order })
   }
   if (existsSync(resolve(docs, 'images'))) cpSync(resolve(docs, 'images'), resolve(output, 'public/images'), { recursive: true })
+  copyReferencedUpstreamAssets(repositoryRoot, output, pages)
   const evidenceDirectory = resolve(docs, 'reference/evidence')
   if (existsSync(evidenceDirectory)) {
     const publicEvidence = resolve(output, 'public/reference/evidence')

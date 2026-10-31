@@ -1,0 +1,2812 @@
+{
+  "schema": 1,
+  "document_id": "usage-procurement",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/usage-procurement.md",
+  "source_sha256": "1e7c483b75e9ec956157d5857fbde5a49e28de7bdc051355388c470c712cc266",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current authored and semantically reviewed working-tree files; not a clean commit or global release claim",
+  "method": "本人此前已对四语355行全文逐篇审读，本次再实际逐语审读新增分页与扩充规则筛选/自动卡片两段并对照中文；容器精确证明其他全文、全部标题、44图引用逐字节一致。最终审校由先前全篇与本次实际差量审读共同构成，不把哈希检查冒称语义审读。176幅原图及此前逐张view_image结论不变。",
+  "actual_complete_reading_sha256": "6e87dad9af866ab5cd370ecbd53d323f5fba2b5f3139bdb5ac273c511b409916",
+  "images": [
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-material-category.png",
+      "image_sha256": "3c185484a825725c7be9b65efb91e6e7040767e8a23cd0e790cfba99f78abb7e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:31:45.717Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-category-edit.png",
+      "image_sha256": "6b7fb4e55a75f114eb5ebfe846b88e0167958bb6f2d0a0a29eb0191ad57fd72b",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:51.370Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-material.png",
+      "image_sha256": "556ff96709176dc2565b9604bba16b4ea6cf8c098d7458d6604bad64c619f81f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:52.138Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-approval-route.png",
+      "image_sha256": "b8b656690a15db7d452b71c8ae6536663f3c6164b6818576f98d490bc78395d9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:25.102Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-scope.png",
+      "image_sha256": "3e72b70218d476df8c696fcb02e942330bf7cffc95c87a85305ac37ce1bdfb5d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:26.088Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-flow.png",
+      "image_sha256": "9c66226b82c0b5f4656950ccd35512ad71e62fd1896f49811d69874a47d44f5e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:26.239Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-confirm.png",
+      "image_sha256": "d340be4cb8a822163394261eeadfeb8cb750f11a9a612c4c853eae8458c612bc",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:26.388Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-match.png",
+      "image_sha256": "8412fe1c481349f13b645592f4ab2f9bd974f8e43b114f4513dd08583a3f356c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:37.241Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-match-mobile.png",
+      "image_sha256": "d6d0c05025f1695b6e0eb4245671becbb7fcba299a85331a147f32042bf6af04",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:12.689Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-match-tablet.png",
+      "image_sha256": "1135687f72f8354ed32eb2d84d5b2012338dc085e6a21e23b8441dbff4c1f599",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:25.263Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rule-impact.png",
+      "image_sha256": "9b4379d98c3d8d6699ce9310841d1f309340efc6d479fa2c9679da7d842bbd38",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:27.019Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-requisition-list.png",
+      "image_sha256": "b2467abd3521a340e1ac72f2f13d3e8ae3d10e2aa35aa0eb6ea6d45f8f1310c9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:04.824Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-requisition-detail.png",
+      "image_sha256": "54a80e6fbc6bf723db4365fbbcdd53372ef5b15c5fe0371385cb039d1dcab7ef",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:06.934Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-requisition.png",
+      "image_sha256": "b33ce1e8f03a3a2907f72ec8df2b885e3c805b088d6998e76fb23597ac0274ef",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:11.970Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-start-failed.png",
+      "image_sha256": "0b0e48e2e3c76a75db315562162e41b8940f075f0ac6e7bc528f7c274385c4c5",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:47.730Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-start-failed-detail.png",
+      "image_sha256": "fadffa559a92b8a669271873c2810a2a662f14627a8a5bc9b96f410391b9686c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:48.242Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-recovered-list.png",
+      "image_sha256": "26158876c34f86506d8ea832de67731165207143b3950c067486501bcc32b59a",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:38.834Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-retry-approved.png",
+      "image_sha256": "ada089b408d8f13de8863d7dc90db5935191a827deac330e1cee33c0d41620ce",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:39.323Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-start-cancelled.png",
+      "image_sha256": "c4f9cea78bb470802914aa0885f87b29bc2f6ce045fd7170eaaa470c0462129f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:51.478Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-supplier-approved.png",
+      "image_sha256": "56ae625c9c2d249064a3ab96ba6a12740e7fc456b137664a3e8ed47f5bfaab77",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:16.635Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rfq-list.png",
+      "image_sha256": "0435a172361dfc6fe3655650571366eacf9db9712d22adb285458e0175b9e203",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:08.291Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rfq-form.png",
+      "image_sha256": "963ec3e7cc2745a6239af894eaf35248950a0feeb1ed5f663b3c78889732032d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:15.429Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-rfq-awarded.png",
+      "image_sha256": "d243718622a6c03283cfb6eda75e51b36a9fc45766dca9889e5c36f3dbf190ec",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:21.498Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-portal-quote.png",
+      "image_sha256": "80bf1a4cf59cb18a33b8d7c923428b8967b40ded4fdd0161c0a07d3ab4c5982c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:42:57.416Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-rfq.png",
+      "image_sha256": "5622a184b8194a49e221ce47877e0616af2e8b959bdb7e86745065a9a1a41b9f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:51:55.076Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-award-form.png",
+      "image_sha256": "a76069b6c1003647e3082ea69e4af6a99d1cbcc2b0fc88f3355e23a8b1ec83c9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:51:55.382Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-order-list.png",
+      "image_sha256": "52900953b1138c3a9cb37e41d542340e9af0e3749ee47e8c60e184a3649f043c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:12.183Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-order-edit.png",
+      "image_sha256": "0555a32ff035e4a20e4fca350bbf648f25a8c1311c9faa0f9c65ee4d146096c0",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:08:42.217Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-purchase-order.png",
+      "image_sha256": "7e38c3643672d64a3085c4ff56a645595138da7f6aeb49e9efa2086b3ed1b86e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:29:11.733Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-order-cross-owner.png",
+      "image_sha256": "37bde714cfb3ba5909542e75c9a8dc149f973cafb81297b5c847c1c3872093ba",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:23.654Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-receipt-form.png",
+      "image_sha256": "62ec93a3acbaad3f2a87e78990a398e22ccc9515c8f43abb45182ab3a237a900",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:06.715Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-receipt-pending.png",
+      "image_sha256": "cc63287469df9b0060533a8da6de903c0b09e531775f84f58fe801d6e70f8264",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:08.930Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-receipt-awaiting-quality.png",
+      "image_sha256": "654efcc63f5d7a879cea6ab15863b88acd428c73642780ef7eea9f5117bb25ca",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:32:52.813Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-quality-form.png",
+      "image_sha256": "1e8482ec9d3958aad0ea138f3caffff16112127add521571116e3e255a1ec53e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:32:53.902Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-goods-receipt.png",
+      "image_sha256": "52e7e38d4f6206b21c56cc47e3bb187bf88814c2a761d0a0d690f8639d352508",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:38:32.672Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-asset-list.png",
+      "image_sha256": "2cbee833840c72c2d759ae2fd8ed7c92fd7b2e1996d6d6b242d730825f6f08db",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:38:38.445Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-assets.png",
+      "image_sha256": "96846f69e750df739ba0f5595e73581f48fc6a4fbfd3e2e6bbed12592e4d199e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:42.620Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-overview.png",
+      "image_sha256": "0e3e6017f665c9742fc1d1237e95de4743b69aede1da0c5fb9b0cd54cda80486",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:02.797Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-overview-supplier.png",
+      "image_sha256": "592a52522b947e0e6e11a41d69e02f4d8abc73a616f345a5efc2ab2f22805acf",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:03.153Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-overview-department.png",
+      "image_sha256": "d8b5277d0501b47af15a36ad836eb2e5ce02341eb611000c13cca7492d67b373",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:03.496Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-scope-self.png",
+      "image_sha256": "db3c5f7b2696e33820ad0169b8267c076fc7a684a9861b76970cbdf8f7865b18",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:12.807Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-scope-parent.png",
+      "image_sha256": "67b3f2ba38f6b076fdc6793c835ad989313d52ca3035791284091945a4cd3bb6",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:17.857Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-scope-peer.png",
+      "image_sha256": "d700b8b454fec068282af17bdf8194a2a27237809b440a07466c9a348daf6aea",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:22.844Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.md",
+      "image": "docs/images/zh-CN/procurement-tutorial-forbidden.png",
+      "image_sha256": "906f2ff83faac99dd1fe07de83fe151e147b654829016257f38dcf8ef089ac94",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:27.255Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-material-category.png",
+      "image_sha256": "287a2972396a2d27553348366c8ad82f6e009a86cb5380939f68d5e3f8647a0a",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:31:50.307Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-category-edit.png",
+      "image_sha256": "39fb82466e6c17b0fe492ee986ee6ba1b4292b108dc25e957f48c8ae1815c415",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:56.245Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-material.png",
+      "image_sha256": "0f2c8c609f6416a088dc6a63255a8b348471fd842cdb18c75813876d69882261",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:56.925Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-approval-route.png",
+      "image_sha256": "e558db4dec8ab7defb5f6880a4f9c073ea4eb7ff96a6defaa94ca5f926d38a80",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:28.618Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-scope.png",
+      "image_sha256": "1b8c6d43cf46ad5b2f32bfbf6ec595624d9d92a1bd456b672c561487983b452e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:29.513Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-flow.png",
+      "image_sha256": "7ce81bfdfc698faeb8f6262a150aa8e5e6b9dd19f8daaf34efde582f0f0b1096",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:29.658Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-confirm.png",
+      "image_sha256": "e947cbabc189fa96c4774716cb065bb8836d3fca8bb957b80093ec8a2851c281",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:29.801Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-match.png",
+      "image_sha256": "96cbddf1288f0bda89870580906aae7d81acbe67f0d1629011e2ecaecd198dde",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:39.234Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-match-mobile.png",
+      "image_sha256": "f59d5e4b53bb4d51816dc28d1e6ef9ef122be95603ce5c105b27c270af9ea229",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:14.640Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-match-tablet.png",
+      "image_sha256": "a404ae6dfe9771e2d075a9368a145534c6bea06508c3108ab321f67b2b5662b0",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:27.132Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rule-impact.png",
+      "image_sha256": "6c5d4bb6c8d9953b85e811563ee55355f82a3b2863236ac7e77bd7120c5fed3d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:30.423Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-requisition-list.png",
+      "image_sha256": "c74102906f1145d861f9be76dff03656a50994a24574a32912f03991919d7d75",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:14.081Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-requisition-detail.png",
+      "image_sha256": "60b4603459ff10cf159b7506c1db2fe4fbb653654d7c9ef84d3ef8cf4ed575d8",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:15.891Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-requisition.png",
+      "image_sha256": "8fdc35d2fa12e8ea056c4d85a31034f1fe62c9a044a836e5bc03de02e9ac7689",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:19.693Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-start-failed.png",
+      "image_sha256": "1c4742fff8849d4b52cbf1e98c83431d7db3a78e46d4bdad1396b80ec8292742",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:49.576Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-start-failed-detail.png",
+      "image_sha256": "8957bd76a0bba7a71a7bf0e47fae9db8a5e1e1f470009eaf7197335d0aac998d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:50.138Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-recovered-list.png",
+      "image_sha256": "09da2fdc78eca5f60e82d976fc042af39d7fbadec3c7d1cebca572d2fa3909df",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:40.623Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-retry-approved.png",
+      "image_sha256": "b8edcf7387035d1def0cd35ec11a58c3b02acafb60607aa89849a856f346e244",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:41.112Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-start-cancelled.png",
+      "image_sha256": "1102dd817562d776e581328fff162dd02a6e9b1fd4dc5eb4e341282f32b3b49e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:53.157Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-supplier-approved.png",
+      "image_sha256": "dd01dac218313e6a631f0b067de907bffa7c00bff4477897dc666ca0180c5039",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:21.897Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rfq-list.png",
+      "image_sha256": "ddef0dd0c30419e83dc5757fe5b11525a14ef892520c3e256d1d7e117fb839a0",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:17.204Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rfq-form.png",
+      "image_sha256": "c2b5affc8f73ded99e0effda5a9fe9f9d6c5d4268bbcbd9d025016fd24234f03",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:23.144Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-rfq-awarded.png",
+      "image_sha256": "b73201c8004a64f4cb8590aa755ed829cbd850dc180833c6e63e008a8ca5b468",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:30.693Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-portal-quote.png",
+      "image_sha256": "f4d4f6191b436ee7c51548deacd59c0be8116577e84836b7d17c9938340cd2ea",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:43:04.243Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-rfq.png",
+      "image_sha256": "4c41cce4a197cd790fee47a9a93ec5be5fdad3d32a05ed5fe46847f6c7a3ef91",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:02.173Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-award-form.png",
+      "image_sha256": "661f6f5c3d125e5790b1fdd43f9c9adc64cb72cef7d1168711c8a94831f48704",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:02.430Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-order-list.png",
+      "image_sha256": "0f481e6304700951c0a5a4ade83d19affdeaae53a9138a25525bd6f49eda8e3d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:20.974Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-order-edit.png",
+      "image_sha256": "66121ded60d631c5e5c98bdcb5e643747991b429927c7a2f46b3f95bd0f0316c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:08:46.973Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-purchase-order.png",
+      "image_sha256": "49298366cdede5b6d530807179b2d85d1b3e9970205c120439e1a0dceac058dd",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:29:17.377Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-order-cross-owner.png",
+      "image_sha256": "57038e3c10d95937ae4b8abf89eb3fa796e4edbfdfb38af6a7562cbc62ad3457",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:32.147Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-receipt-form.png",
+      "image_sha256": "85749f9d45ba61864f1fb9d22926acbcb8bec1016215eadf97afbd1fcc581bbe",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:14.665Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-receipt-pending.png",
+      "image_sha256": "cce377562bee1b78ad6c2cd10d5cbaca53819b266dca8c333339493ee91d3e3e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:17.382Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-receipt-awaiting-quality.png",
+      "image_sha256": "a4206b6d5a7c6f03097c651c9521b352103717a31e6f268616317e081737a43d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:32:59.540Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-quality-form.png",
+      "image_sha256": "4ed9d6b2ac9e90cc8f2f67de562140e24332d19def6e49674cba6bc1fc15900a",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:33:00.655Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-goods-receipt.png",
+      "image_sha256": "94b29e2a95f7ee25f25e37602d3447320e35e6a755ba6eace46119a32bc30672",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:38:44.172Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-asset-list.png",
+      "image_sha256": "890f71a2e2c2e0d2962433cc50c32cf32ffd2be5d88066579d10fffde3038800",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:38:49.926Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-assets.png",
+      "image_sha256": "2e63c2811de570ab3031733372d17c84696a83158bb1aa88907b1b7336bebe16",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:48.319Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-overview.png",
+      "image_sha256": "9c0fadfcf9ab671e5042b7f9dac261b7c093f5eb57f4d08ef74fa2f0c419eb22",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:07.312Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-overview-supplier.png",
+      "image_sha256": "d929610f9bd2188af6c6040b6dde698049911e38ba8839426eba089c90bfa85d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:07.644Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-overview-department.png",
+      "image_sha256": "43299a72746857470a8c147dd5c46db3d94be8df9ed13b7b1d852017d3672cc8",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:07.967Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-scope-self.png",
+      "image_sha256": "ea5606be62529510eee4536ea71bec86c3da2c457981ff0d2a1263d46bdb5320",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:32.264Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-scope-parent.png",
+      "image_sha256": "564ce854f016b76fec2b6e75a40b26465e7b04959ffe79baae48a198a3edbbb1",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:37.154Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-scope-peer.png",
+      "image_sha256": "c72337ac79a25892d921b0dfcf907a8f2566198d5f3312b45b1bcb24f13d9ca3",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:41.922Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.en.md",
+      "image": "docs/images/en-US/procurement-tutorial-forbidden.png",
+      "image_sha256": "259e486683e5e508eeb637b7bf423d835c3bbec84aa00638c939c8ae2e00283d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:46.218Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-material-category.png",
+      "image_sha256": "fed221f970d522dedd07e3aa257bd0e037cea490fa7a89a7d8bfa7b188c9a948",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:31:54.764Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-category-edit.png",
+      "image_sha256": "9ebbd9a5a6c63644fc5d3feeae990d0eba728a13561d8245ef44cb44f1483767",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:59.647Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-material.png",
+      "image_sha256": "9217ed6047ad5facc3a815dc0d7fb6d0ed2d3b2ddd3fef5f54041fd62b60caf5",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:00.327Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-approval-route.png",
+      "image_sha256": "f5519eead8dc6484dfa9499226e28c78a79d78c00d449941a4a08a7923b4d91f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:32.088Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-scope.png",
+      "image_sha256": "87f40b721c0537e024c38c5a7fa36bddb3c0a1a511751a7916ab19971110a696",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:33.103Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-flow.png",
+      "image_sha256": "332757a010d7609816dcd46ac57710f49eeae1063df323c11ac58d6e563f7774",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:33.250Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-confirm.png",
+      "image_sha256": "554f422abe447a593b471cad729656738344c726e37df7228d3bebdbf9fbcca4",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:33.384Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-match.png",
+      "image_sha256": "f95e87eca304cc94d4dd6b1a2ce7808d19f4dedd1db214488ef3eb5b64d36757",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:41.171Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-match-mobile.png",
+      "image_sha256": "fae61a9a030ab3d6755c0ed00d24f43601a9b82f1bba158928cfbc42039d8312",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:16.504Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-match-tablet.png",
+      "image_sha256": "e0608e5cdfb42a8776e3b9bb9a17f6905fb5356391fdb6d283208acf0da9f07c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:28.862Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rule-impact.png",
+      "image_sha256": "51e7ab8e0ae9151d7cb24200768a6717222884793f3ce8503efd6b3ad5c70499",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:34.000Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-requisition-list.png",
+      "image_sha256": "f88ab048b88cd197c79c5abd3b4502f6bd882dd0f948f82372bc6bfbb21603a7",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:22.940Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-requisition-detail.png",
+      "image_sha256": "804deccf2a760a6aff562cf6b60582c6f431ce3686acf445278777df5779fece",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:24.705Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-requisition.png",
+      "image_sha256": "eb13ba28bd67ad4e635ad88bf7a421ce8e2ca5ebd72c4e40e7f1e9002a8ee7ec",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:28.679Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-start-failed.png",
+      "image_sha256": "10c0286d7cccba1790744575fdb0c71f5e09cc4e266b9a4c2741a24f117dd441",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:51.442Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-start-failed-detail.png",
+      "image_sha256": "b665dddc628540daab97d90fc7b0f8646db0ff42a8cee79b8ecc4a1e11c67273",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:51.947Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-recovered-list.png",
+      "image_sha256": "c7f01fc5a2c3c8220fe998be7c1aa439a2b3fd0b26cad31c0673d516ebca0cb2",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:42.412Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-retry-approved.png",
+      "image_sha256": "8eb2356449839f2250e3c5a56f53881942c0dd828e54101d3a6cdb013134604a",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:42.910Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-start-cancelled.png",
+      "image_sha256": "6af224c227dca53f92195d6d130561535ae69779dd583ed735d7875eeb110f8f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:54.809Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-supplier-approved.png",
+      "image_sha256": "d7eeef70416b9e4ccbf9c417c47d9d92c8edf640e42116799311db4701891888",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:27.155Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rfq-list.png",
+      "image_sha256": "a009e2b1d5021f15ca1302e0754da7b869deffe658b3e8f18e64c8e5da56c02a",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:26.032Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rfq-form.png",
+      "image_sha256": "7b7fb419cfaece266fd2668be654484da43c1e028dbfebf170554c6215bc45a8",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:31.949Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-rfq-awarded.png",
+      "image_sha256": "5236bd3041c5f93e17d08f8c14fb270f6c5ffdf09218bd3bb0129634cdc2a620",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:38.590Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-portal-quote.png",
+      "image_sha256": "fa550ebd4f299cc1ef78172ac350018d0a7916330f7e7125725f5efa26aca690",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:43:10.734Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-rfq.png",
+      "image_sha256": "2aa37721b7225eb8d028debee78f9d955e84a0e71c012555edccd65258394102",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:09.076Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-award-form.png",
+      "image_sha256": "d7848d8fab3ebac167b17e206ca16a742dd07c7f96e005e427966d74c9b468d6",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:09.352Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-order-list.png",
+      "image_sha256": "093694d8fd06c74b8784c8a73f8550d1cdcda542856f6287b965d6d676b11a6d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:29.802Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-order-edit.png",
+      "image_sha256": "d5851a77fe1b7a1883615906a3a46d4508950a712c864eee3d2621883f8605d7",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:08:51.750Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-purchase-order.png",
+      "image_sha256": "66733e8d2aff49ca4a4e9edf9f522e138886ea81b3c34d3ff2642d648126851f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:29:22.079Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-order-cross-owner.png",
+      "image_sha256": "d5180d6cd7923f5fe9c9ddd5c6364cb38d8d0c76dc2d3524af050dd941e2ca74",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:40.009Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-receipt-form.png",
+      "image_sha256": "17cccd42adc0d47ee977fccfa24158e40004ddf7762085f883ae88af2ab2840f",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:23.299Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-receipt-pending.png",
+      "image_sha256": "ed5a2c3d764b4590c6cd504826ef4ad1be29c12a95ff9db3cdaf9742f711c3e6",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:25.528Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-receipt-awaiting-quality.png",
+      "image_sha256": "92ccde0c8202f2902af0ef52ace4e6113062dea9a64b54c4544e286080fef7c3",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:33:05.938Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-quality-form.png",
+      "image_sha256": "bff7f1952b4df10d9d65246d1ae8ea2516f550f9633add958bac5eec95af066e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:33:07.048Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-goods-receipt.png",
+      "image_sha256": "772f4fb54733153c28cea0888f6655d2702f100a125524aafed2a4ef319e0735",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:38:56.259Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-asset-list.png",
+      "image_sha256": "212c317365ebdb69c7c9267f1a6fad7b2ac9b95fae30049e8d99164a646f239c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:39:01.935Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-assets.png",
+      "image_sha256": "8272c669e0181666fe0726400af01333825c28cad2ad127202144290291c2e63",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:52.603Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-overview.png",
+      "image_sha256": "9e9f4dcce817e2804b26b6ef3a719bb77c2a6af8ea81071cf5da159d13d99ae6",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:11.782Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-overview-supplier.png",
+      "image_sha256": "93be92e3a1e471d21ffd3089e13d6e476a23d09564271a9d57a37a82d3f7eb68",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:12.132Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-overview-department.png",
+      "image_sha256": "43a55c6ce02af492d16fbc559fa0409e1edbca9bc737caeed765c6944a2b2259",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:12.489Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-scope-self.png",
+      "image_sha256": "cf2795a680c6e1ca76d6dcb438f83485af5c434a73bb77c1b6ecf0dc6f181abe",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:51.666Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-scope-parent.png",
+      "image_sha256": "6bbc8a8443997e91b49708b33dd51649b785bbca26a9b19b8cd0101e3ec4bbc4",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:01:56.485Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-scope-peer.png",
+      "image_sha256": "a0b1350058e8d3f573050412ffc6c38e5880d1cae062ca673cfcb2680aab7cb4",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:01.975Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.jp.md",
+      "image": "docs/images/ja-JP/procurement-tutorial-forbidden.png",
+      "image_sha256": "a13fd46884a6fd90355ca0f21af7719ec2d323ee3cd5e1a3e0a2550f598849b9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:06.502Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-material-category.png",
+      "image_sha256": "2de9d7153c173450453ed85839c94e21c2b5a2999de7121c55e06f91b900d6ad",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:31:59.115Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-category-edit.png",
+      "image_sha256": "82e0dbdbe45061a8a53712d3bb5aa7531ee38bf8f201a1a5997350a1a2bca3fa",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:04.066Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-material.png",
+      "image_sha256": "c19709c5ff859ebd40bded063114db08a67110d4410a486387cd5fb7e0667ef4",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:04.758Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-approval-route.png",
+      "image_sha256": "7f5577da9e07d7ff9c88737ec6ecfe261ac49b0a82a0856680894db49fd00425",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:35.477Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-scope.png",
+      "image_sha256": "f93b4f5743c0758f8bb8136b9f34acfe6944df99dc12b2a2a77379b6368f1451",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:36.432Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-flow.png",
+      "image_sha256": "205b6780ec4f17a5bddb5cb44c446933068bd2e77964cd0beeebd71252a273d8",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:36.571Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-confirm.png",
+      "image_sha256": "a0174b5aaf883a53dbb1131e82985abc2378327de0646a3ca2951e60b5a14184",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:36.724Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-match.png",
+      "image_sha256": "727288f5d7fd0efd1d654d9297d97050cfcdee5235dc56d347ab695afcd95611",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:42.975Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-match-mobile.png",
+      "image_sha256": "5cb866f83d5555e6fc7b7c346e07e4ae395acb86461003105dfc197410b6fbb5",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:18.552Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-match-tablet.png",
+      "image_sha256": "f4dda8d33469245270a263b0f47c71bd2960a7cfb4988620e4272801d8f5fbc3",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:05:30.592Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1024,
+        "height": 768
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rule-impact.png",
+      "image_sha256": "7451bda0be743304486bdd8e315c09cb1c657b4defe16403d7d2c20e317ea2ca",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:13:37.350Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-requisition-list.png",
+      "image_sha256": "cfacc9ce4538741a334179a0d2c4ce0fcce5c73b08f81800203a5274a23ce872",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:31.667Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-requisition-detail.png",
+      "image_sha256": "3f3fd258fef587e4b3418693a2b274391e4a34d28141728136f38a1f4336147e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:33.526Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-requisition.png",
+      "image_sha256": "21c7ccac83e71c579de0bccf3e6c78dce710bd10ffe72f9a03855bededfd63be",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:36.756Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-start-failed.png",
+      "image_sha256": "5fcc35a89cb6363166c1a3b3788ca826cbccfdfd5bb7ba3bcc6c8e2be7140754",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:53.257Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-start-failed-detail.png",
+      "image_sha256": "446ee0eb073929402b603b3d667f72bcebfd41db5a140d0ec801bb92c0231fc5",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T00:58:53.743Z",
+      "runtime_image": "sha256:2663c1b40c790fa1e6f10b63214e7d47c9d7f18d26d95d076ee3bad365d7abe1",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "historical_failure_capture": true,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-recovered-list.png",
+      "image_sha256": "59192a3be9e62d10ddb88897b5972b48148bbfce94ab0cd605ca52376d9f5e04",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:44.167Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-retry-approved.png",
+      "image_sha256": "9356d9647015a0c2fcf6162525c217b3a96e90f3fe09f822f9e699f9c0b4aa16",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:44.645Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-start-cancelled.png",
+      "image_sha256": "806ea6e907f7b9b94929048eb4d7a7348573016207093973e045a8e193543eda",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:56.456Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-supplier-approved.png",
+      "image_sha256": "e047f973f0a925e236fe4cea2ef4544545f871b41ac2a762270ae585aa5c6ae3",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:18:32.369Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rfq-list.png",
+      "image_sha256": "757304bb71e22a36ee9a3aeed945fa271d4b14e847dbb9929e9808a75d30fb0e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:34.747Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rfq-form.png",
+      "image_sha256": "b1290fba6f792fd333aad589bd2c5bee7a709e95316da3d81ddf643934cce3ca",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:06:40.411Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-rfq-awarded.png",
+      "image_sha256": "6fb958221130aa1ac890f21868a497e921b952105bcf2f1641616f627259456c",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:46.278Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-portal-quote.png",
+      "image_sha256": "e6f9085f8fc8649ab85f7f195d84809edb4172efd9cd1b87f875ff12d2ac60ed",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:43:16.930Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-rfq.png",
+      "image_sha256": "e86a2acc5462bf0416a15ef2f811d89711558ae6356a6ea8a0c166bb3f7a6a4d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:16.133Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-award-form.png",
+      "image_sha256": "238ae3f30f8cc9c4572275f34e78554f224625924bf123747763ee42f66afe10",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T05:52:16.397Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-order-list.png",
+      "image_sha256": "10e40e6cef63187a1fb80ea1fd1ed59edda7551c4e9d67486c8519c79a21f77d",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:34:38.584Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-order-edit.png",
+      "image_sha256": "a344055c650658a5a5e1d5c81c44f580b54e3ceac09402475bf39244d0b3cfe7",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:08:56.449Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-purchase-order.png",
+      "image_sha256": "1456637757e39f0ccc16904cd9b4d176bedcac6c7191cb753facc15231d5b562",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:29:26.710Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-order-cross-owner.png",
+      "image_sha256": "ed2e0bc26e74d4b7ebf2c181df31afe4a2bcddc10d5051a102a8ffe2fcbf5a60",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T03:15:48.471Z",
+      "runtime_image": "sha256:17b596d47bb45b8b827d9192c1b16643c313914231a851a83cc13f37063c6c37",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-receipt-form.png",
+      "image_sha256": "79045157361d970d20a6f761fcc335045e9b56105bf476ce51e6d9b9938a8344",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:31.479Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-receipt-pending.png",
+      "image_sha256": "37afabc0740c2d60175e2163a2df63f9ac3a03447bc8a9284b5de6fa8f0625a9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:10:33.625Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-receipt-awaiting-quality.png",
+      "image_sha256": "5d28218f41e0becb3b399718f832bbcd0605e527b89c80d4fb9c6486524a9f9b",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:33:12.378Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-quality-form.png",
+      "image_sha256": "6621f5f66ef9f15761f78b90ebdee8daebe4ae1d919b968aa079126e3815e992",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:33:13.468Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-goods-receipt.png",
+      "image_sha256": "f23f884fccfce9b0a9aa862a68547c4cab30667ed13358d40675e33d6d3be625",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:39:07.851Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-asset-list.png",
+      "image_sha256": "0f04ba1176465b8f522b561fad28f8708aa2bf7b0b5c17a756b568e6239344b0",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T07:39:13.502Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-assets.png",
+      "image_sha256": "a592cd276cba7ba6d126c603b3444c9339d99f102f85f09fbcb3134e819f6163",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:58.360Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-overview.png",
+      "image_sha256": "d8d76743cf3c2a30ac28220fbb0011df265034c33d01713c2c971e69c6eec4df",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:16.224Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-overview-supplier.png",
+      "image_sha256": "34d01c53102186284c6bc653e35f30c66071343578b403875c62c5a34ff5dd23",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:16.554Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-overview-department.png",
+      "image_sha256": "c41d0ca23f2536e08402254d152492196a657712a984ef544e07b1edc1d870c6",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T09:19:16.878Z",
+      "runtime_image": "sha256:d2cf6cb712e38a037855a41f18febec74a6095b83247731520c35181376ecb5a",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-scope-self.png",
+      "image_sha256": "86c9639687dd8f39050bd260dc21d7f676db5366aaf1a98102ea86912dade59e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:11.382Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-scope-parent.png",
+      "image_sha256": "58d1131d2229b46006fe3d48d8ee38e25a8a027c32fec49d1b3c010c4db507b3",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:15.126Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-scope-peer.png",
+      "image_sha256": "b3bab303f336724be607eb0b0fc1a62534cd3a74c05df9fa8c3d1cde3aa27de9",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:19.888Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    },
+    {
+      "article": "docs/wiki/usage-procurement.kr.md",
+      "image": "docs/images/ko-KR/procurement-tutorial-forbidden.png",
+      "image_sha256": "fbbdbbbf3773cdbade90ff0b2f3281f575b0753caacf08b17521fb8f7220ceca",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:02:24.118Z",
+      "runtime_image": "sha256:6c206503f7db0dcd8df6ff46004d58249bfe99e9208c7839ef376142ff4b6e39",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "historical_failure_capture": false,
+      "identity_source": "test-fixture"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/usage-procurement.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-28 09:59:21",
+      "result": "approved",
+      "translation_sha256": "517134997a923690cc885de6f4567527c2a67b8a64c7dc44fa99d7d673400475",
+      "checks": {
+        "coverage_and_meaning": "当前12节、全部编号子节和17任务逐段对照中文，44场景四语同序，准备/配置/查询/正向/失败恢复与2个集成边界齐全，不靠源码跳转操作。",
+        "technical_literals": "主链PR8/RFQ8/报价6v1/PO5/GR6，3×25与2×12.5=100、3卡各25；高级PO2=112.5300、合计212.5300 CNY；半开区间和单位保持，全文无代码/HTTP/SQL/权限码。",
+        "security_and_failure_semantics": "区分合法候选/普通查询权限、门户企业关联、SELF和部门下级；驳回新轮、启动失败原单重试、后台订单确认、全订单累计、待定后补终态质量、无GR删改；未验内部历史G11不冒称通过。",
+        "language_and_terminology": "此前完整英文355行已由本人逐段对照中文审读。本次另实际审读两段新英文：page total/pages/page size及first-page reset，keyword/category/active filters和自动phone cards，同一rule edit/status/delete，无虚构layout toggle。其余英文全文逐字节一致。",
+        "images_and_links": "本语44幅实际原图逐图语言与场景审核，176幅都有原view_image收据且正式发布字节相同；手机390/平板1024/8张历史1920尺寸真实。版本0未提交报价、PO6布局表单、已定标RFQ5、资产单行筛选与列表遮挡均不夸大结论。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧正文把截止后才能定标、供应商门户确认订单等未实现行为当成操作",
+          "resolution": "四语统一按已验证当前源码：截止前允许有效报价定标，内部采购员确认订单，无门户订单确认按钮。"
+        },
+        {
+          "status": "resolved",
+          "issue": "普通员工授权、草稿及驳回重申、启动失败重试与活动审批撤回易混",
+          "resolution": "明确授权申请者、驳回编辑保存回草稿新轮、原单先读回/失败取消，活动审批无撤回。"
+        },
+        {
+          "status": "resolved",
+          "issue": "规则向导手填编码/优先级、订单供应商筛选、单独资产数量输入与实际界面不符",
+          "resolution": "说明编码由系统生成/高级信息只读、实际交期筛选、按入荷数量逐件资产化，未增加界面字段。"
+        },
+        {
+          "status": "resolved",
+          "issue": "未提交表单、不同PO/RFQ和历史失败图可能被混为主链成功",
+          "resolution": "逐图分开RFQ8版本0表单与v1结果、RFQ5/PO2高级例、PO6后取消布局样本，8张1920历史失败保留来源。"
+        },
+        {
+          "status": "resolved",
+          "issue": "跨owner累计、收货草稿预留、质检待定和资产历史回补边界不清",
+          "resolution": "四语明确全订单累计/草稿不占量/GR无删改/终态质量不可反改，真实3卡各25仅证明正常异步建卡，G11历史回补不冒称通过。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现物料/单据分页操作未向小白说明。",
+          "resolution": "四语新增总条数、页码、每页条数、查询或改变条数回第一页，明确翻页不扩大身份范围，真实Vue检索与分页绑定已核对。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现规则查询字段与手机卡片的自动响应式展示未说明。",
+          "resolution": "四语扩充keyword/category/status/reset及桌面表格/手机自动卡片，操作对应同条规则，明确没有手工切换按钮；非新功能。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/usage-procurement.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-28 09:59:21",
+      "result": "approved",
+      "translation_sha256": "e3cb7178dabcd797cbd6597312ca079d050c5a4cf53e563323eb44a6f89036d3",
+      "checks": {
+        "coverage_and_meaning": "当前12节、全部编号子节和17任务逐段对照中文，44场景四语同序，准备/配置/查询/正向/失败恢复与2个集成边界齐全，不靠源码跳转操作。",
+        "technical_literals": "主链PR8/RFQ8/报价6v1/PO5/GR6，3×25与2×12.5=100、3卡各25；高级PO2=112.5300、合计212.5300 CNY；半开区间和单位保持，全文无代码/HTTP/SQL/权限码。",
+        "security_and_failure_semantics": "区分合法候选/普通查询权限、门户企业关联、SELF和部门下级；驳回新轮、启动失败原单重试、后台订单确认、全订单累计、待定后补终态质量、无GR删改；未验内部历史G11不冒称通过。",
+        "language_and_terminology": "此前完整日文355行已由本人逐段对照中文审读。本次另实际审读総件数/ページ/表示件数/1ページ目，キーワード/カテゴリ/有効状態/リセット、表と自動カード、同一ルールの操作与無切替ボタン；其余日文全文逐字节一致。",
+        "images_and_links": "本语44幅实际原图逐图语言与场景审核，176幅都有原view_image收据且正式发布字节相同；手机390/平板1024/8张历史1920尺寸真实。版本0未提交报价、PO6布局表单、已定标RFQ5、资产单行筛选与列表遮挡均不夸大结论。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧正文把截止后才能定标、供应商门户确认订单等未实现行为当成操作",
+          "resolution": "四语统一按已验证当前源码：截止前允许有效报价定标，内部采购员确认订单，无门户订单确认按钮。"
+        },
+        {
+          "status": "resolved",
+          "issue": "普通员工授权、草稿及驳回重申、启动失败重试与活动审批撤回易混",
+          "resolution": "明确授权申请者、驳回编辑保存回草稿新轮、原单先读回/失败取消，活动审批无撤回。"
+        },
+        {
+          "status": "resolved",
+          "issue": "规则向导手填编码/优先级、订单供应商筛选、单独资产数量输入与实际界面不符",
+          "resolution": "说明编码由系统生成/高级信息只读、实际交期筛选、按入荷数量逐件资产化，未增加界面字段。"
+        },
+        {
+          "status": "resolved",
+          "issue": "未提交表单、不同PO/RFQ和历史失败图可能被混为主链成功",
+          "resolution": "逐图分开RFQ8版本0表单与v1结果、RFQ5/PO2高级例、PO6后取消布局样本，8张1920历史失败保留来源。"
+        },
+        {
+          "status": "resolved",
+          "issue": "跨owner累计、收货草稿预留、质检待定和资产历史回补边界不清",
+          "resolution": "四语明确全订单累计/草稿不占量/GR无删改/终态质量不可反改，真实3卡各25仅证明正常异步建卡，G11历史回补不冒称通过。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现物料/单据分页操作未向小白说明。",
+          "resolution": "四语新增总条数、页码、每页条数、查询或改变条数回第一页，明确翻页不扩大身份范围，真实Vue检索与分页绑定已核对。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现规则查询字段与手机卡片的自动响应式展示未说明。",
+          "resolution": "四语扩充keyword/category/status/reset及桌面表格/手机自动卡片，操作对应同条规则，明确没有手工切换按钮；非新功能。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/usage-procurement.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-28 09:59:21",
+      "result": "approved",
+      "translation_sha256": "9350bcb408d4248c7518127c126dc0acfb041433fa77bd59067ed50ed5df7333",
+      "checks": {
+        "coverage_and_meaning": "当前12节、全部编号子节和17任务逐段对照中文，44场景四语同序，准备/配置/查询/正向/失败恢复与2个集成边界齐全，不靠源码跳转操作。",
+        "technical_literals": "主链PR8/RFQ8/报价6v1/PO5/GR6，3×25与2×12.5=100、3卡各25；高级PO2=112.5300、合计212.5300 CNY；半开区间和单位保持，全文无代码/HTTP/SQL/权限码。",
+        "security_and_failure_semantics": "区分合法候选/普通查询权限、门户企业关联、SELF和部门下级；驳回新轮、启动失败原单重试、后台订单确认、全订单累计、待定后补终态质量、无GR删改；未验内部历史G11不冒称通过。",
+        "language_and_terminology": "此前完整韩文355行已由本人逐段对照中文审读。本次另实际审读전체 건수/페이지/페이지당 표시 건수/첫 페이지，검색어/분류/활성/초기화与桌面표/手机자동 카드；权限范围不扩大、无独立切换按钮准确，其余全文逐字节一致。",
+        "images_and_links": "本语44幅实际原图逐图语言与场景审核，176幅都有原view_image收据且正式发布字节相同；手机390/平板1024/8张历史1920尺寸真实。版本0未提交报价、PO6布局表单、已定标RFQ5、资产单行筛选与列表遮挡均不夸大结论。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧正文把截止后才能定标、供应商门户确认订单等未实现行为当成操作",
+          "resolution": "四语统一按已验证当前源码：截止前允许有效报价定标，内部采购员确认订单，无门户订单确认按钮。"
+        },
+        {
+          "status": "resolved",
+          "issue": "普通员工授权、草稿及驳回重申、启动失败重试与活动审批撤回易混",
+          "resolution": "明确授权申请者、驳回编辑保存回草稿新轮、原单先读回/失败取消，活动审批无撤回。"
+        },
+        {
+          "status": "resolved",
+          "issue": "规则向导手填编码/优先级、订单供应商筛选、单独资产数量输入与实际界面不符",
+          "resolution": "说明编码由系统生成/高级信息只读、实际交期筛选、按入荷数量逐件资产化，未增加界面字段。"
+        },
+        {
+          "status": "resolved",
+          "issue": "未提交表单、不同PO/RFQ和历史失败图可能被混为主链成功",
+          "resolution": "逐图分开RFQ8版本0表单与v1结果、RFQ5/PO2高级例、PO6后取消布局样本，8张1920历史失败保留来源。"
+        },
+        {
+          "status": "resolved",
+          "issue": "跨owner累计、收货草稿预留、质检待定和资产历史回补边界不清",
+          "resolution": "四语明确全订单累计/草稿不占量/GR无删改/终态质量不可反改，真实3卡各25仅证明正常异步建卡，G11历史回补不冒称通过。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现物料/单据分页操作未向小白说明。",
+          "resolution": "四语新增总条数、页码、每页条数、查询或改变条数回第一页，明确翻页不扩大身份范围，真实Vue检索与分页绑定已核对。"
+        },
+        {
+          "status": "resolved",
+          "issue": "原S05反查发现规则查询字段与手机卡片的自动响应式展示未说明。",
+          "resolution": "四语扩充keyword/category/status/reset及桌面表格/手机自动卡片，操作对应同条规则，明确没有手工切换按钮；非新功能。"
+        }
+      ]
+    }
+  }
+}

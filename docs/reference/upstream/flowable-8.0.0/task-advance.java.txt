@@ -1,0 +1,7 @@
+        completeTask(taskEntity, userId);
+
+        // Continue process (if not a standalone task)
+        if (taskEntity.getExecutionId() != null && !bpmnErrorPropagated) {
+            ExecutionEntity executionEntity = processEngineConfiguration.getExecutionEntityManager().findById(taskEntity.getExecutionId());
+            CommandContextUtil.getAgenda(commandContext).planTriggerExecutionOperation(executionEntity);
+        }

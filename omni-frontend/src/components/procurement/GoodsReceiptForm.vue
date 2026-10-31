@@ -190,7 +190,7 @@ async function createDraft() {
 
 <template>
   <el-dialog v-model="dialogVisible" :title="t('procurementGoodsReceiptForm.createDraftTitle')" width="980px" destroy-on-close>
-    <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="100px">
+    <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-width="auto">
       <el-form-item :label="t('procurementGoodsReceiptForm.purchaseOrder')" prop="poId">
         <el-select
           v-model="createForm.poId"

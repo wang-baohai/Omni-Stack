@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "wiki-index",
+  "source": "docs/wiki/index.md",
+  "source_sha256": "cf273581fad054cbb0709b9ef83881930e1a9d5045ad61d1a335e1c5432b89f9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本人实际完整复读四语首页全部内容；原10章标识与次序不动，追加日志/MQ两行；README缩减后入口标签与第一行职责同步更正，目录表仍在Wiki。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/index.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:30:37",
+      "result": "approved",
+      "translation_sha256": "e0c31e3cccdff62090d9d416e8f89e4781bb236eca6b1ed68aef169a16d6edfd",
+      "checks": {
+        "coverage_and_meaning": "全文实际复读：12章、10目录职责、仓库关系与工程参考全部对应，新增日志/MQ概要由浅入深且没有扩大能力。",
+        "technical_literals": "五预设、目录名、Git远端职责与Markdown链接原值保持；原前十章未重排。",
+        "security_and_failure_semantics": "中文事实基准、构建不等于审校、历史不能替代当前验证的限制保留；无秘密或额外运行声称。",
+        "language_and_terminology": "实际逐篇完整阅读英文/日文/韩文首页，十二章数量和新标题自然一致；韩文Outbox前补空格后复读。",
+        "images_and_links": "首页无栅格图；本语README、12个入口、相应本语工程事实链接明确，详细结构在Wiki表内而非已精简README。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/index.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:30:37",
+      "result": "approved",
+      "translation_sha256": "acec9715fad97cba159f4bfce4797888c67a8723ff211586f47d9230d34d0053",
+      "checks": {
+        "coverage_and_meaning": "全文实际复读：12章、10目录职责、仓库关系与工程参考全部对应，新增日志/MQ概要由浅入深且没有扩大能力。",
+        "technical_literals": "五预设、目录名、Git远端职责与Markdown链接原值保持；原前十章未重排。",
+        "security_and_failure_semantics": "中文事实基准、构建不等于审校、历史不能替代当前验证的限制保留；无秘密或额外运行声称。",
+        "language_and_terminology": "实际逐篇完整阅读英文/日文/韩文首页，十二章数量和新标题自然一致；韩文Outbox前补空格后复读。",
+        "images_and_links": "首页无栅格图；本语README、12个入口、相应本语工程事实链接明确，详细结构在Wiki表内而非已精简README。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/index.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:30:37",
+      "result": "approved",
+      "translation_sha256": "8aeddc13631a215f45862744dd1cf3e0fb9082027d387fee2a396cc6f21fa78f",
+      "checks": {
+        "coverage_and_meaning": "全文实际复读：12章、10目录职责、仓库关系与工程参考全部对应，新增日志/MQ概要由浅入深且没有扩大能力。",
+        "technical_literals": "五预设、目录名、Git远端职责与Markdown链接原值保持；原前十章未重排。",
+        "security_and_failure_semantics": "中文事实基准、构建不等于审校、历史不能替代当前验证的限制保留；无秘密或额外运行声称。",
+        "language_and_terminology": "实际逐篇完整阅读英文/日文/韩文首页，十二章数量和新标题自然一致；韩文Outbox前补空格后复读。",
+        "images_and_links": "首页无栅格图；本语README、12个入口、相应本语工程事实链接明确，详细结构在Wiki表内而非已精简README。"
+      },
+      "findings": []
+    }
+  }
+}

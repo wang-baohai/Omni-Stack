@@ -103,6 +103,7 @@ Router는 `createWebHistory(import.meta.env.BASE_URL)`를 사용합니다. 정�
 | `/supplier-portal` | token과 portalAccess 정책 필요 |
 | `/menu-load-error` | token 필요, 메뉴 재시도 |
 | `/admin`, `/admin/dashboard` | 관리 레이아웃·기본 자식 페이지, 관리 신원 정책 적용 |
+| `/workspace`, `/workspace/overview` | 보호 경로. 루트는 통합 조종석으로 이동하며 이전 승인·작업 경로는 5.1의 같은 화면 내 패널로 이동 |
 | `/admin/:pathMatch(.*)*`, `/:pathMatch(.*)*` | 각각403/404페이지, 전자는 보호·후자는 공개 |
 
 보호 경로에 token이 없으면 safeAppRedirect로 앱 내 복귀를 유지하고 Login/PortalLogin을 선택합니다. token이 있으면 매번 initFromToken을 실행합니다. 메뉴 미완료 시 loadMenus를 기다려 등록·replace 재이동하고 실패하면 MenuLoadError로 갑니다. 나머지 분기는 등록을 보완하고 관리·공급업체 포털·자산 본인 정책을 적용합니다. token 존재·디코딩으로 서명 유효성이나 만료를 증명할 수 없으며 서버 요청은 계속 인증해야 합니다.
@@ -112,6 +113,22 @@ Router는 `createWebHistory(import.meta.env.BASE_URL)`를 사용합니다. 정�
 `import.meta.glob('../views/**/index.vue')`가 지연 뷰를 제공합니다. viewOverrides는 system:oauth2→views/oauth2-client/index.vue, base:operlog→views/monitor/oper-log/index.vue 두 개입니다. 동적 meta에는 title/icon/requiresAuth/permissionCode가 있지만 타입은 선택 필드이며 모든 정적 레코드가 전부 명시하지는 않습니다. 등록명으로 중복을 막고 종료 시 제거합니다.
 
 메뉴 실패에도 menusLoaded=true이므로 idle/loading/loaded/failed를 함께 봐야 합니다. retryLoadMenus는 초기화 후 다시 읽습니다. 복구 작업은 Wiki에서 관리합니다.
+
+---
+
+### 5.1 홈·워크스페이스·앱 탐색 경계
+
+공식 CLI는 catalog에서 해석한 모듈 의존성 집합을 `OMNI_FRONTEND_MODULES`로 프런트엔드 빌드 인수 `VITE_OMNI_MODULES`에 전달합니다. 소스를 작은 프리셋으로 빌드하면 뷰 해석과 클라이언트 표시 권한을 이 선택 범위와 교집합으로 제한합니다. workflow가 없으면 프로세스 통계를 요청하거나 승인 패널을 표시하지 않으며, SRM이 없으면 공급업체 진입점도 제공하지 않습니다. 이 인수가 없는 직접 빌드는 기존 전체 동작을 유지하고, 생성 프로젝트는 실제로 남은 파일의 제약도 받습니다. 이 필터는 JWT, DB 역할 또는 서버 인가를 바꾸지 않습니다. 구현은 [deployment-modules.ts](../omni-frontend/src/utils/deployment-modules.ts)에 있습니다.
+
+홈의 워크스페이스는 동일 출처의 기본 링크로 `noopener noreferrer`를 사용해 새 탭을 엽니다. 기존 세션을 공유하고 URL에 token을 넣지 않습니다. 워크스페이스에는 홈/Wiki 복귀 진입점이 없습니다.
+
+개요, 승인, 내 작업은 `/workspace/overview`에서 기존 목록·양식·API를 재사용합니다. 이전 `/workspace/approvals`, `/workspace/jobs`는 query를 보존해 `#approvals`, `#my-tasks`로 이동하며 세 화면을 따로 유지하지 않습니다.
+
+워크스페이스 앱과 검색은 권한이 있고 실제 뷰가 있는 전체 메뉴가 대상이며 업무 진입점은 새 탭을 엽니다. 업무 레이아웃에는 전체 앱 버튼이나 패널이 없고 사이드바는 현재 모듈에 집중합니다. 검색은 안정적인 루트 ID `route.meta.appId`로 진입 가능한 페이지를 필터링하고 선택 시 대상 appId를 다시 확인해 현재 탭에서 이동합니다. 잘못된 ID는 빈 후보이며 URL 접두사로 추측하지 않습니다.
+
+비공개 오류 화면도 홈·뒤로 복구 버튼이 없습니다. 알 수 없는 모듈이나 권한 거부 화면에서 대시보드를 대체 메뉴로 쓰지 않습니다. 브라우저 뒤로, 탭 전환, 주소 입력은 막지 않으며 UI 경계가 서버 인가를 대신하지 않습니다. 최초 메뉴 로딩 후 `resolveMenuReloadTarget()`에 path, query, hash를 따로 전달하고 객체 path에 fullPath를 넣지 않아 복귀 인수와 앵커를 보존합니다.
+
+구현은 [ConsoleHeader](../omni-frontend/src/components/ConsoleHeader.vue), [워크스페이스](../omni-frontend/src/views/workspace/index.vue), [탐색 도구](../omni-frontend/src/utils/navigation.ts)에 있습니다.
 
 ---
 
@@ -242,6 +259,8 @@ const { options, loading } = useDictOptions('workflow_category')
 ---
 
 ## 15. 빌드와 정적 서비스 경계
+
+프런트엔드 이미지는 앱 빌드 후 같은 저장소의 Wiki를 순서대로 빌드하고, 동일한 3000 포트의 `/wiki/`에서 공개 정적 문서를 제공합니다. 공개 `/` 페이지는 로그인 없이 문서를 표시하며, 인증 상태는 계정 영역만 바꿉니다. 작업 공간과 업무 경로의 인증 가드는 유지합니다. Wiki 파일이 없으면 앱 홈으로 대체하지 않고 404를 반환합니다. 같은 출처의 삽입은 Wiki 문서에만 허용하고 시작 스크립트에는 응답 nonce를 사용합니다. 로그인 및 업무 경로의 기존 보안 정책은 유지합니다.
 
 [프런트엔드 Dockerfile](../docker/frontend/Dockerfile)은 Node 22로 빌드하고 Nginx 1.28로 dist를 3000에서 제공합니다. 현재 [Nginx](../docker/frontend/nginx.conf)는 /api/, /oauth2/, /.well-known/을 Docker DNS로 omni-gateway:8080에 전달하고 index.html history 폴백을 제공합니다.
 

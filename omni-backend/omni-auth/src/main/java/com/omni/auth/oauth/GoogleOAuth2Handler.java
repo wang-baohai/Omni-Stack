@@ -208,6 +208,9 @@ public class GoogleOAuth2Handler implements OAuth2ProviderHandler {
             }
 
             GoogleUser user = objectMapper.readValue(response.body(), GoogleUser.class);
+            if (user.getSub() == null || user.getSub().isBlank()) {
+                throw new BusinessException(502, "Google 用户资料缺少唯一标识");
+            }
 
             // 从邮箱 @ 前缀派生用户名，fallback 到 Google sub（用户 ID）
             String username = deriveUsername(user);

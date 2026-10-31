@@ -226,6 +226,8 @@ DomainEventEnvelope fields include eventId/eventType/occurredAt/tenantId/produce
 
 On creation/transfer, OwnerResolver validates enabled tenant-local Auth users, primary units and assignable scope; selecting others additionally requires transfer permission. OwnerEnricher deduplicates and separately batches users and organizations. Errors can leave IDs/empty names without widening access; not every Feign call is outside a database transaction.
 
+An internal owner must not have any portal association with `deleted=0` in the current tenant, including `ACTIVE` and `INACTIVE` associations. `OwnerOptionServiceImpl` removes portal accounts in a batch before limiting the candidate count. `SrmOwnerResolver` checks creation/transfer targets again: a portal association returns 403, and a null portal-identity count returns 503. A valid internal transfer still updates the supplier and its evaluations' owners in the formal business transaction.
+
 Transactions explicitly call `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` for local Outbox insertion with default REQUIRED propagation. Relay later sends to the Broker; stopping Relay does not stop Outbox writes. eventId is top-level in DomainEventEnvelope and passed as msgKey; Outbox msgId is separate. Consumers still need atomic event/intent processing. Payloads may contain explicit ID, version, state, score or amount snapshots, never full account/contact details or invitation tokens.
 
 `srm.supplier.registered.v1` · `srm.supplier.approved.v1` · `srm.supplier.rejected.v1` · `srm.supplier.suspended.v1` · `srm.supplier.blacklisted.v1` · `srm.supplier.eliminated.v1` · `srm.portal-role.assign-requested.v1` · `auth.portal-role.assigned.v1` · `auth.portal-role.assign-failed.v1` · `srm.evaluation.completed.v1` · `srm.risk.level-changed.v1` · `srm.quotation.submitted.v1`
@@ -274,7 +276,7 @@ Extension steps are in the [development Wiki](guides/scaffold-development.en.md#
 
 ## 10. Verification Boundaries
 
-Reused, individually digest-matched Docker Reactor artifacts contain 27 SRM JUnit reports and 119 passing cases, with zero failures/errors/skips. Each test proves its own state/score, authorization/isolation, invitation/role-result, quotation replay/version/money assertions. The old highest-color helper test is not verification of the current risk-service algorithm.
+Retained Docker Reactor artifacts from 2026-10-24, each matched by digest, contain 29 SRM JUnit reports and 135 passing cases, with zero failures/errors/skips. Each test proves its own state/score, authorization/isolation, invitation/role-result, quotation replay/version/money assertions. The old highest-color helper test is not verification of the current risk-service algorithm.
 
 These reports do not prove real CAPTCHA registration, external accounts, live Workflow/MQ delivery, MySQL concurrency or tutorial execution; those behaviors require separate runtime evidence. Language review uses authorized AI_REVIEW, never mislabelled HUMAN_REVIEW; runtime/screenshot evidence keeps its actual scope.
 

@@ -1,0 +1,57 @@
+{
+  "step": "WP-24.S02 / WP-24.S04",
+  "object": "platform_tutorial_four_language_images",
+  "generated_at": "2026-10-21T11:45:00Z",
+  "environment": {
+    "project": "omni-stack",
+    "network": "omni-stack_default",
+    "frontend": "omni-stack-omni-frontend-1:3000",
+    "gateway": "omni-stack-omni-gateway-1:8080",
+    "verifier": "omni-stack-verifier",
+    "image": "omni-frontend:latest sha256:1d634d3c16df"
+  },
+  "capture": {
+    "script": "omni-frontend/e2e-docs 场景清单 + scripts/fixtures/capture-platform-tutorial.mjs（仓库内可复跑入口）",
+    "locales": ["zh-CN", "en-US", "ja-JP", "ko-KR"],
+    "viewport": { "width": 1920, "height": 1080 },
+    "scenarios": 31,
+    "images": 124,
+    "identity_sources": {
+      "admin": "真实验证码登录（本次第 1/2 次尝试记录见 records）",
+      "employee": "真实验证码登录，菜单 0 节点",
+      "asset_user": "用户授权偏离下经管理端建号 + 既有 ASSET_USER 单角色（见 user-authorization-2026-10-21-asset-identity.md）",
+      "portal": "DEC-01=B 正式邀请→注册→入驻 Saga",
+      "anonymous": "无令牌"
+    },
+    "not_captured": [
+      "/callback 外部 OAuth 未配置（重定向登录页，未伪造回调）",
+      "monitor 无独立页面（仅操作日志与消息记录）",
+      "无 admin 级 approvals 页（审批入口为 /workspace/approvals）",
+      "菜单加载失败态沿用 WP-07.S03 的故障注入证据，未重复造图"
+    ]
+  },
+  "desensitization": {
+    "method": "按场景逐张查看 zh-CN 原图；四语变体共享同一份数据，语言只影响文案与版式。表单/错误页（login/register/portal-login/portal-register/device/consent/access-denied）不含业务数据，已在 WP-07 取证中目视复核。",
+    "reviewed_scenarios": [
+      "site-home", "not-found", "audit", "online", "users", "user-dialog", "mq-messages",
+      "operlog", "login-record", "workspace", "roles", "oauth2", "config", "workflow-models",
+      "job-types", "approvals", "jobs", "tenant", "orgs", "xss", "dict", "system-jobs",
+      "auth-record", "workflow-instances"
+    ],
+    "findings": [
+      "邮箱列由产品掩码（如 w***@domain）",
+      "登录记录与审计日志的来源地址掩码为网段（172.19.0.*）",
+      "操作日志显示容器内网 IP（172.19.0.17/9），非个人敏感数据",
+      "OAuth2 客户端面板显示 Client ID 与回调地址，不含客户端密钥",
+      "无验证码答案、令牌、Cookie 或真实密码出现在任何图片中"
+    ],
+    "text_image_corrections": 6,
+    "full_124_review": "locale-variants-share-data;zh-scenario-review-complete"
+  },
+  "gates": {
+    "links": "exit 0",
+    "i18n_content": "exit 0",
+    "docs_tests": "13/13",
+    "docs_build": "300 canonical pages, 40.35s"
+  }
+}

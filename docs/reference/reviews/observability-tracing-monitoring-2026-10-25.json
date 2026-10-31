@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-tracing",
+  "source": "docs/wiki/observability-tracing.md",
+  "source_sha256": "6828791dc048cc8ac32058fc4c04a4e74087e3892d502562fc0bea4ed4f97324",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current source, translation and actual-image digests",
+  "method": "本人逐篇完整复读最终中文及英日韩全文；43张本轮正式原图已逐张实际查看。此脚本仅校验阅读记录与最终摘要后登记人工智能审校，不执行自动语义盖章，不冒称真人或全部运行验收。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/observability-tracing.md",
+      "image": "docs/images/zh-CN/monitor-trace.png",
+      "sha256": "a7034d870662c5725575418ee702f2d695e82d75a685ea93388a39855f1f3a24",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.md",
+      "image": "docs/images/zh-CN/monitor-logs.png",
+      "sha256": "170b2a3744eaa67e619322c46df87f8135c092da573c97e7787bc553191b7c4a",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.md",
+      "image": "docs/images/shared/monitor-alloy.png",
+      "sha256": "9768dc04c495d11aee818a7fa39cf0573518ef753129e1da10da2594de2b0b77",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.en.md",
+      "image": "docs/images/en-US/monitor-trace.png",
+      "sha256": "d9a6cb0818fb1d815cb6957ba05198fd17d9dee65eea92361052a95acdce3dad",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.en.md",
+      "image": "docs/images/en-US/monitor-logs.png",
+      "sha256": "21311f660659be76b0df540e73bf9736e069123578c58e63c4cdd1e73333ec0a",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.en.md",
+      "image": "docs/images/shared/monitor-alloy.png",
+      "sha256": "9768dc04c495d11aee818a7fa39cf0573518ef753129e1da10da2594de2b0b77",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.jp.md",
+      "image": "docs/images/ja-JP/monitor-trace.png",
+      "sha256": "ceb36eb025bc74e56dee804cb73c9eddab6dbe80d60f9551472cf174ac1c23f5",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.jp.md",
+      "image": "docs/images/ja-JP/monitor-logs.png",
+      "sha256": "fb3a33e7e92497a9f9405c77617ad9f93e0e22dd74b99efd9306cb1b1bc6f972",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.jp.md",
+      "image": "docs/images/shared/monitor-alloy.png",
+      "sha256": "9768dc04c495d11aee818a7fa39cf0573518ef753129e1da10da2594de2b0b77",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.kr.md",
+      "image": "docs/images/ko-KR/monitor-trace.png",
+      "sha256": "46b14c1029a8aa6d0dac20178b8e2116cf0c5f336b071e116701dc376afa28a7",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.kr.md",
+      "image": "docs/images/ko-KR/monitor-logs.png",
+      "sha256": "ba19c7e93373950c6c4fce8b1ff9b5b77f44af6e6c861e3da0d03f2e40d4923c",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-tracing.kr.md",
+      "image": "docs/images/shared/monitor-alloy.png",
+      "sha256": "9768dc04c495d11aee818a7fa39cf0573518ef753129e1da10da2594de2b0b77",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-tracing.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "b206081ff7c3ada204b0492e298a6fc376900f1f9ae39cc742925c2999e442a7",
+      "checks": {
+        "coverage_and_meaning": "逐篇解释Trace/Span/W3C传播、MDC、Collector、Alloy/Loki与查询顺序，实际例子只涉及已存储的网关和Base十个span。",
+        "technical_literals": "五个原始源码块保留；真实trace号、GET /api/base/my-job/types、两服务十span、Explore/Run query实际选项及日志查询投影核对一致。",
+        "security_and_failure_semantics": "MDC必须finally清理；不假设异步同树或线程自动继承，不公开凭据和完整请求。临时采样已恢复，socket只属于正式采集器。",
+        "language_and_terminology": "逐段对照中文并完整复读最终英文，入站/出站、分位数、空数据与通知边界自然准确；上游界面保留英文按钮便于照图查找。",
+        "images_and_links": "四语Tempo/Loki八图及共享Alloy逐张看过。两条日志为真实启动事件；父子span时长不累加，四组件Healthy不等于日志全部入库。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-tracing.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "50903af6beb8da468d0f674f2cc4d4e2acc90da842075e0d871f0244216c7aa0",
+      "checks": {
+        "coverage_and_meaning": "逐篇解释Trace/Span/W3C传播、MDC、Collector、Alloy/Loki与查询顺序，实际例子只涉及已存储的网关和Base十个span。",
+        "technical_literals": "五个原始源码块保留；真实trace号、GET /api/base/my-job/types、两服务十span、Explore/Run query实际选项及日志查询投影核对一致。",
+        "security_and_failure_semantics": "MDC必须finally清理；不假设异步同树或线程自动继承，不公开凭据和完整请求。临时采样已恢复，socket只属于正式采集器。",
+        "language_and_terminology": "逐段对照中文并完整复读最终日文；自然解释専門語、収集対象、分位与追跡，原生英文字段附语境，源码注释不擅自翻译。",
+        "images_and_links": "四语Tempo/Loki八图及共享Alloy逐张看过。两条日志为真实启动事件；父子span时长不累加，四组件Healthy不等于日志全部入库。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-tracing.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "a1c3a9e5ffd1c37bbceebc523edbdd894cc678b628ff273e8cd6016de53ad243",
+      "checks": {
+        "coverage_and_meaning": "逐篇解释Trace/Span/W3C传播、MDC、Collector、Alloy/Loki与查询顺序，实际例子只涉及已存储的网关和Base十个span。",
+        "technical_literals": "五个原始源码块保留；真实trace号、GET /api/base/my-job/types、两服务十span、Explore/Run query实际选项及日志查询投影核对一致。",
+        "security_and_failure_semantics": "MDC必须finally清理；不假设异步同树或线程自动继承，不公开凭据和完整请求。临时采样已恢复，socket只属于正式采集器。",
+        "language_and_terminology": "逐段对照中文并完整复读最终韩文；메트릭/트레이스/경보、无样本与失败语义保持一致，原生按钮和工程字面量不改写。",
+        "images_and_links": "四语Tempo/Loki八图及共享Alloy逐张看过。两条日志为真实启动事件；父子span时长不累加，四组件Healthy不等于日志全部入库。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    }
+  }
+}

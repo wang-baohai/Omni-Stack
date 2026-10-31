@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "mq-outbox",
+  "source": "docs/wiki/mq-outbox.md",
+  "source_sha256": "af57a88d53ec919b76078e6f8bfaba8769a275cbbf71907d958b4a359af76a90",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/mq-outbox.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "106ba2ffff2d99efc802c576928f43043194e2ba22a1e323561c949e6edf1617",
+      "checks": {
+        "coverage_and_meaning": "待发意图、有效事务、正租户、初始状态和分阶段验证由浅入深。",
+        "technical_literals": "两个模板片段、REQUIRED、PENDING/0/3/serviceName/producerTraceId/msgId/msgKey均准确。",
+        "security_and_failure_semantics": "明确msgKey不是唯一幂等约束；跨库/事务结束后处理不能证明原子性；演示插行不冒充业务事务。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/mq-outbox.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "7ceca1aed8638734a76c4356a31f38d5e3e2b2d68499c53132bb0e61e95bf000",
+      "checks": {
+        "coverage_and_meaning": "待发意图、有效事务、正租户、初始状态和分阶段验证由浅入深。",
+        "technical_literals": "两个模板片段、REQUIRED、PENDING/0/3/serviceName/producerTraceId/msgId/msgKey均准确。",
+        "security_and_failure_semantics": "明确msgKey不是唯一幂等约束；跨库/事务结束后处理不能证明原子性；演示插行不冒充业务事务。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/mq-outbox.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:13",
+      "result": "approved",
+      "translation_sha256": "48beba45110833fa7a99da274e427720dccec89b41bb8e8e760a867e8d2650d6",
+      "checks": {
+        "coverage_and_meaning": "待发意图、有效事务、正租户、初始状态和分阶段验证由浅入深。",
+        "technical_literals": "两个模板片段、REQUIRED、PENDING/0/3/serviceName/producerTraceId/msgId/msgKey均准确。",
+        "security_and_failure_semantics": "明确msgKey不是唯一幂等约束；跨库/事务结束后处理不能证明原子性；演示插行不冒充业务事务。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

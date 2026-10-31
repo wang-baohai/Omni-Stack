@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-alerts",
+  "source": "docs/wiki/observability-alerts.md",
+  "source_sha256": "c3bfb03eb5282f37ff0428f123212ab2c9ecf4825f61c30319068bbae43f4af3",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整审读六篇中文和全部18篇三译；对照当前完整事实文档、Java/Compose及收集存储配置；修正后逐段复核。13段原文在四语共52处另由Docker严格匹配。本记录不是机械QA或抽样签核，不冒称HUMAN_REVIEW/观测运行/图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-alerts.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "fa47431fa9fde079fc7a858d58ccaf42b39cde5ece8aca224ba8acb4b59ffaa3",
+      "checks": {
+        "coverage_and_meaning": "真实两分钟规则、local-null、单后端四语、SLI/SLO/错误预算与阈值校准逐层解释。",
+        "technical_literals": "两个YAML片段保留，包括up、for、group和receiver原文；30日99.9%=43分12秒。",
+        "security_and_failure_semantics": "时间型与请求型预算区分；告警触发/外部送达/业务恢复不混淆，不冒称默认外发或生产保证。",
+        "language_and_terminology": "已逐篇完整实际复读英文；信号/指标/日志/链路/告警术语及叙述自然，无新增运行结论。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-alerts.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "80f86a09e0800bc0836a53aee0c3433dfe022748e3109a82ef80dfdd0813a5d1",
+      "checks": {
+        "coverage_and_meaning": "真实两分钟规则、local-null、单后端四语、SLI/SLO/错误预算与阈值校准逐层解释。",
+        "technical_literals": "两个YAML片段保留，包括up、for、group和receiver原文；30日99.9%=43分12秒。",
+        "security_and_failure_semantics": "时间型与请求型预算区分；告警触发/外部送达/业务恢复不混淆，不冒称默认外发或生产保证。",
+        "language_and_terminology": "全文复读，不自然的不可用改为サービスにアクセスできない状態。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-alerts.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "64d747fcb1964de98ad0f274ef6546580b4043ab9a102fd1ec2c4c1825408020",
+      "checks": {
+        "coverage_and_meaning": "真实两分钟规则、local-null、单后端四语、SLI/SLO/错误预算与阈值校准逐层解释。",
+        "technical_literals": "两个YAML片段保留，包括up、for、group和receiver原文；30日99.9%=43分12秒。",
+        "security_and_failure_semantics": "时间型与请求型预算区分；告警触发/外部送达/业务恢复不混淆，不冒称默认外发或生产保证。",
+        "language_and_terminology": "全文复读，경보与통지分别对应告警和传达，预算单位不混淆。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    }
+  }
+}

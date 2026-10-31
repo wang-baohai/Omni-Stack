@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "workflow-tasks",
+  "source": "docs/wiki/workflow-tasks.md",
+  "source_sha256": "895230430871e8f86617af3a7cacdf310a1d2f831fc8066aae5a74313d73d510",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人完整复读七篇中文，再逐篇完整复读全部21篇英日韩，修改后检查差异；框架/工程源码已实际阅读，三译原文另作逐字绑定。不是抽样/机械QA盖章，不冒称真人、运行或图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/workflow-tasks.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "83a73f108bd0ca2c8d868a1dab2c86029a02c04fec71878d36d3a3101e9ff858",
+      "checks": {
+        "coverage_and_meaning": "精确assignee守卫、票与根变量、MI根32层、完成前计数、ALL/ANY/阈值、加减签/改派、MI_END和终止/未暴露动作完整。",
+        "technical_literals": "三处工程原文和完成条件字面量保持；业务码409/403、权限名、setAssignee、executionIsCompleted均准确。",
+        "security_and_failure_semantics": "false不是cascade参数；目标仅数字与附加变量未过滤准确；MI标签非真人同意；无approved兼容通过和首意见、终止不等于暂停均保留。",
+        "language_and_terminology": "全文对照中文实际复读；术语、句式和段落自然，events修正standalone与internal API歧义。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/workflow-tasks.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "29806f5667410a44995f26c9b7034ec2e346304f8d1400480981d6888bd7ce05",
+      "checks": {
+        "coverage_and_meaning": "精确assignee守卫、票与根变量、MI根32层、完成前计数、ALL/ANY/阈值、加减签/改派、MI_END和终止/未暴露动作完整。",
+        "technical_literals": "三处工程原文和完成条件字面量保持；业务码409/403、权限名、setAssignee、executionIsCompleted均准确。",
+        "security_and_failure_semantics": "false不是cascade参数；目标仅数字与附加变量未过滤准确；MI标签非真人同意；无approved兼容通过和首意见、终止不等于暂停均保留。",
+        "language_and_terminology": "全文复读并修正claim/摘要/跨服务/设计器/组织关系等直译；保留源码注释原文，最终改动段落再次核对。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "result": "fixed-and-reread",
+          "resolution": "按所在页面改为引き受け/ハッシュ/組織関係/サービス間/ローカルトランザクション等自然措辞；实际差异已复读",
+          "issue": "日语claim/摘要/组织关系/跨服务及本地交易等直译",
+          "status": "resolved",
+          "id": "ja-JP-terminology-1",
+          "description": "日语claim/摘要/组织关系/跨服务及本地交易等直译"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/workflow-tasks.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "3f20d422bd9e9fcee65c7a9b685b8914a96868b5aae80ba93d7081760213efce",
+      "checks": {
+        "coverage_and_meaning": "精确assignee守卫、票与根变量、MI根32层、完成前计数、ALL/ANY/阈值、加减签/改派、MI_END和终止/未暴露动作完整。",
+        "technical_literals": "三处工程原文和完成条件字面量保持；业务码409/403、权限名、setAssignee、executionIsCompleted均准确。",
+        "security_and_failure_semantics": "false不是cascade参数；目标仅数字与附加变量未过滤准确；MI标签非真人同意；无approved兼容通过和首意见、终止不等于暂停均保留。",
+        "language_and_terminology": "全文复读并修正启用主组织修饰、设计画面用词及助词、兼容处理器与任务委派混淆、终止权限句式，最终差异复核。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": [
+        {
+          "result": "fixed-and-reread",
+          "resolution": "明确主组织及兼容处理器；使用설계 화면은/이与权利外的其他条件，差异已复读",
+          "issue": "启用对象、兼容delegate、设计器直译后助词、终止权限句式",
+          "status": "resolved",
+          "id": "ko-KR-terminology-1",
+          "description": "启用对象、兼容delegate、设计器直译后助词、终止权限句式"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "common-operlog",
+  "source": "docs/wiki/common-operlog.md",
+  "source_sha256": "9a49b984e2e43732b42e8ab1b7f4b66195fced373ec9e3bf0d6a80c0350c594a",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source/translation contents; code and original plan unchanged",
+  "method": "实际完整读完三个主题的中文与三译，按源码相关方法逐项核对；修正后核对四语最终差异，截断输出对应MQ后半段另外补读。不把机械摘要或翻译结构检查当语义审读。",
+  "actual_complete_reading_sha256": "c9910aea06445de3ff80bdc9994381b5c1a9d0486b64dd64fdfef8b2565e8a38",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-operlog.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "24820b4f37d9341baef753398c580e7c55d5654f1007d702e91e2937167877dc",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语采集装配、生产者、快照差异、脱敏、安全审计区别、扩展与验证入口；保留查询可纳入记录及Auth不依赖本模块的边界。",
+        "technical_literals": "Java原片段三译与中文逐字一致；Servlet/AspectJ条件、注解入口、五文件/28使用文件、UPDATE/DELETE/CREATE各快照分支与实际方法相符。",
+        "security_and_failure_semantics": "日志Outbox不保证与业务同事务；捕获异常不能取消rollback-only；前置旧快照读取可能阻止调用；无tenantId全局实体仍可读，租户不匹配不采集；脱敏非全形态安全保证。",
+        "language_and_terminology": "全文逐段实际对照，普通英语解释日志、事务、请求幂等和任务转交；限定条件、失败恢复与源码文字量均完整，最终事实修正后再读。",
+        "images_and_links": "本篇无栅格图片；Mermaid按调用时事务落库而非保证业务原子性，前后common及MQ章节为本语链接；不将源码枚举当运行投递成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "operlog：Controller后处理与业务事务不必同一；发送捕获异常不取消rollback-only；旧快照读取前置异常；无tenantId全局实体不跳过；UPDATE/DELETE/CREATE各快照路径",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-operlog.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "dffd435437e1508a3b1cc28ed4100a3c8c2080d952b7ecb112672ab8d9e1b1d9",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语采集装配、生产者、快照差异、脱敏、安全审计区别、扩展与验证入口；保留查询可纳入记录及Auth不依赖本模块的边界。",
+        "technical_literals": "Java原片段三译与中文逐字一致；Servlet/AspectJ条件、注解入口、五文件/28使用文件、UPDATE/DELETE/CREATE各快照分支与实际方法相符。",
+        "security_and_failure_semantics": "日志Outbox不保证与业务同事务；捕获异常不能取消rollback-only；前置旧快照读取可能阻止调用；无tenantId全局实体仍可读，租户不匹配不采集；脱敏非全形态安全保证。",
+        "language_and_terminology": "全文逐段实际对照；修正サプライヤー、切り詰め、カスタマイザー及承认者追加削除等直译词，事务与请求编号的最终段落再次核对。",
+        "images_and_links": "本篇无栅格图片；Mermaid按调用时事务落库而非保证业务原子性，前后common及MQ章节为本语链接；不将源码枚举当运行投递成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "operlog：Controller后处理与业务事务不必同一；发送捕获异常不取消rollback-only；旧快照读取前置异常；无tenantId全局实体不跳过；UPDATE/DELETE/CREATE各快照路径",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-operlog.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "9688a9bedd7d7f0fc7b22374c427f52913332380a2142e8fbe63967a58f2bccf",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语采集装配、生产者、快照差异、脱敏、安全审计区别、扩展与验证入口；保留查询可纳入记录及Auth不依赖本模块的边界。",
+        "technical_literals": "Java原片段三译与中文逐字一致；Servlet/AspectJ条件、注解入口、五文件/28使用文件、UPDATE/DELETE/CREATE各快照分支与实际方法相符。",
+        "security_and_failure_semantics": "日志Outbox不保证与业务同事务；捕获异常不能取消rollback-only；前置旧快照读取可能阻止调用；无tenantId全局实体仍可读，租户不匹配不采集；脱敏非全形态安全保证。",
+        "language_and_terminology": "全文逐段实际对照；승인자 추가·제거、처리자 전달与事务/请求编号等用语清楚，finally清理、默认装配条件和无通知限制完整保留。",
+        "images_and_links": "本篇无栅格图片；Mermaid按调用时事务落库而非保证业务原子性，前后common及MQ章节为本语链接；不将源码枚举当运行投递成功。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "operlog：Controller后处理与业务事务不必同一；发送捕获异常不取消rollback-only；旧快照读取前置异常；无tenantId全局实体不跳过；UPDATE/DELETE/CREATE各快照路径",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    }
+  }
+}

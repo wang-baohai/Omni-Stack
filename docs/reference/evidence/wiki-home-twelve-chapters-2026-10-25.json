@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "original_step": "WP-24.S04",
+  "scope": "本轮十二章首页四语原图、真实匿名采集、实际逐图AI审读；仅4首页，不冒签其余平台图或整个Goal",
+  "capture_script": "scripts/fixtures/capture-wiki-home.mjs",
+  "capture_script_sha256": "ccc4f1634a9dfd0e8cc981e839db76f3d7d8481866686f3d29e8a28b023bc424",
+  "capture_receipt_sha256": "cdc83a94797edbf42ca62e47c8cc608befcc17db694cd666f888cc6afa7e2c3f",
+  "runtime_image_id": "sha256:d8e0f2c32a36b01bb840308b0fc7dca5098806b3caf65957d987437e9250f5d5",
+  "project": "omni-stack",
+  "preset": "full",
+  "identity_source": "anonymous-no-token",
+  "human_captcha_login_claimed": false,
+  "response_mocked": false,
+  "display_dom_modified": false,
+  "workers": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "working-tree contents with current per-file digests, not a clean commit claim",
+  "screenshots": [
+    {
+      "id": "platform-site-home-zh-CN",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/platform-site-home.png",
+      "image_sha256": "61e52dd78c31fe0517ae53013095df4969f7c058a664475224b0fac65a1d36f8",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T16:00:02.704Z",
+      "wiki_body_sha256": "28c965dc552af8d83fafe34350e59c3cc6f0a49261650c0d90cabfdcdf217d2a",
+      "wiki_chapters": 12,
+      "preset": "full",
+      "header": "Omni-Stack\n中\n供应商入口\n登录",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-25T00:01:34.648914+08:00",
+      "result": "passed-scoped",
+      "finding": "本人实际逐张查看完整1920×1080原图：本语正文、搜索、两侧目录、十二章入口及新增日志/MQ行清晰；顶部为匿名登录和供应商入口，无旧Hero、用户凭据或验证码答案。截图只显示首页首屏，不冒称全站旧图或登录业务场景审校。"
+    },
+    {
+      "id": "platform-site-home-en-US",
+      "locale": "en-US",
+      "image": "docs/images/en-US/platform-site-home.png",
+      "image_sha256": "bd091070932eebf1a3cc3ba201397ba95a2aa8cdc2f0563c2a8a511f8f9593d2",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T16:00:03.823Z",
+      "wiki_body_sha256": "74165ef9f51dad985e5bf94deb88c704130f6e95422626c4178cb77e44cc6f3d",
+      "wiki_chapters": 12,
+      "preset": "full",
+      "header": "Omni-Stack\nEN\nSupplier Portal\nLogin",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-25T00:01:34.6535716+08:00",
+      "result": "passed-scoped",
+      "finding": "本人实际逐张查看完整1920×1080原图：本语正文、搜索、两侧目录、十二章入口及新增日志/MQ行清晰；顶部为匿名登录和供应商入口，无旧Hero、用户凭据或验证码答案。截图只显示首页首屏，不冒称全站旧图或登录业务场景审校。"
+    },
+    {
+      "id": "platform-site-home-ja-JP",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/platform-site-home.png",
+      "image_sha256": "8897b351c6aaacf925150bda9de862c427586a58b58e70d31ee14d411cdbd613",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T16:00:04.898Z",
+      "wiki_body_sha256": "d8eadd20a97bddb9c338b24ee3796bc6f547bcad42b8167a9f5e2a3fdd722890",
+      "wiki_chapters": 12,
+      "preset": "full",
+      "header": "Omni-Stack\n日\nサプライヤー入口\nログイン",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-25T00:01:34.6548627+08:00",
+      "result": "passed-scoped",
+      "finding": "本人实际逐张查看完整1920×1080原图：本语正文、搜索、两侧目录、十二章入口及新增日志/MQ行清晰；顶部为匿名登录和供应商入口，无旧Hero、用户凭据或验证码答案。截图只显示首页首屏，不冒称全站旧图或登录业务场景审校。"
+    },
+    {
+      "id": "platform-site-home-ko-KR",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/platform-site-home.png",
+      "image_sha256": "c4fa1fd341e2e8d8469339dc53358697623a03b3ced8902c33b9ef6bec24e8f6",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "captured_at": "2026-10-24T16:00:05.989Z",
+      "wiki_body_sha256": "e89b09992cc488b3c487ee124081ffe70cd08c11dc8770e2073e6f5a603dda95",
+      "wiki_chapters": 12,
+      "preset": "full",
+      "header": "Omni-Stack\n한\n공급업체 입구\n로그인",
+      "actual_view_image": true,
+      "review_type": "AI_REVIEW",
+      "reviewer": "Codex",
+      "HUMAN_REVIEW": 0,
+      "reviewed_at": "2026-10-25T00:01:34.6558992+08:00",
+      "result": "passed-scoped",
+      "finding": "本人实际逐张查看完整1920×1080原图：本语正文、搜索、两侧目录、十二章入口及新增日志/MQ行清晰；顶部为匿名登录和供应商入口，无旧Hero、用户凭据或验证码答案。截图只显示首页首屏，不冒称全站旧图或登录业务场景审校。"
+    }
+  ],
+  "result": "PASS_FOUR_PUBLISHED_TWELVE_CHAPTER_HOME_IMAGES"
+}

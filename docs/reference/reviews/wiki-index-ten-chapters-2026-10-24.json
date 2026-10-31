@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "wiki-index",
+  "source": "docs/wiki/index.md",
+  "source_sha256": "b46aa78320d018f4808ae258354f641bae73b4a15b9fe3aeaf0f8bc0770187c5",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人对修改后的四语首页逐篇完整实际复读，核对十章、目录、仓库和工程入口；git remote -v本轮实际只读核对。原九章内容及旧审校保全，最终站点和截图另验。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/index.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:48:28",
+      "result": "approved",
+      "translation_sha256": "8f656036c6898297cdcbc6df497832b67c885daa855ed2e014c435e416ba4949",
+      "checks": {
+        "coverage_and_meaning": "十章及十目录、仓库关系、工程参考全篇对照；新认证/租户/工作流循序说明与第十章可观测入口完整。",
+        "technical_literals": "目录名、五预设、技术名、remote地址逐项保留；四语相邻链接本语后缀正确。",
+        "security_and_failure_semantics": "截图业务号为例子；构建与审校、历史与当前验证不混淆；未宣称观测服务已启动。",
+        "language_and_terminology": "全文实际复读；ten topics与十行入口对应，framework source和slow system表达自然。",
+        "images_and_links": "本页无栅格图；十行入口与四语现有正文核对，工程参考/仓库地址保留；实际站点点击/窄屏另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/index.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:48:28",
+      "result": "approved",
+      "translation_sha256": "8e2b0e9ffbf0b8b6dcb6557f4b9b4f9ba52420f7915468051b4e232034181d56",
+      "checks": {
+        "coverage_and_meaning": "十章及十目录、仓库关系、工程参考全篇对照；新认证/租户/工作流循序说明与第十章可观测入口完整。",
+        "technical_literals": "目录名、五预设、技术名、remote地址逐项保留；四语相邻链接本语后缀正确。",
+        "security_and_failure_semantics": "截图业务号为例子；构建与审校、历史与当前验证不混淆；未宣称观测服务已启动。",
+        "language_and_terminology": "全文实际复读；十のテーマ、本人確認与可観測性等表述自然，无中文直译段落。",
+        "images_and_links": "本页无栅格图；十行入口与四语现有正文核对，工程参考/仓库地址保留；实际站点点击/窄屏另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/index.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:48:28",
+      "result": "approved",
+      "translation_sha256": "6aaefd76067a0197e8e7a641fbf66bc6d6616daa002e9e1a4b7d300ae6f90004",
+      "checks": {
+        "coverage_and_meaning": "十章及十目录、仓库关系、工程参考全篇对照；新认证/租户/工作流循序说明与第十章可观测入口完整。",
+        "technical_literals": "目录名、五预设、技术名、remote地址逐项保留；四语相邻链接本语后缀正确。",
+        "security_and_failure_semantics": "截图业务号为例子；构建与审校、历史与当前验证不混淆；未宣称观测服务已启动。",
+        "language_and_terminology": "全文实际复读；열 가지、회사별 데이터分离与경보用词自然，语序及技术名正确。",
+        "images_and_links": "本页无栅格图；十行入口与四语现有正文核对，工程参考/仓库地址保留；实际站点点击/窄屏另验。"
+      },
+      "findings": []
+    }
+  }
+}

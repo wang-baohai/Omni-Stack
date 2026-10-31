@@ -1,0 +1,8 @@
+            // 2.3、scan + registry Jobhandler
+            Object jobBean = applicationContext.getBean(beanName);
+            for (Map.Entry<Method, XxlJob> jobMethodEntry : annotatedMethods.entrySet()) {
+                Method jobMethod = jobMethodEntry.getKey();
+                XxlJob xxlJob = jobMethodEntry.getValue();
+                // regist
+                registryJobHandler(xxlJob, jobBean, jobMethod);
+            }

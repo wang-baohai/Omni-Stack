@@ -103,6 +103,7 @@ Router 使用 `createWebHistory(import.meta.env.BASE_URL)`。静态只表示预�
 | `/supplier-portal` | 需要 token 与 portalAccess 策略 |
 | `/menu-load-error` | 需要 token；提供菜单重试 |
 | `/admin`、`/admin/dashboard` | 管理布局及默认子页；受管理身份策略约束 |
+| `/workspace`、`/workspace/overview` | 受保护；工作台根路径重定向到统一驾驶舱，旧审批/任务子页按 5.1 定位同页面板 |
 | `/admin/:pathMatch(.*)*`、`/:pathMatch(.*)*` | 分别渲染403/404页；前者受保护，后者公开 |
 
 保护路由无 token 时通过 safeAppRedirect 保留站内回跳，并选择 Login/PortalLogin。有 token 时每次 initFromToken；菜单未完成则等待 loadMenus、注册并 replace 重导航，失败进入 MenuLoadError；其余分支补注册，再执行管理/供应商门户/资产本人访问策略。Token 存在与客户端解码不证明签名有效或未过期，服务端请求仍须认证。
@@ -112,6 +113,22 @@ Router 使用 `createWebHistory(import.meta.env.BASE_URL)`。静态只表示预�
 视图由 `import.meta.glob('../views/**/index.vue')` 延迟加载。当前 viewOverrides 恰有两项：system:oauth2→views/oauth2-client/index.vue、base:operlog→views/monitor/oper-log/index.vue。动态 meta 包含 title/icon/requiresAuth/permissionCode；类型中的元字段可选，不能说所有静态记录都显式填写全部字段。动态名称集合用于去重，退出时按注册名移除。
 
 菜单失败也会设置 menusLoaded=true，必须同时查看 idle/loading/loaded/failed 状态；retryLoadMenus 先重置后重载。具体恢复操作归 Wiki。
+
+---
+
+### 5.1 首页、工作台与应用导航边界
+
+正式 CLI 将 catalog 解析的模块闭包通过 `OMNI_FRONTEND_MODULES` 传给前端构建参数 `VITE_OMNI_MODULES`。源码按精简预设构建时，视图解析和客户端展示权限与该选择求交；缺少 workflow 时不请求流程统计或挂载审批面板，缺少 SRM 时不提供供应商入口。未设置该参数的直接构建保持全量行为，生成工程仍受实际文件裁剪约束。此过滤不改 JWT、数据库角色或服务端授权；实现见 [deployment-modules.ts](../omni-frontend/src/utils/deployment-modules.ts)。
+
+首页“我的工作台”使用同源原生链接在新标签打开，带 `noopener noreferrer`；沿用既有会话，不在 URL 携带 token。工作台不提供首页/Wiki 返回入口。
+
+概览、待我审批、我的任务在 `/workspace/overview` 同页展示，复用原列表、表单和 API。旧 `/workspace/approvals`、`/workspace/jobs` 保留 query 并分别定位 `#approvals`、`#my-tasks`，不另维护三套页面。
+
+工作台的“应用”抽屉与搜索覆盖全部已授权且有实际视图的菜单；目录和抽屉的业务入口打开新标签。业务布局不挂全局“应用”按钮或抽屉，侧栏聚焦当前模块，搜索按当前 `route.meta.appId` 的稳定根 ID 过滤可进入页面；选择时再次核对目标 appId，并在当前标签导航。无效 appId 返回空候选，不按 URL 前缀猜归属。
+
+私有错误页不提供首页/上一页恢复按钮；未知模块和无权限页也不以仪表盘作为备用菜单。浏览器原生后退、切换标签和手输地址不被封锁；界面边界不替代服务端授权。菜单首次加载后的重匹配使用 `resolveMenuReloadTarget()` 分别传 path、query、hash，不把 fullPath 填入对象 path，避免丢失回跳参数和定位锚点。
+
+实现入口为 [ConsoleHeader](../omni-frontend/src/components/ConsoleHeader.vue)、[工作台](../omni-frontend/src/views/workspace/index.vue)与[导航工具](../omni-frontend/src/utils/navigation.ts)。
 
 ---
 
@@ -242,6 +259,8 @@ const { options, loading } = useDictOptions('workflow_category')
 ---
 
 ## 15. 构建与静态服务边界
+
+前端镜像在应用构建后顺序构建同仓 Wiki，并从同一 3000 端口的 `/wiki/` 路径交付公开静态文档。官网 `/` 直接展示这些文档，游客不需要登录；身份只改变账户区，工作台和业务路由继续执行原认证守卫。Wiki 缺失返回 404，不回退为应用首页；只有 Wiki 文档允许同源嵌入，其启动脚本使用响应 nonce，登录及业务路径保留原安全策略。
 
 [前端 Dockerfile](../docker/frontend/Dockerfile) 以 Node 22 构建、Nginx 1.28 交付 dist，监听3000。当前 [Nginx](../docker/frontend/nginx.conf) 把 /api/、/oauth2/、/.well-known/ 代理到 omni-gateway:8080，以 Docker DNS 解析，并提供 history 的 index.html 回退。
 

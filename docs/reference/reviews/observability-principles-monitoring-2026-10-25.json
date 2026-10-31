@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-principles",
+  "source": "docs/wiki/observability-principles.md",
+  "source_sha256": "f32c77df68d3b8fe64d78dcd86f37843c79e97d3374e46f21b114c96cf308afb",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current source, translation and actual-image digests",
+  "method": "本人逐篇完整复读最终中文及英日韩全文；43张本轮正式原图已逐张实际查看。此脚本仅校验阅读记录与最终摘要后登记人工智能审校，不执行自动语义盖章，不冒称真人或全部运行验收。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/observability-principles.md",
+      "image": "docs/images/zh-CN/monitor-platform.png",
+      "sha256": "a4c3ce2b780ac003d73c5c2d035dca184923e0b62bbc20410d15dbe7e206a35f",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-principles.en.md",
+      "image": "docs/images/en-US/monitor-platform.png",
+      "sha256": "3e9f8a2f5d1d833f0323a8661c0274327473451fd17c3de0c362ee15a3c79c8e",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-principles.jp.md",
+      "image": "docs/images/ja-JP/monitor-platform.png",
+      "sha256": "9266b89d50fb97a5668f59b32894015835c23cfad5c1c385e83e2384c3b19ce4",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-principles.kr.md",
+      "image": "docs/images/ko-KR/monitor-platform.png",
+      "sha256": "4b4b1370991bb206634aa2d54e512c9e4b959242aeb57e182c295b0a076c3f09",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "687ea5be289cee6d5c1d3a5db5c48365461c71801a1c6bcd5afd43c0ebf86bf4",
+      "checks": {
+        "coverage_and_meaning": "从慢系统的故事解释指标、日志、链路和告警；三种译文完整保留工具分工、full与core范围及逐步阅读入口。",
+        "technical_literals": "监控工具、四个信号名称和P95含义一致；八个业务目标不是用户数量，也不把截图读数写成固定运行承诺。",
+        "security_and_failure_semantics": "明确空数据、零值和查询失败不同；不开第二套应用环境，不把本地看板当生产性能验收。",
+        "language_and_terminology": "逐段对照中文并完整复读最终英文，入站/出站、分位数、空数据与通知边界自然准确；上游界面保留英文按钮便于照图查找。",
+        "images_and_links": "四语真实平台看板逐张看过，母语界面与上游英文看板标题如实保留，重启低谷和本地八目标事实匹配。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "b4c7c3cff5a3b649161da440dd62042440fb9a034cdd56cd515ca0b989ef1690",
+      "checks": {
+        "coverage_and_meaning": "从慢系统的故事解释指标、日志、链路和告警；三种译文完整保留工具分工、full与core范围及逐步阅读入口。",
+        "technical_literals": "监控工具、四个信号名称和P95含义一致；八个业务目标不是用户数量，也不把截图读数写成固定运行承诺。",
+        "security_and_failure_semantics": "明确空数据、零值和查询失败不同；不开第二套应用环境，不把本地看板当生产性能验收。",
+        "language_and_terminology": "逐段对照中文并完整复读最终日文；自然解释専門語、収集対象、分位与追跡，原生英文字段附语境，源码注释不擅自翻译。",
+        "images_and_links": "四语真实平台看板逐张看过，母语界面与上游英文看板标题如实保留，重启低谷和本地八目标事实匹配。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "6739bc833c936259111eb0a7e608674827593966ba01859be0f3e4f733a97c6c",
+      "checks": {
+        "coverage_and_meaning": "从慢系统的故事解释指标、日志、链路和告警；三种译文完整保留工具分工、full与core范围及逐步阅读入口。",
+        "technical_literals": "监控工具、四个信号名称和P95含义一致；八个业务目标不是用户数量，也不把截图读数写成固定运行承诺。",
+        "security_and_failure_semantics": "明确空数据、零值和查询失败不同；不开第二套应用环境，不把本地看板当生产性能验收。",
+        "language_and_terminology": "逐段对照中文并完整复读最终韩文；메트릭/트레이스/경보、无样本与失败语义保持一致，原生按钮和工程字面量不改写。",
+        "images_and_links": "四语真实平台看板逐张看过，母语界面与上游英文看板标题如实保留，重启低谷和本地八目标事实匹配。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "wiki-site-interface-copy",
+  "source": "docs/.vitepress/locales/zh-CN.json",
+  "source_sha256": "943e21983b41f1c1e7fcea2ba2854fb0d624a8b6d90c1ed428caa874addd1801",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source and translation contents",
+  "method": "本人实际完整读完四语正文/JSON，按中文逐段对照；common-job日韩补漏与日文术语修正后逐项复核。此脚本只登记这些具体审校及校验摘要，不审签未读的前端事实、平台教程或其他文章。",
+  "translations": {
+    "en-US": {
+      "path": "docs/.vitepress/locales/en-US.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "58e8eebd87e5e05eb4633ad905be5a4bf2e6d34f027281a31475e9c5026ec2b0",
+      "checks": {
+        "coverage_and_meaning": "逐项实际读完四个语言JSON：搜索、目录、前后页、辅助键、外观、中文唯一维护说明及十三个内容章节标题均完整对应。",
+        "technical_literals": "WIKI-01至WIKI-13稳定键、sourceOnly三字段与全部interface键一致，不用改编号适应新顺序；工程事实组独立于十三个主题。",
+        "security_and_failure_semantics": "中文源入口不冒充译文，不把站点生成当发布签核；源只读、正文跳转与外观功能未改变身份和权限边界。",
+        "language_and_terminology": "全文逐段对照中文实际审读，事实、限制和恢复语气自然准确；保留协议、代码、接口和目录原文，不用术语代替解释。",
+        "images_and_links": "四语真实搜索、索引、手机页与首页共20幅本轮站点原图已逐张查看；母语搜索提示和章节标题与JSON对应，长页缩略图不代替全文语义审读。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/.vitepress/locales/ja-JP.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "9e9182136e37fdc305a6a593c357b7090a142f8c7402c28fa8997ecec3f086f9",
+      "checks": {
+        "coverage_and_meaning": "逐项实际读完四个语言JSON：搜索、目录、前后页、辅助键、外观、中文唯一维护说明及十三个内容章节标题均完整对应。",
+        "technical_literals": "WIKI-01至WIKI-13稳定键、sourceOnly三字段与全部interface键一致，不用改编号适应新顺序；工程事实组独立于十三个主题。",
+        "security_and_failure_semantics": "中文源入口不冒充译文，不把站点生成当发布签核；源只读、正文跳转与外观功能未改变身份和权限边界。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job修正執行器/工程/定点整理等直译并补代理父类接口与private说明，最后变更再次核对。其他文档术语与索引语义一致。",
+        "images_and_links": "四语真实搜索、索引、手机页与首页共20幅本轮站点原图已逐张查看；母语搜索提示和章节标题与JSON对应，长页缩略图不代替全文语义审读。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/.vitepress/locales/ko-KR.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:15:03",
+      "result": "approved",
+      "translation_sha256": "076e497475eab3de55d09de84505b8715a7446282e49ad1586a63467d6b5a61b",
+      "checks": {
+        "coverage_and_meaning": "逐项实际读完四个语言JSON：搜索、目录、前后页、辅助键、外观、中文唯一维护说明及十三个内容章节标题均完整对应。",
+        "technical_literals": "WIKI-01至WIKI-13稳定键、sourceOnly三字段与全部interface键一致，不用改编号适应新顺序；工程事实组独立于十三个主题。",
+        "security_and_failure_semantics": "中文源入口不冒充译文，不把站点生成当发布签核；源只读、正文跳转与外观功能未改变身份和权限边界。",
+        "language_and_terminology": "全文逐段对照中文实际审读；common-job补齐Bean条件/扫描两段引导和代理父类接口/private注意项，日期、权限、失败与归属限制未省略。",
+        "images_and_links": "四语真实搜索、索引、手机页与首页共20幅本轮站点原图已逐张查看；母语搜索提示和章节标题与JSON对应，长页缩略图不代替全文语义审读。"
+      },
+      "findings": []
+    }
+  }
+}

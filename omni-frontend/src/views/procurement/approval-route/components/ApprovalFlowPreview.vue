@@ -15,9 +15,8 @@ const businessNodes = computed(() => props.graph?.nodes.filter(
 
 function nodeDescription(node: ApprovalNode) {
   if (node.type === 'GATEWAY') return t('procurementApprovalRules.flowBranchHint')
-  if (node.description) return node.description
   if (node.roleCode) return `${t('procurementApprovalRules.role')}：${node.roleCode}`
-  return node.name
+  return t('procurementApprovalRules.configuredApproval')
 }
 </script>
 
@@ -67,6 +66,7 @@ function nodeDescription(node: ApprovalNode) {
 <style scoped>
 .flow-preview {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 12px;
 }
@@ -78,16 +78,27 @@ function nodeDescription(node: ApprovalNode) {
 
 .node-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
 
 .flow-node {
   display: flex;
+  min-width: 0;
   gap: 12px;
   align-items: flex-start;
   padding: 12px;
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 8px;
+}
+
+.flow-node > .el-tag {
+  flex-shrink: 0;
+}
+
+.flow-node > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .node-description {

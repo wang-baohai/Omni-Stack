@@ -51,6 +51,21 @@ function resultTitle(outcome: MatchPreview['outcome']) {
   }
   return t(`procurementApprovalRules.${keys[outcome]}`)
 }
+
+function resultDescription(preview: MatchPreview) {
+  switch (preview.outcome) {
+  case 'MATCHED':
+    return t(preview.defaultRule
+      ? 'procurementApprovalRules.matchDefaultHint'
+      : 'procurementApprovalRules.matchExactHint')
+  case 'NO_MATCH':
+    return t('procurementApprovalRules.matchNoRuleHint')
+  case 'AMBIGUOUS':
+    return t('procurementApprovalRules.matchConflictHint')
+  default:
+    return t('procurementApprovalRules.matchUnavailableHint')
+  }
+}
 </script>
 
 <template>
@@ -94,25 +109,33 @@ function resultTitle(outcome: MatchPreview['outcome']) {
         :closable="false"
         show-icon
         :title="resultTitle(result.outcome)"
-        :description="result.actionMessage"
+        :description="resultDescription(result)"
       />
-      <el-descriptions v-if="result.routeId" :column="2" border>
-        <el-descriptions-item :label="t('procurementApprovalRules.ruleName')">
-          {{ result.routeName }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('procurementApprovalRules.category')">
-          {{ result.defaultRule
-            ? t('procurementApprovalRules.defaultCategory')
-            : result.effectiveCategoryCode }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('procurementApprovalRules.amountRange')">
-          {{ result.minAmount }} ≤ x &lt; {{ result.maxAmount || '∞' }}
-        </el-descriptions-item>
-        <el-descriptions-item :label="t('procurementApprovalRules.approvalFlow')">
-          {{ result.modelName || t('procurementApprovalRules.unavailableFlow') }}
-          <span v-if="result.modelVersion"> · {{ t('procurementApprovalRules.version', { version: result.modelVersion }) }}</span>
-        </el-descriptions-item>
-      </el-descriptions>
+      <dl v-if="result.routeId" class="match-summary">
+        <div>
+          <dt>{{ t('procurementApprovalRules.ruleName') }}</dt>
+          <dd>{{ result.routeName }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('procurementApprovalRules.category') }}</dt>
+          <dd>
+            {{ result.defaultRule
+              ? t('procurementApprovalRules.defaultCategory')
+              : result.effectiveCategoryCode }}
+          </dd>
+        </div>
+        <div>
+          <dt>{{ t('procurementApprovalRules.amountRange') }}</dt>
+          <dd>{{ result.minAmount }} ≤ x &lt; {{ result.maxAmount || '∞' }}</dd>
+        </div>
+        <div>
+          <dt>{{ t('procurementApprovalRules.approvalFlow') }}</dt>
+          <dd>
+            {{ result.modelName || t('procurementApprovalRules.unavailableFlow') }}
+            <span v-if="result.modelVersion"> · {{ t('procurementApprovalRules.version', { version: result.modelVersion }) }}</span>
+          </dd>
+        </div>
+      </dl>
       <ApprovalFlowPreview :graph="result.approvalGraph" />
     </div>
   </el-card>
@@ -136,8 +159,39 @@ function resultTitle(outcome: MatchPreview['outcome']) {
 
 .match-result {
   display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   margin-top: 4px;
+}
+
+.match-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 6px;
+}
+
+.match-summary > div {
+  min-width: 0;
+  padding: 10px 12px;
+}
+
+.match-summary dt {
+  margin-bottom: 6px;
+  color: var(--el-text-color-secondary);
+  font-weight: 600;
+}
+
+.match-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.match-result :deep(.el-alert__content) {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 768px) {
@@ -150,8 +204,8 @@ function resultTitle(outcome: MatchPreview['outcome']) {
     width: 100%;
   }
 
-  .match-result :deep(.el-descriptions__body) {
-    overflow-x: auto;
+  .match-summary {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

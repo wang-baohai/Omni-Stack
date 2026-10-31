@@ -1,0 +1,4 @@
+            boolean isCompletionConditionSatisfied = completionConditionSatisfied(execution.getParent());
+            if (nrOfCompletedInstances >= nrOfInstances || isCompletionConditionSatisfied) {
+                leave(executionEntity, nrOfInstances, nrOfCompletedInstances, isCompletionConditionSatisfied);
+

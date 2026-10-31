@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "distributed-jobs-recovery",
+  "source": "docs/wiki/distributed-jobs-recovery.md",
+  "source_sha256": "0dfdf8cc71b9c4060a4e4c988ead15c48b788910945dfdb517d5d376d267a487",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Actual current article, literal source and reviewed-image digests",
+  "method": "本人逐篇实际完整读完七篇中文与21篇英日韩，日文正文自然化后复核；随后对八篇使用/恢复最终全文再读，另两处My Jobs实际界面名称改动逐项复核。12张适用原生/工作台/表单图逐张看过。脚本仅绑定既有真实审校与摘要，不产生机器语义盖章或真人签核。",
+  "image_bindings": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/distributed-jobs-recovery.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "fdc42479a4a40212593b6ce2aa77cee6951e4851f2db8c189a557e77124ad3c1",
+      "checks": {
+        "coverage_and_meaning": "按未到时间、未派发、执行失败、无回报逐层排查，再解释保留关联、个人/系统扩展和正负场景验证。",
+        "technical_literals": "可恢复关联源码注释已与实际Java原文逐字修正；Task-00001 Bean、显式tenantId及同语言事实/章入口均一致。",
+        "security_and_failure_semantics": "不按名称猜测删除、不填虚假成功时间，不把线程中断当副作用回滚；明确跨用户/跨租户拒绝、响应丢失、远端残留检查。",
+        "language_and_terminology": "全文逐段对照中文复读，dispatch/execute/callback和ownership不混同；按当前截图统一My Jobs与Trigger Now原生文字，代码原文不改。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码注释待恢复关联与当前Java可恢复关联不同。",
+          "resolution": "四语原文修正并再次完整复读，字面匹配测试通过。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/distributed-jobs-recovery.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "28b6c8549a1dead127e0e613a1654be9d91b0804917630ad77c4ebcb5d412d29",
+      "checks": {
+        "coverage_and_meaning": "按未到时间、未派发、执行失败、无回报逐层排查，再解释保留关联、个人/系统扩展和正负场景验证。",
+        "technical_literals": "可恢复关联源码注释已与实际Java原文逐字修正；Task-00001 Bean、显式tenantId及同语言事实/章入口均一致。",
+        "security_and_failure_semantics": "不按名称猜测删除、不填虚假成功时间，不把线程中断当副作用回滚；明确跨用户/跨租户拒绝、响应丢失、远端残留检查。",
+        "language_and_terminology": "全文复读后自然化概念、派发、阻塞方针与复旧用语；按当前截图统一マイジョブ/今すぐ実行/毎分，原生中文配置和值与源码注释如实保留。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码注释待恢复关联与当前Java可恢复关联不同。",
+          "resolution": "四语原文修正并再次完整复读，字面匹配测试通过。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/distributed-jobs-recovery.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 20:02:37",
+      "result": "approved",
+      "translation_sha256": "9cf7ae2ba5751f81965a8185400b0cbae4c0b249656d281b936c016773649ad4",
+      "checks": {
+        "coverage_and_meaning": "按未到时间、未派发、执行失败、无回报逐层排查，再解释保留关联、个人/系统扩展和正负场景验证。",
+        "technical_literals": "可恢复关联源码注释已与实际Java原文逐字修正；Task-00001 Bean、显式tenantId及同语言事实/章入口均一致。",
+        "security_and_failure_semantics": "不按名称猜测删除、不填虚假成功时间，不把线程中断当副作用回滚；明确跨用户/跨租户拒绝、响应丢失、远端残留检查。",
+        "language_and_terminology": "全文逐段对照中文复读，배정/실행/콜백与소유권边界完整；新表单실행 일정/매분与实际截图一致，共享中文数据明确说明。",
+        "images_and_links": "本篇没有栅格图片；机制图、框架/工程源码与同语言前后章节和事实入口实际对照。技术原文可在本站阅读，外链仅作自愿补充，不用跳转代替解释。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "源码注释待恢复关联与当前Java可恢复关联不同。",
+          "resolution": "四语原文修正并再次完整复读，字面匹配测试通过。"
+        }
+      ]
+    }
+  }
+}

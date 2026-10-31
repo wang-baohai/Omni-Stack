@@ -517,6 +517,8 @@ services:
     build:
       context: .
       dockerfile: docker/frontend/Dockerfile
+      args:
+        VITE_OMNI_MODULES: ${OMNI_FRONTEND_MODULES:-}
     image: ${OMNI_IMAGE_NAMESPACE:-omni}-frontend:latest
     restart: unless-stopped
     ports:

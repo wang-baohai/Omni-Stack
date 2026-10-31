@@ -8,12 +8,24 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { usePermissionStore } from '@/stores/permission'
+import { useWorkspaceStore } from '@/stores/workspace'
 import type { MenuNode } from '@/api/menu'
 import { menuI18nMap } from '@/constants/menu'
 import { hasManagementAccess, hasSupplierPortalAccess, isAssetSelfServiceUser } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import i18n from '@/i18n'
-import { safeAppRedirect } from '@/utils/navigation'
+import { APP_LANDINGS, resolveAppLanding, resolveMenuReloadTarget, safeAppRedirect } from '@/utils/navigation'
+import { isDeploymentPermissionEnabled, isDeploymentRouteEnabled } from '@/utils/deployment-modules'
+
+/** 面包屑单项：titleKey 缺失为 null，交由消费方回退 fallbackTitle，绝不伪造。 */
+export interface RouteBreadcrumbItem {
+  /** 该级权限编码，用于稳定标识与 i18n 查找 */
+  code: string
+  /** 标题 i18n 键；menuI18nMap 未登记为 null */
+  titleKey: string | null
+  /** 后端权限名称，作为无 i18n 时的回退显示 */
+  fallbackTitle: string
+}
 
 /** 扩展 Vue Router 路由元信息类型 */
 declare module 'vue-router' {
@@ -23,6 +35,12 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     permissionCode?: string
     portalAccess?: boolean
+    /** 所属应用（顶层菜单根）稳定 ID，供侧栏/面包屑定位模块 */
+    appId?: number
+    /** 所属应用权限编码（顶层根），如 base:operlog 归属 monitor */
+    appCode?: string
+    /** 从应用根到本页面的面包屑链，作为面包屑渲染依据 */
+    breadcrumb?: RouteBreadcrumbItem[]
   }
 }
 
@@ -44,8 +62,10 @@ const viewOverrides: Record<string, string> = {
  * 根据权限码解析对应的视图组件路径。
  * 约定规则：permissionCode "system:user" -> 路径 "views/system/user/index.vue"
  * 特殊映射通过 viewOverrides 覆盖。
+ * 导出供共享导航派生入口判定“真实可进入页面”，避免各组件复制解析逻辑。
  */
-function resolveViewComponent(permissionCode: string): (() => Promise<unknown>) | undefined {
+export function resolveViewComponent(permissionCode: string): (() => Promise<unknown>) | undefined {
+  if (!isDeploymentPermissionEnabled(permissionCode)) return undefined
   // 优先使用特殊映射
   if (viewOverrides[permissionCode]) {
     return viewModules[viewOverrides[permissionCode]]
@@ -58,8 +78,14 @@ function resolveViewComponent(permissionCode: string): (() => Promise<unknown>) 
 
 /**
  * 权限码到 Element Plus 图标名称的映射。
+ * 导出供共享导航派生入口复用，保持图标来源单一，避免各组件各自维护副本。
  */
-const iconMap: Record<string, string> = {
+export const iconMap: Record<string, string> = {
+  'system': 'Setting',
+  'base': 'DataAnalysis',
+  'job': 'Timer',
+  'monitor': 'Monitor',
+  'workflow': 'Guide',
   'crm': 'TrendCharts',
   'crm:overview': 'DataAnalysis',
   'crm:lead': 'User',
@@ -206,6 +232,42 @@ const staticRoutes: RouteRecordRaw[] = [
     ],
   },
   {
+    // 个人工作台：独立受保护页面，与官网公开落地页和管理控制台分离；
+    // 沿用 /admin 的 403 兜底规则，未识别的工作台地址落回现行 403/404 处理。
+    path: '/workspace',
+    name: 'Workspace',
+    component: () => import('@/views/workspace/layout.vue'),
+    redirect: '/workspace/overview',
+    children: [
+      {
+        path: 'overview',
+        name: 'WorkspaceOverview',
+        component: () => import('@/views/workspace/index.vue'),
+        meta: { title: 'Workspace Overview', requiresAuth: true },
+      },
+      {
+        path: 'approvals',
+        name: 'WorkspaceApprovals',
+        // 旧书签定位同一驾驶舱，认证与供应商边界继续由目标路由守卫处理。
+        redirect: to => ({ name: 'WorkspaceOverview', query: to.query, hash: '#approvals' }),
+        meta: { title: 'Workspace Approvals', requiresAuth: true },
+      },
+      {
+        path: 'jobs',
+        name: 'WorkspaceJobs',
+        redirect: to => ({ name: 'WorkspaceOverview', query: to.query, hash: '#my-tasks' }),
+        meta: { title: 'Workspace Jobs', requiresAuth: true },
+      },
+      {
+        path: ':pathMatch(.*)*',
+        name: 'WorkspaceAccessDenied',
+        component: () => import('@/views/error/status/index.vue'),
+        props: { statusCode: 403 },
+        meta: { title: 'Access Denied', requiresAuth: true },
+      },
+    ],
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/error/status/index.vue'),
@@ -217,7 +279,7 @@ const staticRoutes: RouteRecordRaw[] = [
 // 创建路由实例，使用 HTML5 History 模式
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: staticRoutes,
+  routes: staticRoutes.filter((route) => isDeploymentRouteEnabled(route.path)),
 })
 
 /**
@@ -228,6 +290,7 @@ const dynamicRouteNames = new Set<string>()
 /**
  * 根据后端菜单树动态注册路由。
  * 仅处理 MENU 类型节点，通过约定式映射查找视图组件。
+ * 每个顶层菜单即其下所有页面的所属应用，据此写入模块标识与面包屑依据。
  *
  * @param menus 菜单树节点列表
  */
@@ -236,15 +299,28 @@ export function registerDynamicRoutes(menus: MenuNode[]) {
   const adminRoute = router.getRoutes().find((r) => r.path === '/admin')
   if (!adminRoute) return
 
-  for (const menu of menus) {
-    registerMenuRoute(menu, adminRoute.name?.toString())
+  for (const root of menus) {
+    registerMenuRoute(root, root, [])
   }
+}
+
+/** 由祖先链与当前节点构造面包屑：应用根 → 中间目录 → 本页面。 */
+function buildBreadcrumb(ancestors: readonly MenuNode[], self: MenuNode): RouteBreadcrumbItem[] {
+  return [...ancestors, self].map((node) => ({
+    code: node.permissionCode,
+    titleKey: menuI18nMap[node.permissionCode] ?? null,
+    fallbackTitle: node.permissionName,
+  }))
 }
 
 /**
  * 递归注册单个菜单节点及其子节点。
+ *
+ * @param menu 当前节点
+ * @param appRoot 所属应用（顶层根节点），提供稳定 appId/appCode
+ * @param ancestors 从应用根到当前节点父级的祖先链，用于面包屑
  */
-function registerMenuRoute(menu: MenuNode, parentName?: string) {
+function registerMenuRoute(menu: MenuNode, appRoot: MenuNode, ancestors: readonly MenuNode[]) {
   // 仅处理 MENU 类型节点（DIRECTORY 类型仅作为分组，不需要路由）
   if (menu.type === 'MENU' && !menu.permissionCode.startsWith('srm:portal:')) {
     const component = resolveViewComponent(menu.permissionCode)
@@ -262,16 +338,20 @@ function registerMenuRoute(menu: MenuNode, parentName?: string) {
           icon: iconMap[menu.permissionCode] || 'Document',
           requiresAuth: true,
           permissionCode: menu.permissionCode,
+          appId: appRoot.id,
+          appCode: appRoot.permissionCode,
+          breadcrumb: buildBreadcrumb(ancestors, menu),
         },
       })
       dynamicRouteNames.add(menu.permissionCode)
     }
   }
 
-  // 递归处理子节点
+  // 递归处理子节点：应用根保持不变，当前节点并入祖先链
   if (menu.children && menu.children.length > 0) {
+    const nextAncestors = [...ancestors, menu]
     for (const child of menu.children) {
-      registerMenuRoute(child, parentName)
+      registerMenuRoute(child, appRoot, nextAncestors)
     }
   }
 }
@@ -293,6 +373,16 @@ export function clearDynamicRoutes() {
  */
 export function clearAuthenticatedSession(explicit = true) {
   useUserStore().logout(explicit)
+  usePermissionStore().reset()
+  clearDynamicRoutes()
+}
+
+/**
+ * 仅回收本标签内存中的会话、权限快照与动态路由，不写共享存储。
+ * 跨标签同步必须先回收旧身份再由同步入口写入新身份，避免两标签互相清理形成回声。
+ */
+export function clearSessionInMemory() {
+  useUserStore().clearLocalSession()
   usePermissionStore().reset()
   clearDynamicRoutes()
 }
@@ -339,9 +429,9 @@ router.beforeEach(async (to) => {
   if (to.meta.requiresAuth === false) {
     // 已登录用户访问登录页时重定向
     if (to.name === 'Login' && userStore.token) {
-      return { name: 'Home' }
+      return APP_LANDINGS.site
     } else if (to.name === 'PortalLogin' && userStore.token) {
-      return '/supplier-portal'
+      return APP_LANDINGS.portal
     } else {
       return true
     }
@@ -361,15 +451,24 @@ router.beforeEach(async (to) => {
     if (permCode === 'asset:asset' && assetSelfServiceOnly) {
       document.title = t('common.assetMyAssets')
     }
+    // 菜单失败降级页：目标只能来自本守卫产出的已校验值。外部伪造的 redirect 在此改写为
+    // 安全落点，已是安全值时直接放行，避免在降级页上反复重定向形成导航循环。
+    if (to.name === 'MenuLoadError') {
+      const safeTarget = resolveAppLanding(to.query.redirect, { entry: 'console', assetSelfServiceOnly })
+      if (safeTarget === to.query.redirect) return true
+      return { path: safeTarget, replace: true }
+    }
     // 已登录但菜单未加载：加载菜单并注册动态路由
     if (!permissionStore.menusLoaded) {
       try {
         await permissionStore.loadMenus()
         registerDynamicRoutes(permissionStore.menuTree)
-        // 重新导航到目标路由（使用 fullPath 避免传递内部路由对象状态）
-        return { path: to.fullPath, replace: true }
+        // 只传递公开地址字段，保留冷启动深链的查询参数与章节锚点。
+        return resolveMenuReloadTarget(to)
       } catch {
-        return { name: 'MenuLoadError', query: { redirect: to.fullPath } }
+        // 降级目标必须是已校验站内路径：原目标合法则保留，被篡改则回落到控制台落点。
+        const degradeTarget = resolveAppLanding(to.fullPath, { entry: 'console', assetSelfServiceOnly })
+        return { name: 'MenuLoadError', query: { redirect: degradeTarget } }
       }
     } else {
       // 菜单已加载（可能由 Home 页预加载），确保动态路由已注册
@@ -381,22 +480,40 @@ router.beforeEach(async (to) => {
       const canAccessPortal = hasSupplierPortalAccess(permissionStore.permissions, roles)
 
       if (to.meta.portalAccess && !canAccessPortal) {
-        return { name: 'Home' }
+        return APP_LANDINGS.site
       }
 
       // 只有门户权限的 USER/SUPPLIER 账号不得进入管理后台。
       if (to.path.startsWith('/admin') && isSupplier && !hasManagementPermission) {
-        return '/supplier-portal'
+        return APP_LANDINGS.portal
       }
       if (to.path.startsWith('/admin') && !hasManagementPermission) {
-        return canAccessPortal ? '/supplier-portal' : '/'
+        return canAccessPortal ? APP_LANDINGS.portal : APP_LANDINGS.site
       }
       if (to.path === '/admin/dashboard' && assetSelfServiceOnly) {
-        return '/admin/asset/asset'
+        return APP_LANDINGS.assetSelf
       }
       return true
     }
   }
+})
+
+/**
+ * 访问成功钩子：最近访问的唯一写入口。
+ * 放在 afterEach 而不是 beforeEach，是因为 afterEach 只在导航被确认后才触发，且它的返回值不参与导航决策：
+ * 守卫里的重定向、取消与失败会以 failure 传出，本钩子据此直接跳过，因此失败导航不会新增记录，
+ * 原生 <a>、浏览器前进后退与现有守卫行为都不受影响。
+ * 交给 recordVisit 的只有该路由的权限码与当前已授权菜单树，登记结果是菜单叶子的稳定 ID；
+ * 认证回调、403/404 兜底与不存在路径没有 permissionCode，也不会命中菜单叶子，因此不落任何记录，
+ * 完整 URL、query、hash 与令牌从不参与登记。
+ *
+ * @param to 已成功抵达的路由
+ * @param _from 导航前的路由，登记不需要
+ * @param failure 导航失败或中断原因，成功时为空
+ */
+router.afterEach((to, _from, failure) => {
+  if (failure) return
+  useWorkspaceStore().recordVisit(usePermissionStore().menuTree, to.meta.permissionCode)
 })
 
 export default router

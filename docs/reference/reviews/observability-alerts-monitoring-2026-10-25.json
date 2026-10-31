@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-alerts",
+  "source": "docs/wiki/observability-alerts.md",
+  "source_sha256": "79e7469d124d924607e9b2307363072ac0ac253f444eda957a3578c4e8c75617",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current source, translation and actual-image digests",
+  "method": "本人逐篇完整复读最终中文及英日韩全文；43张本轮正式原图已逐张实际查看。此脚本仅校验阅读记录与最终摘要后登记人工智能审校，不执行自动语义盖章，不冒称真人或全部运行验收。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/observability-alerts.md",
+      "image": "docs/images/zh-CN/monitor-alertmanager.png",
+      "sha256": "3931867789554f3956c8c9364b261e98ec9c11c4cc16bb21fa356c521d1d1825",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-alerts.en.md",
+      "image": "docs/images/en-US/monitor-alertmanager.png",
+      "sha256": "0279e49aba53273f97ad62b4fd45b43ef5310eda22c8534f93823a102a285328",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-alerts.jp.md",
+      "image": "docs/images/ja-JP/monitor-alertmanager.png",
+      "sha256": "659c3248db53500bad0407cff67439200ac21bd26a6a25f59a4832f7876e3aa1",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-alerts.kr.md",
+      "image": "docs/images/ko-KR/monitor-alertmanager.png",
+      "sha256": "72cb0b91d1d573bb10877ac0af1171ece6b4001d9007ae4b48b2163098d74c50",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-alerts.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "683b6aa9b5069e391a09776060c789c98390f6432ecaa5a1252bb477f1c406ef",
+      "checks": {
+        "coverage_and_meaning": "先讲告警规则、等待时间、分组和接收，再解释原生四语空告警页、静默与SLI/SLO/错误预算。",
+        "technical_literals": "规则原文、两分钟持续条件、分组间隔及local-null一致；按请求与按时间的99.9%预算不能互换。",
+        "security_and_failure_semantics": "空告警不证明外部通知通畅；静默只抑制通知而非修复业务，本轮不创建静默、不注入假告警、不声称外部送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终英文，入站/出站、分位数、空数据与通知边界自然准确；上游界面保留英文按钮便于照图查找。",
+        "images_and_links": "四语Alertmanager原生页面已逐张看过。中文静默规则、韩文알림及일시중지규칙与实际菜单一致，空列表保持真实。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-alerts.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "7caedc7f4c3b9261308cf8ae69c937eda697fe06d1c23e780b37d1157f1ccda4",
+      "checks": {
+        "coverage_and_meaning": "先讲告警规则、等待时间、分组和接收，再解释原生四语空告警页、静默与SLI/SLO/错误预算。",
+        "technical_literals": "规则原文、两分钟持续条件、分组间隔及local-null一致；按请求与按时间的99.9%预算不能互换。",
+        "security_and_failure_semantics": "空告警不证明外部通知通畅；静默只抑制通知而非修复业务，本轮不创建静默、不注入假告警、不声称外部送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终日文；自然解释専門語、収集対象、分位与追跡，原生英文字段附语境，源码注释不擅自翻译。",
+        "images_and_links": "四语Alertmanager原生页面已逐张看过。中文静默规则、韩文알림及일시중지규칙与实际菜单一致，空列表保持真实。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-alerts.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "6c8e53284e0f52c96b9f436c9cf4097e775f4764b62f607af895a92737a81e73",
+      "checks": {
+        "coverage_and_meaning": "先讲告警规则、等待时间、分组和接收，再解释原生四语空告警页、静默与SLI/SLO/错误预算。",
+        "technical_literals": "规则原文、两分钟持续条件、分组间隔及local-null一致；按请求与按时间的99.9%预算不能互换。",
+        "security_and_failure_semantics": "空告警不证明外部通知通畅；静默只抑制通知而非修复业务，本轮不创建静默、不注入假告警、不声称外部送达。",
+        "language_and_terminology": "逐段对照中文并完整复读最终韩文；메트릭/트레이스/경보、无样本与失败语义保持一致，原生按钮和工程字面量不改写。",
+        "images_and_links": "四语Alertmanager原生页面已逐张看过。中文静默规则、韩文알림及일시중지규칙与实际菜单一致，空列表保持真实。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    }
+  }
+}

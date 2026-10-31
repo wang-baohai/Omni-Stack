@@ -1,9 +1,7 @@
 {
   "label": "English",
-  "wiki": "Learning paths",
-  "guides": "How-to guides",
+  "wiki": "Wiki home",
   "truth": "Engineering reference",
-  "design": "Design and history",
   "outline": "On this page",
   "search": "Search docs",
   "back": "Back to top",
@@ -29,5 +27,20 @@
   },
   "sourceOnlyTitle": "Chinese source reference",
   "sourceOnlyNotice": "This document is registered for Chinese-only maintenance. This page links to its canonical source; it is not a translated body.",
-  "sourceOnlyLink": "Read the canonical Chinese source"
+  "sourceOnlyLink": "Read the canonical Chinese source",
+  "chapters": {
+    "WIKI-01": "Project introduction",
+    "WIKI-02": "Harness concepts and engineering practices",
+    "WIKI-03": "Illustrated feature tutorials",
+    "WIKI-04": "Preset selection, build and startup",
+    "WIKI-05": "Authentication and authorization",
+    "WIKI-06": "Multi-tenancy",
+    "WIKI-07": "Workflow",
+    "WIKI-08": "Common shared capabilities",
+    "WIKI-09": "Project customization with Harness",
+    "WIKI-10": "Observability: metrics, traces, logs and alerts",
+    "WIKI-11": "Centralized log collection",
+    "WIKI-12": "Unified MQ management",
+    "WIKI-13": "Distributed scheduling (XXL-JOB)"
+  }
 }

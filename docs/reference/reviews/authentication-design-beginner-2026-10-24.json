@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-design",
+  "source": "docs/wiki/authentication-design.md",
+  "source_sha256": "90102bdf5adae485b3e5ff701310977ab75d5d2ff3c44ccc41c1b34e357215d5",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "1f254c5949c0b14db790838e8453723897285434aa9ec8bb02c979c21a23c1fb",
+      "checks": {
+        "coverage_and_meaning": "四角色、报表委托例、授权码与PKCE、2012/2015/2019/2025历史、OIDC和两类项目链路全部对应。",
+        "technical_literals": "概念时序完整译写标签；RFC6749/7636/8628/9700及OIDC原始可选链接、协议字面量不变。",
+        "security_and_failure_semantics": "自有可信密码表单未误写OAuth password grant；PKCE不能代替state/传输/页面安全；真实外部实联未冒称成功。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.en.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "0f13cfc0a05506cd6802e964246e4f1079bb4e2c285257f9cfb4b8c895566768",
+      "checks": {
+        "coverage_and_meaning": "四角色、报表委托例、授权码与PKCE、2012/2015/2019/2025历史、OIDC和两类项目链路全部对应。",
+        "technical_literals": "概念时序完整译写标签；RFC6749/7636/8628/9700及OIDC原始可选链接、协议字面量不变。",
+        "security_and_failure_semantics": "自有可信密码表单未误写OAuth password grant；PKCE不能代替state/传输/页面安全；真实外部实联未冒称成功。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.jp.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        },
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 12:36:37",
+      "result": "approved",
+      "translation_sha256": "b1742778a8274e9bb4ca4f3b1021fa6b43ce883085c231cf7e9908b0b2e20896",
+      "checks": {
+        "coverage_and_meaning": "四角色、报表委托例、授权码与PKCE、2012/2015/2019/2025历史、OIDC和两类项目链路全部对应。",
+        "technical_literals": "概念时序完整译写标签；RFC6749/7636/8628/9700及OIDC原始可选链接、协议字面量不变。",
+        "security_and_failure_semantics": "自有可信密码表单未误写OAuth password grant；PKCE不能代替state/传输/页面安全；真实外部实联未冒称成功。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.kr.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        }
+      ]
+    }
+  }
+}

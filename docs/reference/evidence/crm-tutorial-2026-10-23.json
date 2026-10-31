@@ -1,0 +1,2412 @@
+{
+  "schema": 1,
+  "original_step": "WP-25.S04",
+  "generated_at": "2026-10-23T06:36:40.939Z",
+  "environment": {
+    "project": "omni-stack",
+    "verifier": "omni-stack-verifier",
+    "frontend": "http://omni-frontend:3000",
+    "docker_socket_mounted": false,
+    "verifier_image_id": "sha256:1ae44a71fd557e55504b730dc1cb1f35ffc848d7ecf2e5eccd0cb5186ebf44d3",
+    "workers": 1,
+    "frontend_image_id": "sha256:c7c4e4ed144d3f3472845dfce6c45589be110b824f7faed4ffbd02ce23687d23",
+    "playwright": "1.61.1",
+    "network": "omni-stack_default"
+  },
+  "identity_boundary": "Authorized local test-fixture sessions with real server validation. These images do not claim human CAPTCHA login.",
+  "capture_script": "scripts/fixtures/capture-crm-tutorial.mjs",
+  "capture_script_sha256": "0043c37ad4fba88bdcef3206591d46b2d87161c87c97d7a372287437bd98a002",
+  "source_commit": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree; per-file evidence digests",
+  "chain": {
+    "completed_activity_id": 20,
+    "business_state_sql": false,
+    "lead_id": 11,
+    "customer_id": 8,
+    "namespace": "GOAL20261022CRM",
+    "states": [
+      "real lead conversion",
+      "real opportunity win",
+      "real activity cancel/reschedule/complete"
+    ],
+    "opportunity_id": 9,
+    "contact_id": 10
+  },
+  "capture": {
+    "images": 60,
+    "flows": 14,
+    "locales": [
+      "zh-CN",
+      "en-US",
+      "ja-JP",
+      "ko-KR"
+    ],
+    "result": "PASS",
+    "scenes": 15
+  },
+  "review": {
+    "review_type": "AI_REVIEW",
+    "no_dom_fabrication": true,
+    "actually_viewed_images": 60,
+    "no_ai_image_generation": true,
+    "resolved": [
+      "dialog not open",
+      "validation message absent",
+      "identity mismatch on refusal",
+      "default dictionary localization",
+      "primary button clipping",
+      "status column clipping",
+      "raw customer status",
+      "fixed actions obscuring status and time"
+    ],
+    "human_review": 0,
+    "reviewer": "Codex",
+    "method": "Every original image was individually viewed and checked for language, object, status, readability, dimensions and sensitive information."
+  },
+  "images": [
+    {
+      "id": "crm-lead-converted",
+      "flow": "crm-lead-converted",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-lead-converted.png",
+      "image_sha256": "2372e225a69fab20ad02e50b1f2cdb29f6c8557e572344ad50b4667b6bf216a9",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 11,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:30.47Z",
+      "last_success_at": "2026-10-23T06:32:30.47Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语已转换/Converted/転換済み/전환됨标签全部完整可见，MAIN精确关键词唯一一行，负责人是本Goal销售。真实横向滚动后显示状态；手机脱敏，旧固定列遮挡已消除。",
+        "reviewed_at": "2026-10-23T14:42:20.3791475+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "已转换",
+        "left": 563,
+        "right": 619,
+        "text_left": 573,
+        "text_right": 609,
+        "cell_left": 551,
+        "cell_right": 691,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-converted",
+      "flow": "crm-lead-converted",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-lead-converted.png",
+      "image_sha256": "d8d9e4391e222fb4119340632b2f7fee5ec40493390e8e1647c4861c9ed9e53a",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 11,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:51.968Z",
+      "last_success_at": "2026-10-23T06:33:51.968Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语已转换/Converted/転換済み/전환됨标签全部完整可见，MAIN精确关键词唯一一行，负责人是本Goal销售。真实横向滚动后显示状态；手机脱敏，旧固定列遮挡已消除。",
+        "reviewed_at": "2026-10-23T14:42:20.3906251+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "Converted",
+        "left": 563,
+        "right": 638.375,
+        "text_left": 573,
+        "text_right": 628.375,
+        "cell_left": 551,
+        "cell_right": 691,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-converted",
+      "flow": "crm-lead-converted",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-lead-converted.png",
+      "image_sha256": "fb7dcdb89cfdd3d3c4bc9997df6c8a1677fba3e78b6c3b6b581d73b6560868fb",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 11,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:11.388Z",
+      "last_success_at": "2026-10-23T06:35:11.388Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语已转换/Converted/転換済み/전환됨标签全部完整可见，MAIN精确关键词唯一一行，负责人是本Goal销售。真实横向滚动后显示状态；手机脱敏，旧固定列遮挡已消除。",
+        "reviewed_at": "2026-10-23T14:42:20.3921414+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "転換済み",
+        "left": 563,
+        "right": 631,
+        "text_left": 573,
+        "text_right": 621,
+        "cell_left": 551,
+        "cell_right": 691,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-converted",
+      "flow": "crm-lead-converted",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-lead-converted.png",
+      "image_sha256": "ddfd599e7467747fe1a82b5f28830403fd3116fbd0dc057c88469bbc0574f4b4",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 11,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:31.151Z",
+      "last_success_at": "2026-10-23T06:36:31.151Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语已转换/Converted/転換済み/전환됨标签全部完整可见，MAIN精确关键词唯一一行，负责人是本Goal销售。真实横向滚动后显示状态；手机脱敏，旧固定列遮挡已消除。",
+        "reviewed_at": "2026-10-23T14:42:20.3930545+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "전환됨",
+        "left": 563,
+        "right": 619,
+        "text_left": 573,
+        "text_right": 609,
+        "cell_left": 551,
+        "cell_right": 691,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunity-won",
+      "flow": "crm-opportunity-won",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-opportunity-won.png",
+      "image_sha256": "df20e685162a11932212f164a8a795398b2249848152a0b3b0d89146946cfce1",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 9,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:12.808Z",
+      "last_success_at": "2026-10-23T06:32:12.808Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语赢单/Won/受注/수주状态与100%概率、1000金额、预计成交日期可读。左侧阶段赢单为自定义业务名称，独立状态标签已本地化并完整露出；筛选命中唯一实际商机。",
+        "reviewed_at": "2026-10-23T14:42:20.4600582+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "赢单",
+        "left": 833,
+        "right": 877,
+        "text_left": 843,
+        "text_right": 867,
+        "cell_left": 821,
+        "cell_right": 911,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunity-won",
+      "flow": "crm-opportunity-won",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-opportunity-won.png",
+      "image_sha256": "d547b5a604b7cb8d99ea8094a911d0b85ac7682420c46ab2816545b2805b9eae",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 9,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:34.147Z",
+      "last_success_at": "2026-10-23T06:33:34.147Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语赢单/Won/受注/수주状态与100%概率、1000金额、预计成交日期可读。左侧阶段赢单为自定义业务名称，独立状态标签已本地化并完整露出；筛选命中唯一实际商机。",
+        "reviewed_at": "2026-10-23T14:42:20.461844+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "Won",
+        "left": 833,
+        "right": 877.46875,
+        "text_left": 843,
+        "text_right": 867.46875,
+        "cell_left": 821,
+        "cell_right": 911,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunity-won",
+      "flow": "crm-opportunity-won",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-opportunity-won.png",
+      "image_sha256": "d1b76d0e5158e0e4946ba9f54f4df01e9d083f57ccb7d46ecf8ebd591e764304",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 9,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:53.628Z",
+      "last_success_at": "2026-10-23T06:34:53.628Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语赢单/Won/受注/수주状态与100%概率、1000金额、预计成交日期可读。左侧阶段赢单为自定义业务名称，独立状态标签已本地化并完整露出；筛选命中唯一实际商机。",
+        "reviewed_at": "2026-10-23T14:42:20.4628995+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "受注",
+        "left": 833,
+        "right": 877,
+        "text_left": 843,
+        "text_right": 867,
+        "cell_left": 821,
+        "cell_right": 911,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunity-won",
+      "flow": "crm-opportunity-won",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-opportunity-won.png",
+      "image_sha256": "0276633b071e86ff1d7f51b1ac5d68249f65b0535bb216f9da4e7e5a942dbaf1",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 9,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:13.927Z",
+      "last_success_at": "2026-10-23T06:36:13.927Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语赢单/Won/受注/수주状态与100%概率、1000金额、预计成交日期可读。左侧阶段赢单为自定义业务名称，独立状态标签已本地化并完整露出；筛选命中唯一实际商机。",
+        "reviewed_at": "2026-10-23T14:42:20.4639852+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "수주",
+        "left": 833,
+        "right": 877,
+        "text_left": 843,
+        "text_right": 867,
+        "cell_left": 821,
+        "cell_right": 911,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-activity-completed",
+      "flow": "crm-activity-completed",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-activity-completed.png",
+      "image_sha256": "4d4aba6e0a3a0a540b208bcc2a0c99097b33046a54a95498462effaceea0db6b",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 20,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:24.469Z",
+      "last_success_at": "2026-10-23T06:32:24.469Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语真实关联客户8的两条活动显示完整已完成状态及2026-10-22 18:00:07/05真实完成时间，负责人可读。横向已滚动所以主题在左外，图注需按关联客户状态与时间描述；不是伪造完成。",
+        "reviewed_at": "2026-10-23T14:42:20.4865587+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "已完成",
+        "left": 473,
+        "right": 529,
+        "text_left": 483,
+        "text_right": 519,
+        "cell_left": 461,
+        "cell_right": 601,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": {
+        "text": "2026-10-22 18:00:07",
+        "left": 771,
+        "right": 941,
+        "text_left": 771,
+        "text_right": 940,
+        "cell_left": 771,
+        "cell_right": 941,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "refusal": null
+    },
+    {
+      "id": "crm-activity-completed",
+      "flow": "crm-activity-completed",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-activity-completed.png",
+      "image_sha256": "2a09456999bfcbdff3ab08d97761ab40c684eb69a0c5da19193b51ec26f4a00d",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 20,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:46.14Z",
+      "last_success_at": "2026-10-23T06:33:46.14Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语真实关联客户8的两条活动显示完整已完成状态及2026-10-22 18:00:07/05真实完成时间，负责人可读。横向已滚动所以主题在左外，图注需按关联客户状态与时间描述；不是伪造完成。",
+        "reviewed_at": "2026-10-23T14:42:20.4874984+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "Completed",
+        "left": 473,
+        "right": 551.03125,
+        "text_left": 483,
+        "text_right": 541.03125,
+        "cell_left": 461,
+        "cell_right": 601,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": {
+        "text": "2026-10-22 18:00:07",
+        "left": 771,
+        "right": 941,
+        "text_left": 771,
+        "text_right": 940,
+        "cell_left": 771,
+        "cell_right": 941,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "refusal": null
+    },
+    {
+      "id": "crm-activity-completed",
+      "flow": "crm-activity-completed",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-activity-completed.png",
+      "image_sha256": "8d444544c7f0169cde01caae4558ced7d1cc4a826681bda0ca4a2d2f937af813",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 20,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:05.467Z",
+      "last_success_at": "2026-10-23T06:35:05.467Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语真实关联客户8的两条活动显示完整已完成状态及2026-10-22 18:00:07/05真实完成时间，负责人可读。横向已滚动所以主题在左外，图注需按关联客户状态与时间描述；不是伪造完成。",
+        "reviewed_at": "2026-10-23T14:42:20.4886779+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "完了",
+        "left": 473,
+        "right": 517,
+        "text_left": 483,
+        "text_right": 507,
+        "cell_left": 461,
+        "cell_right": 601,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": {
+        "text": "2026-10-22 18:00:07",
+        "left": 771,
+        "right": 941,
+        "text_left": 771,
+        "text_right": 940,
+        "cell_left": 771,
+        "cell_right": 941,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "refusal": null
+    },
+    {
+      "id": "crm-activity-completed",
+      "flow": "crm-activity-completed",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-activity-completed.png",
+      "image_sha256": "365b6aaeeb4aa4681042281bbdc7d8d097f55ba6edb52e48d47dba50e3b8eac1",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 20,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:25.38Z",
+      "last_success_at": "2026-10-23T06:36:25.38Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语真实关联客户8的两条活动显示完整已完成状态及2026-10-22 18:00:07/05真实完成时间，负责人可读。横向已滚动所以主题在左外，图注需按关联客户状态与时间描述；不是伪造完成。",
+        "reviewed_at": "2026-10-23T14:42:20.4897666+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": {
+        "text": "완료",
+        "left": 473,
+        "right": 517,
+        "text_left": 483,
+        "text_right": 507,
+        "cell_left": 461,
+        "cell_right": 601,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "completion_time_exposure": {
+        "text": "2026-10-22 18:00:07",
+        "left": 771,
+        "right": 941,
+        "text_left": 771,
+        "text_right": 940,
+        "cell_left": 771,
+        "cell_right": 941,
+        "viewport_left": 289,
+        "viewport_right": 1371,
+        "unobscured": true
+      },
+      "refusal": null
+    },
+    {
+      "id": "crm-customer-360",
+      "flow": "crm-customer-360",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-customer-360.png",
+      "image_sha256": "ac607376054e5bc2e54673ef261d9900245a881d18c5af6056819c80c3f30f09",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 8,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:51.674Z",
+      "last_success_at": "2026-10-23T06:31:51.674Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户360的ACTIVE已变成对应活跃客户/Active/有効な顧客/활성 고객，测试客户及联系人和两条活动完整可见，开放商机真实为空。电话脱敏，邮件example.invalid，REDACTED解释与正文一致。",
+        "reviewed_at": "2026-10-23T14:42:20.5089637+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customer-360",
+      "flow": "crm-customer-360",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-customer-360.png",
+      "image_sha256": "3ff4bef3c6828bdf55fb0a8344ae4767cea19373d30fb4045106118476baa8c0",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 8,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:12.597Z",
+      "last_success_at": "2026-10-23T06:33:12.597Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户360的ACTIVE已变成对应活跃客户/Active/有効な顧客/활성 고객，测试客户及联系人和两条活动完整可见，开放商机真实为空。电话脱敏，邮件example.invalid，REDACTED解释与正文一致。",
+        "reviewed_at": "2026-10-23T14:42:20.5099685+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customer-360",
+      "flow": "crm-customer-360",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-customer-360.png",
+      "image_sha256": "a4e2dc6f14bb66d1b46c696c9852c1188789aa1582233c2c29e9d4d27e7a9b67",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 8,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:32.751Z",
+      "last_success_at": "2026-10-23T06:34:32.751Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户360的ACTIVE已变成对应活跃客户/Active/有効な顧客/활성 고객，测试客户及联系人和两条活动完整可见，开放商机真实为空。电话脱敏，邮件example.invalid，REDACTED解释与正文一致。",
+        "reviewed_at": "2026-10-23T14:42:20.5107203+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customer-360",
+      "flow": "crm-customer-360",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-customer-360.png",
+      "image_sha256": "29b8c5bdb32268996edca6980ca095e30bde22b860ca4c463666e6e9d554f9c7",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": 8,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:52.191Z",
+      "last_success_at": "2026-10-23T06:35:52.191Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户360的ACTIVE已变成对应活跃客户/Active/有効な顧客/활성 고객，测试客户及联系人和两条活动完整可见，开放商机真实为空。电话脱敏，邮件example.invalid，REDACTED解释与正文一致。",
+        "reviewed_at": "2026-10-23T14:42:20.511413+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customers",
+      "flow": "crm-customers",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-customers.png",
+      "image_sha256": "c641cb3086b95ef39db904e849784b5e27145f5ebca928a97c216efbada10821",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:46.233Z",
+      "last_success_at": "2026-10-23T06:31:46.233Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户列表均可读，日文有効な顧客不再截字，C1-8与360/编辑/更多清楚。联系方式已脱敏；其余隐藏列可按正文的横向说明查看。",
+        "reviewed_at": "2026-10-23T14:42:20.5345202+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customers",
+      "flow": "crm-customers",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-customers.png",
+      "image_sha256": "3a829be74f7d609f9506211df733eec3dfea2ff41b8c7fe0915ddd7917de5b3e",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:06.702Z",
+      "last_success_at": "2026-10-23T06:33:06.702Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户列表均可读，日文有効な顧客不再截字，C1-8与360/编辑/更多清楚。联系方式已脱敏；其余隐藏列可按正文的横向说明查看。",
+        "reviewed_at": "2026-10-23T14:42:20.5357094+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customers",
+      "flow": "crm-customers",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-customers.png",
+      "image_sha256": "6433397fb9dccecad7e0ae9f89caf35b468dc38376ce9921aa334adbf635e0b8",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:27.218Z",
+      "last_success_at": "2026-10-23T06:34:27.218Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户列表均可读，日文有効な顧客不再截字，C1-8与360/编辑/更多清楚。联系方式已脱敏；其余隐藏列可按正文的横向说明查看。",
+        "reviewed_at": "2026-10-23T14:42:20.5367656+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-customers",
+      "flow": "crm-customers",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-customers.png",
+      "image_sha256": "7c1b9484d10dfd7e1ca6cef0ee4bd212ce9223142499b8498cda419ed00935c1",
+      "route": "/admin/crm/customer",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:46.427Z",
+      "last_success_at": "2026-10-23T06:35:46.427Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语客户列表均可读，日文有効な顧客不再截字，C1-8与360/编辑/更多清楚。联系方式已脱敏；其余隐藏列可按正文的横向说明查看。",
+        "reviewed_at": "2026-10-23T14:42:20.5377744+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-activities",
+      "flow": "crm-activities",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-activities.png",
+      "image_sha256": "c4a34d939ac0fcf8af86c693132d8af712b3b73dec21b688132d1c21e7984474",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:17.746Z",
+      "last_success_at": "2026-10-23T06:32:17.746Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语类型、关联对象和状态正确本地化，英文Completed完整不再出现裁切省略，计划开始时间、详情/完成/更多可用。中文主题和客户名属于真实业务数据，不冒充未翻译UI。",
+        "reviewed_at": "2026-10-23T14:42:20.5769583+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-activities",
+      "flow": "crm-activities",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-activities.png",
+      "image_sha256": "df1feecb79af6f4427c0a942eb76e6e8109144b35da5f0c5693d22d7ff445b87",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:39.281Z",
+      "last_success_at": "2026-10-23T06:33:39.281Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语类型、关联对象和状态正确本地化，英文Completed完整不再出现裁切省略，计划开始时间、详情/完成/更多可用。中文主题和客户名属于真实业务数据，不冒充未翻译UI。",
+        "reviewed_at": "2026-10-23T14:42:20.5780562+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-activities",
+      "flow": "crm-activities",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-activities.png",
+      "image_sha256": "9c9692a41ae7d4f35e2f5fe3e2af451af6137e480eb9f6429da8a4db25fcb453",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:58.58Z",
+      "last_success_at": "2026-10-23T06:34:58.58Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语类型、关联对象和状态正确本地化，英文Completed完整不再出现裁切省略，计划开始时间、详情/完成/更多可用。中文主题和客户名属于真实业务数据，不冒充未翻译UI。",
+        "reviewed_at": "2026-10-23T14:42:20.5794124+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-activities",
+      "flow": "crm-activities",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-activities.png",
+      "image_sha256": "ffe067ce9b9c6c66889db12e1edc3e1e5035ab56b108e2ad74644b2b6e45da3e",
+      "route": "/admin/crm/activity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:18.773Z",
+      "last_success_at": "2026-10-23T06:36:18.773Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语类型、关联对象和状态正确本地化，英文Completed完整不再出现裁切省略，计划开始时间、详情/完成/更多可用。中文主题和客户名属于真实业务数据，不冒充未翻译UI。",
+        "reviewed_at": "2026-10-23T14:42:20.5810206+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-overview",
+      "flow": "crm-overview",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-overview.png",
+      "image_sha256": "47717efb638a8c8ef39f6820173fc080ac3caa5f064a901212e752d72037c17a",
+      "route": "/admin/crm/overview",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:24.714Z",
+      "last_success_at": "2026-10-23T06:31:24.714Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语概览六项统计、漏斗、比率金额和提醒清楚，无顶栏透叠。4新线索/5已转换/4开放/12逾期等为此次真实共享数据快照；自定义中文阶段/客户人员名保留，不误判为本地化失败。",
+        "reviewed_at": "2026-10-23T14:44:19.7974013+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-overview",
+      "flow": "crm-overview",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-overview.png",
+      "image_sha256": "d82cb5ff3aa33874f80b42028f865ef56ebfb833b9c35883556b7ad7cc054662",
+      "route": "/admin/crm/overview",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:45.183Z",
+      "last_success_at": "2026-10-23T06:32:45.183Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语概览六项统计、漏斗、比率金额和提醒清楚，无顶栏透叠。4新线索/5已转换/4开放/12逾期等为此次真实共享数据快照；自定义中文阶段/客户人员名保留，不误判为本地化失败。",
+        "reviewed_at": "2026-10-23T14:44:19.8086001+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-overview",
+      "flow": "crm-overview",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-overview.png",
+      "image_sha256": "5245ebf03b399e3f62e3c4bb11faf40bf84421a33fad93103c8f24b35198470a",
+      "route": "/admin/crm/overview",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:06.598Z",
+      "last_success_at": "2026-10-23T06:34:06.598Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语概览六项统计、漏斗、比率金额和提醒清楚，无顶栏透叠。4新线索/5已转换/4开放/12逾期等为此次真实共享数据快照；自定义中文阶段/客户人员名保留，不误判为本地化失败。",
+        "reviewed_at": "2026-10-23T14:44:19.8098456+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-overview",
+      "flow": "crm-overview",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-overview.png",
+      "image_sha256": "37236f252151fdd40f45c7d8875be679b88d96be7e1a1dbba7845cb1d9137424",
+      "route": "/admin/crm/overview",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:25.706Z",
+      "last_success_at": "2026-10-23T06:35:25.706Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语概览六项统计、漏斗、比率金额和提醒清楚，无顶栏透叠。4新线索/5已转换/4开放/12逾期等为此次真实共享数据快照；自定义中文阶段/客户人员名保留，不误判为本地化失败。",
+        "reviewed_at": "2026-10-23T14:44:19.8110237+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-leads",
+      "flow": "crm-leads",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-leads.png",
+      "image_sha256": "a9fe041d204fed9c1a12379364e4a95e2b8b062bcfd480b84328966aee4da7cc",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:29.881Z",
+      "last_success_at": "2026-10-23T06:31:29.881Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语线索列表搜索、新建/批量分配和真实MAIN/ASSIGN/PEER清楚，手机脱敏；长示例名称换行/省略正常，状态等宽表列按新增横向说明查看，另有转换结果图。",
+        "reviewed_at": "2026-10-23T14:44:19.8679019+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-leads",
+      "flow": "crm-leads",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-leads.png",
+      "image_sha256": "24a917b2c5df5ca8949c3414af8771cc640a6583f7bd5863c35da4db27736871",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:50.219Z",
+      "last_success_at": "2026-10-23T06:32:50.219Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语线索列表搜索、新建/批量分配和真实MAIN/ASSIGN/PEER清楚，手机脱敏；长示例名称换行/省略正常，状态等宽表列按新增横向说明查看，另有转换结果图。",
+        "reviewed_at": "2026-10-23T14:44:19.86887+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-leads",
+      "flow": "crm-leads",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-leads.png",
+      "image_sha256": "5a0ff608a4c83053621ed95a58cba91755fa7246f264e63d6efe47d7276ac26a",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:11.502Z",
+      "last_success_at": "2026-10-23T06:34:11.502Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语线索列表搜索、新建/批量分配和真实MAIN/ASSIGN/PEER清楚，手机脱敏；长示例名称换行/省略正常，状态等宽表列按新增横向说明查看，另有转换结果图。",
+        "reviewed_at": "2026-10-23T14:44:19.8696995+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-leads",
+      "flow": "crm-leads",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-leads.png",
+      "image_sha256": "fcb33c3835509f18f80d2dde263f32d7935e3496319b99bcb0c72a8761ed3bf4",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:30.608Z",
+      "last_success_at": "2026-10-23T06:35:30.608Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语线索列表搜索、新建/批量分配和真实MAIN/ASSIGN/PEER清楚，手机脱敏；长示例名称换行/省略正常，状态等宽表列按新增横向说明查看，另有转换结果图。",
+        "reviewed_at": "2026-10-23T14:44:19.8705258+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-dialog",
+      "flow": "crm-lead-dialog",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-lead-dialog.png",
+      "image_sha256": "0c8d8ebacb42556cb7f64dd70adc47cb3581d927f549826b99a8015bb2527b03",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:35.255Z",
+      "last_success_at": "2026-10-23T06:31:35.255Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际新建弹窗均打开，姓名必填与全部字段、保存取消完整。长的下次跟进标签自然换行但未遮住输入，空表单不含敏感值。",
+        "reviewed_at": "2026-10-23T14:44:19.8870967+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-dialog",
+      "flow": "crm-lead-dialog",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-lead-dialog.png",
+      "image_sha256": "619595632bb4b81f7ca595463cb94f58e1ca2e1064ca64dba9a52cb5fbd1c7d6",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:55.494Z",
+      "last_success_at": "2026-10-23T06:32:55.494Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际新建弹窗均打开，姓名必填与全部字段、保存取消完整。长的下次跟进标签自然换行但未遮住输入，空表单不含敏感值。",
+        "reviewed_at": "2026-10-23T14:44:19.8879104+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-dialog",
+      "flow": "crm-lead-dialog",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-lead-dialog.png",
+      "image_sha256": "e518a05c8ae839f1927bd3152f70346bc7d34d88215734e0e296e20b3f683d51",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:16.577Z",
+      "last_success_at": "2026-10-23T06:34:16.577Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际新建弹窗均打开，姓名必填与全部字段、保存取消完整。长的下次跟进标签自然换行但未遮住输入，空表单不含敏感值。",
+        "reviewed_at": "2026-10-23T14:44:19.8886679+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-dialog",
+      "flow": "crm-lead-dialog",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-lead-dialog.png",
+      "image_sha256": "a3387f3bba7ab5eeb085f4e4162801519555081f036100c3e56ef121f3d0fbc9",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:35.633Z",
+      "last_success_at": "2026-10-23T06:35:35.633Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际新建弹窗均打开，姓名必填与全部字段、保存取消完整。长的下次跟进标签自然换行但未遮住输入，空表单不含敏感值。",
+        "reviewed_at": "2026-10-23T14:44:19.8896423+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-validation",
+      "flow": "crm-lead-validation",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-lead-validation.png",
+      "image_sha256": "b0121b964c2411dee4988742560d245703555df99bf9f0a55609cf53b046d63f",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:41.334Z",
+      "last_success_at": "2026-10-23T06:31:41.334Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际空姓名提交后红色错误正确在姓名字段下方显示，弹窗保持打开，韩文与日文已是真实校验画面，没有虚构保存成功。",
+        "reviewed_at": "2026-10-23T14:44:19.9079979+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-validation",
+      "flow": "crm-lead-validation",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-lead-validation.png",
+      "image_sha256": "b9f5900441fc6c64411016399cef80a1593bedd88f3e2cd432560c4757a45730",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:01.566Z",
+      "last_success_at": "2026-10-23T06:33:01.566Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际空姓名提交后红色错误正确在姓名字段下方显示，弹窗保持打开，韩文与日文已是真实校验画面，没有虚构保存成功。",
+        "reviewed_at": "2026-10-23T14:44:19.9098979+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-validation",
+      "flow": "crm-lead-validation",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-lead-validation.png",
+      "image_sha256": "0031ab30661de8784efe35d9da32f4a3bc46444c5f41b2876e8c811d72a5d847",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:22.312Z",
+      "last_success_at": "2026-10-23T06:34:22.312Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际空姓名提交后红色错误正确在姓名字段下方显示，弹窗保持打开，韩文与日文已是真实校验画面，没有虚构保存成功。",
+        "reviewed_at": "2026-10-23T14:44:19.9113729+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-validation",
+      "flow": "crm-lead-validation",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-lead-validation.png",
+      "image_sha256": "68a21fef3914be5e8e7c9a07ba13954a346d42c941047e3751e1875674d988f3",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:41.525Z",
+      "last_success_at": "2026-10-23T06:35:41.525Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际空姓名提交后红色错误正确在姓名字段下方显示，弹窗保持打开，韩文与日文已是真实校验画面，没有虚构保存成功。",
+        "reviewed_at": "2026-10-23T14:44:19.9125401+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts",
+      "flow": "crm-contacts",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-contacts.png",
+      "image_sha256": "5b6f97a59116653046ddd1f0d9d0d1ae7ce54be1fa3594d2fa580e968ef1d1e5",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:31:56.451Z",
+      "last_success_at": "2026-10-23T06:31:56.451Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语联系人列表的真实测试联系人、所属客户、职位、脱敏手机和邮件完整可辨，编辑/删除入口可读。其他中文姓名、公司、职位和决策角色为共享业务数据，非凭证。",
+        "reviewed_at": "2026-10-23T14:46:51.249681+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts",
+      "flow": "crm-contacts",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-contacts.png",
+      "image_sha256": "a055514d7ae97df920951c7696c2d51a7b6dfbdc7741339424f04e710ca5b7e0",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:17.598Z",
+      "last_success_at": "2026-10-23T06:33:17.598Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语联系人列表的真实测试联系人、所属客户、职位、脱敏手机和邮件完整可辨，编辑/删除入口可读。其他中文姓名、公司、职位和决策角色为共享业务数据，非凭证。",
+        "reviewed_at": "2026-10-23T14:46:51.261787+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts",
+      "flow": "crm-contacts",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-contacts.png",
+      "image_sha256": "c802970d6e2e1e382b633eb19bf15d67bb48b52ff330a0d45c9671997cbe714f",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:37.536Z",
+      "last_success_at": "2026-10-23T06:34:37.536Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语联系人列表的真实测试联系人、所属客户、职位、脱敏手机和邮件完整可辨，编辑/删除入口可读。其他中文姓名、公司、职位和决策角色为共享业务数据，非凭证。",
+        "reviewed_at": "2026-10-23T14:46:51.2634122+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts",
+      "flow": "crm-contacts",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-contacts.png",
+      "image_sha256": "6e11223edcd92cbfba08e3d8b61266bb678676873f62c59e2ae4525f141791d6",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:57.132Z",
+      "last_success_at": "2026-10-23T06:35:57.132Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语联系人列表的真实测试联系人、所属客户、职位、脱敏手机和邮件完整可辨，编辑/删除入口可读。其他中文姓名、公司、职位和决策角色为共享业务数据，非凭证。",
+        "reviewed_at": "2026-10-23T14:46:51.2644489+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts-primary-actions",
+      "flow": "crm-contacts",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-contacts-primary-actions.png",
+      "image_sha256": "b8b67bf67eeb9676b16a5510815a1d3b9cc4c6f4948491d9568a9687ab962272",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:01.871Z",
+      "last_success_at": "2026-10-23T06:32:01.871Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "真实向右滚动后的主要联系人列四语完整可读，设为主要/Set as Primary/主要に設定/주 연락처로 설정均完整，主联系人是/Yes/はい/예与负责人、编辑删除一致；没有对共享联系人执行写入。",
+        "reviewed_at": "2026-10-23T14:46:51.3341449+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts-primary-actions",
+      "flow": "crm-contacts",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-contacts-primary-actions.png",
+      "image_sha256": "ad4a49933fac7138ee1f3f119adb7e13947241f49030a194fae72122a9bbb821",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:23.077Z",
+      "last_success_at": "2026-10-23T06:33:23.077Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "真实向右滚动后的主要联系人列四语完整可读，设为主要/Set as Primary/主要に設定/주 연락처로 설정均完整，主联系人是/Yes/はい/예与负责人、编辑删除一致；没有对共享联系人执行写入。",
+        "reviewed_at": "2026-10-23T14:46:51.3352698+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts-primary-actions",
+      "flow": "crm-contacts",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-contacts-primary-actions.png",
+      "image_sha256": "418f15707645041ef458cb7a760cb555562aec99d75bbdd1d3acd17bbe914d6c",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:42.915Z",
+      "last_success_at": "2026-10-23T06:34:42.915Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "真实向右滚动后的主要联系人列四语完整可读，设为主要/Set as Primary/主要に設定/주 연락처로 설정均完整，主联系人是/Yes/はい/예与负责人、编辑删除一致；没有对共享联系人执行写入。",
+        "reviewed_at": "2026-10-23T14:46:51.3362592+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-contacts-primary-actions",
+      "flow": "crm-contacts",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-contacts-primary-actions.png",
+      "image_sha256": "d23c386aacfd57f00c66fd04f2e6c5871dd1f5798b34c7c2ae7527dfcda528a7",
+      "route": "/admin/crm/contact",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:02.644Z",
+      "last_success_at": "2026-10-23T06:36:02.644Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "真实向右滚动后的主要联系人列四语完整可读，设为主要/Set as Primary/主要に設定/주 연락처로 설정均完整，主联系人是/Yes/はい/예与负责人、编辑删除一致；没有对共享联系人执行写入。",
+        "reviewed_at": "2026-10-23T14:46:51.3371402+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunities",
+      "flow": "crm-opportunities",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-opportunities.png",
+      "image_sha256": "879b880246a4cdf021af373ff0ee10e620d1909068542d892677d8276682ec69",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:07.035Z",
+      "last_success_at": "2026-10-23T06:32:07.035Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语列表/看板、新建、阶段金额、历史及迁移阶段入口可读，示例商机O1-9和客户C1-8对应。宽表概率/状态等列未在此基础图冒充可见，结果图和正文横向说明另行展示；自定义阶段名保留。",
+        "reviewed_at": "2026-10-23T14:46:51.3576804+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunities",
+      "flow": "crm-opportunities",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-opportunities.png",
+      "image_sha256": "99baf86ed3ebb88e3b08cf456ebc545ead27ae4c533175286b618e77143d10f6",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:28.195Z",
+      "last_success_at": "2026-10-23T06:33:28.195Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语列表/看板、新建、阶段金额、历史及迁移阶段入口可读，示例商机O1-9和客户C1-8对应。宽表概率/状态等列未在此基础图冒充可见，结果图和正文横向说明另行展示；自定义阶段名保留。",
+        "reviewed_at": "2026-10-23T14:46:51.3587123+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunities",
+      "flow": "crm-opportunities",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-opportunities.png",
+      "image_sha256": "3e7d3a32f4476cc41ad6b2ea5d77dbb62f53c8d886e63fd7f8c8da500278a8d1",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:47.865Z",
+      "last_success_at": "2026-10-23T06:34:47.865Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语列表/看板、新建、阶段金额、历史及迁移阶段入口可读，示例商机O1-9和客户C1-8对应。宽表概率/状态等列未在此基础图冒充可见，结果图和正文横向说明另行展示；自定义阶段名保留。",
+        "reviewed_at": "2026-10-23T14:46:51.3597699+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-opportunities",
+      "flow": "crm-opportunities",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-opportunities.png",
+      "image_sha256": "cc9cd1b1f5af85c5b04db355b05ae635483e0580dadd3607c1e110c7cddb32a1",
+      "route": "/admin/crm/opportunity",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:07.817Z",
+      "last_success_at": "2026-10-23T06:36:07.817Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语列表/看板、新建、阶段金额、历史及迁移阶段入口可读，示例商机O1-9和客户C1-8对应。宽表概率/状态等列未在此基础图冒充可见，结果图和正文横向说明另行展示；自定义阶段名保留。",
+        "reviewed_at": "2026-10-23T14:46:51.3606872+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-empty",
+      "flow": "crm-lead-empty",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-lead-empty.png",
+      "image_sha256": "beb8fa3e8eb4fc19f14ffbc988de73de79e2a4daae05602e4b17e41222353fb0",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:35.632Z",
+      "last_success_at": "2026-10-23T06:32:35.632Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际不存在关键词ZZZ-NO-SUCH-LEAD返回0行，各语言空态及分页0清楚，无加载或错误冒充无数据。",
+        "reviewed_at": "2026-10-23T14:46:51.3838524+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-empty",
+      "flow": "crm-lead-empty",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-lead-empty.png",
+      "image_sha256": "0fa131476c9cc78481aca5be5becab664a126bb5a967f18a8bae3f6004b98cb1",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:33:57.098Z",
+      "last_success_at": "2026-10-23T06:33:57.098Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际不存在关键词ZZZ-NO-SUCH-LEAD返回0行，各语言空态及分页0清楚，无加载或错误冒充无数据。",
+        "reviewed_at": "2026-10-23T14:46:51.3851448+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-empty",
+      "flow": "crm-lead-empty",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-lead-empty.png",
+      "image_sha256": "6e73567dee18ea84b7db1f458c71226b907236e22349ec56af186fac92824ddf",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:16.391Z",
+      "last_success_at": "2026-10-23T06:35:16.391Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际不存在关键词ZZZ-NO-SUCH-LEAD返回0行，各语言空态及分页0清楚，无加载或错误冒充无数据。",
+        "reviewed_at": "2026-10-23T14:46:51.3861254+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-lead-empty",
+      "flow": "crm-lead-empty",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-lead-empty.png",
+      "image_sha256": "5d619cd933cb587391a96708545b6e9c2f96f015312051992292bc223da4a624",
+      "route": "/admin/crm/lead",
+      "role": "admin",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 1,
+        "username": "admin",
+        "tenant_id": 1,
+        "roles": [
+          "PROCUREMENT_MANAGER",
+          "SUPER_ADMIN"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:36.286Z",
+      "last_success_at": "2026-10-23T06:36:36.286Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语实际不存在关键词ZZZ-NO-SUCH-LEAD返回0行，各语言空态及分页0清楚，无加载或错误冒充无数据。",
+        "reviewed_at": "2026-10-23T14:46:51.3871096+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": null
+    },
+    {
+      "id": "crm-employee-403",
+      "flow": "crm-employee-403",
+      "locale": "zh-CN",
+      "image": "docs/images/zh-CN/crm-employee-403.png",
+      "image_sha256": "75af64f8c3a461035372eac3684e4a3abf39969416321cdcc0d606aa0163c79b",
+      "route": "/admin/crm/lead",
+      "role": "employee",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 210,
+        "username": "goal_20261022_employee",
+        "tenant_id": 1,
+        "roles": [
+          "EMPLOYEE"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:32:40.25Z",
+      "last_success_at": "2026-10-23T06:32:40.25Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语拒绝页完整，顶部真实goal_20261022_employee身份而不是admin，左侧仅允许菜单，无CRM业务记录泄漏；真实服务器403与界面一致，返回入口明确。",
+        "reviewed_at": "2026-10-23T14:46:51.427778+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": {
+        "http_status": 403,
+        "business_code": 403
+      }
+    },
+    {
+      "id": "crm-employee-403",
+      "flow": "crm-employee-403",
+      "locale": "en-US",
+      "image": "docs/images/en-US/crm-employee-403.png",
+      "image_sha256": "05a8e804d6d27bd155a2ae35bf4a957049b368a13f369092bbcb2d49a10115e7",
+      "route": "/admin/crm/lead",
+      "role": "employee",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 210,
+        "username": "goal_20261022_employee",
+        "tenant_id": 1,
+        "roles": [
+          "EMPLOYEE"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:34:01.794Z",
+      "last_success_at": "2026-10-23T06:34:01.794Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语拒绝页完整，顶部真实goal_20261022_employee身份而不是admin，左侧仅允许菜单，无CRM业务记录泄漏；真实服务器403与界面一致，返回入口明确。",
+        "reviewed_at": "2026-10-23T14:46:51.4285883+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": {
+        "http_status": 403,
+        "business_code": 403
+      }
+    },
+    {
+      "id": "crm-employee-403",
+      "flow": "crm-employee-403",
+      "locale": "ja-JP",
+      "image": "docs/images/ja-JP/crm-employee-403.png",
+      "image_sha256": "a7a19ca50318ca76e395823c27a39c5ef6981f6a36c7830c3ccbb93c5e7e745c",
+      "route": "/admin/crm/lead",
+      "role": "employee",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 210,
+        "username": "goal_20261022_employee",
+        "tenant_id": 1,
+        "roles": [
+          "EMPLOYEE"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:35:20.965Z",
+      "last_success_at": "2026-10-23T06:35:20.965Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语拒绝页完整，顶部真实goal_20261022_employee身份而不是admin，左侧仅允许菜单，无CRM业务记录泄漏；真实服务器403与界面一致，返回入口明确。",
+        "reviewed_at": "2026-10-23T14:46:51.4296543+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": {
+        "http_status": 403,
+        "business_code": 403
+      }
+    },
+    {
+      "id": "crm-employee-403",
+      "flow": "crm-employee-403",
+      "locale": "ko-KR",
+      "image": "docs/images/ko-KR/crm-employee-403.png",
+      "image_sha256": "526f50f1f7c844270d05d531f0fbd060b0054bc1b17794021a2af0bc5c6fae8e",
+      "route": "/admin/crm/lead",
+      "role": "employee",
+      "identity_source": "test-fixture",
+      "identity": {
+        "user_id": 210,
+        "username": "goal_20261022_employee",
+        "tenant_id": 1,
+        "roles": [
+          "EMPLOYEE"
+        ]
+      },
+      "object_id": null,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "captured_at": "2026-10-23T06:36:40.934Z",
+      "last_success_at": "2026-10-23T06:36:40.934Z",
+      "visual_review": {
+        "result": "approved",
+        "finding": "四语拒绝页完整，顶部真实goal_20261022_employee身份而不是admin，左侧仅允许菜单，无CRM业务记录泄漏；真实服务器403与界面一致，返回入口明确。",
+        "reviewed_at": "2026-10-23T14:46:51.4303832+08:00",
+        "review_type": "AI_REVIEW",
+        "reviewer": "Codex"
+      },
+      "status_exposure": null,
+      "completion_time_exposure": null,
+      "refusal": {
+        "http_status": 403,
+        "business_code": 403
+      }
+    }
+  ]
+}

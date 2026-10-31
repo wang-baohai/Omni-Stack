@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "document_id": "common-mybatis",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/common-mybatis.md",
+  "source_sha256": "fefa0f001f287dfc8ce8057dbaab3e157db59ba0cbefba035b2fd7a3e0eb6c9f",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "原20261029四语全文实际审读及摘要保留；本次四语45—54行原图表与修复后标签均实际读取。逐字比较证明仅同一边标签前后各增加一个引号，未改语义/连线/源码。旧实际浏览器四语解析失败已保留，修复后真实SVG仍须最终G5验证。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-mybatis-render-correction-actual-reading-20261030.json",
+  "actual_reading_sha256": "1b3df8834652555932f3e69aa0dc695cd427f2c7512652b18b03b4fbfaf0e181",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-mybatis.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 07:09:17",
+      "result": "approved",
+      "translation_sha256": "edb9517472546db07299ff129ea2c1bcef204c0d89fe279bfe0c4dce259bee27",
+      "checks": {
+        "coverage_and_meaning": "单文件默认乐观锁→分页及缺省Bean条件，实际源码一致；同类型服务链覆盖不叠加，TenantLine/DataPermission按已启用功能加入，不把默认分页当数据隔离。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "无栅格图片。实际四语差量复读确认只给含@的现有边标签加引号，保留全部术语和连线；旧渲染失败与本次修复后图形验证分别记录，正文签核不冒称图形已通过。"
+      },
+      "findings": [
+        {
+          "id": "MYBATIS-MERMAID-EDGE-LABEL",
+          "status": "resolved",
+          "description": "@ConditionalOnMissingBean 边标签加引号，解决Mermaid把@识别为LINK_ID的解析失败；四语文字及意义不变。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-mybatis.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 07:09:17",
+      "result": "approved",
+      "translation_sha256": "de15ebf1b687a822193ac1ad02c603564678d76823cc34a788090e9db72f5f6e",
+      "checks": {
+        "coverage_and_meaning": "单文件默认乐观锁→分页及缺省Bean条件，实际源码一致；同类型服务链覆盖不叠加，TenantLine/DataPermission按已启用功能加入，不把默认分页当数据隔离。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "无栅格图片。实际四语差量复读确认只给含@的现有边标签加引号，保留全部术语和连线；旧渲染失败与本次修复后图形验证分别记录，正文签核不冒称图形已通过。"
+      },
+      "findings": [
+        {
+          "id": "MYBATIS-MERMAID-EDGE-LABEL",
+          "status": "resolved",
+          "description": "@ConditionalOnMissingBean 边标签加引号，解决Mermaid把@识别为LINK_ID的解析失败；四语文字及意义不变。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-mybatis.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-30 07:09:17",
+      "result": "approved",
+      "translation_sha256": "2988f87fee92b6bfd7e72689c314382ba117c5376e30c50ff98be3a642b13e98",
+      "checks": {
+        "coverage_and_meaning": "单文件默认乐观锁→分页及缺省Bean条件，实际源码一致；同类型服务链覆盖不叠加，TenantLine/DataPermission按已启用功能加入，不把默认分页当数据隔离。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "无栅格图片。实际四语差量复读确认只给含@的现有边标签加引号，保留全部术语和连线；旧渲染失败与本次修复后图形验证分别记录，正文签核不冒称图形已通过。"
+      },
+      "findings": [
+        {
+          "id": "MYBATIS-MERMAID-EDGE-LABEL",
+          "status": "resolved",
+          "description": "@ConditionalOnMissingBean 边标签加引号，解决Mermaid把@识别为LINK_ID的解析失败；四语文字及意义不变。"
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false,
+  "prior_review": "docs/reference/reviews/common-mybatis-final-2026-10-29.json",
+  "prior_review_sha256": "f6f8d902b4a5e96797e9b410d036b5e67cf4200770b9720f2147ed35f2e88952"
+}

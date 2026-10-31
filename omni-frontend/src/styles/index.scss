@@ -631,7 +631,9 @@ html.dark .el-table {
   }
   .el-table__header-wrapper tr th.el-table-fixed-column--left,
   .el-table__header-wrapper tr th.el-table-fixed-column--right {
-    background-color: var(--el-table-header-bg-color, rgba(255, 255, 255, 0.03)) !important;
+    // 固定表头先铺不透明底色，再叠加表头色，避免下方滚动列的文字透出。
+    background-color: var(--el-bg-color, var(--omni-bg-surface)) !important;
+    background-image: linear-gradient(var(--el-table-header-bg-color), var(--el-table-header-bg-color));
   }
   // 固定列边缘投影（暗色模式下调低不透明度）
   .el-table-fixed-column--right::before,
@@ -654,6 +656,31 @@ html.dark .el-table {
 html.dark .omni-table-fixed-actions {
   .el-table-fixed-column--right {
     box-shadow: -2px 0 8px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@media (max-width: 768px) {
+  // 窄屏操作列可能比表格视口更宽，取消吸附后可通过真实横向滚动查看全部列。
+  .el-table {
+    .el-table__header-wrapper tr th.el-table-fixed-column--left,
+    .el-table__header-wrapper tr th.el-table-fixed-column--right,
+    .el-table__body-wrapper tr td.el-table-fixed-column--left,
+    .el-table__body-wrapper tr td.el-table-fixed-column--right,
+    .el-table__footer-wrapper tr td.el-table-fixed-column--left,
+    .el-table__footer-wrapper tr td.el-table-fixed-column--right {
+      position: static !important;
+    }
+
+    .el-table-fixed-column--left::before,
+    .el-table-fixed-column--right::before {
+      display: none;
+    }
+  }
+
+  // 保留总数、页大小与跳页入口，空间不足时换行而非裁掉控件。
+  .el-pagination {
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 }
 

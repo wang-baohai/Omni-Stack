@@ -1,0 +1,6 @@
+		// Invalidate the authorization code as it can only be used once
+		authorizationBuilder.invalidate(authorizationCode.getToken());
+
+		authorization = authorizationBuilder.build();
+
+		this.authorizationService.save(authorization);

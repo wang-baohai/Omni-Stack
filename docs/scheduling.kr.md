@@ -1,6 +1,6 @@
 # 예약 작업 제약
 
-이 문서는 예약 작업의 사실과 엔지니어링 제약을 정의합니다. 화면 단계, 이미지, 소스 디버깅은 [예약 작업 튜토리얼](guides/scheduling.kr.md), 실행 설정은 [Docker 배포](docker-deployment.kr.md)를 참고하세요.
+이 문서는 예약 작업의 사실과 엔지니어링 제약을 정의합니다. 기초 개념, 프레임워크 원문, 프로젝트 구현, 실제 화면은 [XXL-JOB 독립 장](wiki/distributed-jobs-principles.kr.md), 기존 세부 조작은 [예약 작업 튜토리얼](guides/scheduling.kr.md), 실행 설정은 [Docker 배포](docker-deployment.kr.md)를 참고하세요.
 
 ## 1. 경계와 데이터 소유권
 

@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "document_id": "preset-crm",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/preset-crm.md",
+  "source_sha256": "318d0bd8b97e62c0ce8f268c658419b13bfab397418239d8603f2d88da2cf8c1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "四语均实际读取全文，截断部分单独补读；LeadController路由、auth.sql四角色数据范围实际核对。最终改动完整复读，日文修正后再次阅读；无栅格图。运行/完整G7不由审校代签。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-preset-crm-actual-reading-20261029.json",
+  "actual_reading_sha256": "33ec7e744f55eafaf04ce5a46de30d13ea357f7bcbd7bef54632f250ab65c354",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/preset-crm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:18:21",
+      "result": "approved",
+      "translation_sha256": "c2d411f9f7aaefb1c247ab6b9696989427ba2057e9e0d211e62f6935d034eed5",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照（英文首段截断已单独补读），8模块9服务18端口、资源提示3840/6400、四CRM角色与种子/跨租户边界一致。修正历史运行窗口、串行命令、工作台→CRM新页签，以及401不能单独证明服务路由可用；日文替换后复读发现中文串入并已改回日文再次复读。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "CRM-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧运行计数与失效G7明确历史阶段；串行构建、明确停用列表、Wiki→工作台→独立CRM页签已同步四语。",
+          "final_actual_read": true
+        },
+        {
+          "id": "CRM-401-EVIDENCE-BOUNDARY",
+          "status": "resolved",
+          "description": "401只证明鉴权拒绝，不能单独推断下游服务/路由可用；须结合已授权成功和注册健康证据；日文错误替换已发现纠正。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/preset-crm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:18:21",
+      "result": "approved",
+      "translation_sha256": "d8f68aaa98ecff70f70c878ce7d5efdcd069bb25837674f9fddc9f47b83a3f46",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照（英文首段截断已单独补读），8模块9服务18端口、资源提示3840/6400、四CRM角色与种子/跨租户边界一致。修正历史运行窗口、串行命令、工作台→CRM新页签，以及401不能单独证明服务路由可用；日文替换后复读发现中文串入并已改回日文再次复读。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "CRM-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧运行计数与失效G7明确历史阶段；串行构建、明确停用列表、Wiki→工作台→独立CRM页签已同步四语。",
+          "final_actual_read": true
+        },
+        {
+          "id": "CRM-401-EVIDENCE-BOUNDARY",
+          "status": "resolved",
+          "description": "401只证明鉴权拒绝，不能单独推断下游服务/路由可用；须结合已授权成功和注册健康证据；日文错误替换已发现纠正。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/preset-crm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:18:21",
+      "result": "approved",
+      "translation_sha256": "3474544c45b0b62f1bd3f9f591740bf7925207e5cd4004c6071e51e547edf711",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际对照（英文首段截断已单独补读），8模块9服务18端口、资源提示3840/6400、四CRM角色与种子/跨租户边界一致。修正历史运行窗口、串行命令、工作台→CRM新页签，以及401不能单独证明服务路由可用；日文替换后复读发现中文串入并已改回日文再次复读。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "CRM-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧运行计数与失效G7明确历史阶段；串行构建、明确停用列表、Wiki→工作台→独立CRM页签已同步四语。",
+          "final_actual_read": true
+        },
+        {
+          "id": "CRM-401-EVIDENCE-BOUNDARY",
+          "status": "resolved",
+          "description": "401只证明鉴权拒绝，不能单独推断下游服务/路由可用；须结合已授权成功和注册健康证据；日文错误替换已发现纠正。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

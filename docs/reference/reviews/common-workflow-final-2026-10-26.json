@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "common-workflow",
+  "source": "docs/wiki/common-workflow.md",
+  "source_sha256": "c58da64bc1027461207957ed0a8cd07f8dec56e4c8eb073f5925a6e26dbcd86b",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source/translation contents; code and original plan unchanged",
+  "method": "实际完整读完三个主题的中文与三译，按源码相关方法逐项核对；修正后核对四语最终差异，截断输出对应MQ后半段另外补读。不把机械摘要或翻译结构检查当语义审读。",
+  "actual_complete_reading_sha256": "c9910aea06445de3ff80bdc9994381b5c1a9d0486b64dd64fdfef8b2565e8a38",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-workflow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "90bbee73189c9bf19d7e65111b5f1daa1c080f81eb334a0afb27472846e5afb7",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语三个层次、Flowable自动装配、租户传递、四类通用审批动作、候选查询/NoOp通知、扩展和验证；业务服务不嵌入Flowable边界完整。",
+        "technical_literals": "Java原片段三译与中文逐字一致；EngineConfigurationConfigurer未带MissingBean，不能仅凭同类型Bean宣称默认已替换；四方法签名、setAssignee及MI_END等字面量保持。",
+        "security_and_failure_semantics": "租户过滤器只传递和finally清理，不自行认证或拒绝缺头；上层负责租户/处理人校验。直接转交不自动回还、未主动设owner不等于删除历史；NoOp不发送真实通知。",
+        "language_and_terminology": "全文逐段实际对照，普通英语解释日志、事务、请求幂等和任务转交；限定条件、失败恢复与源码文字量均完整，最终事实修正后再读。",
+        "images_and_links": "本篇无栅格图片；三层Mermaid和工作流原理/前后章节本语链接对应；验证入口是相关测试/运行记录，源码存在不冒充真实审批完成。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "workflow：只有带ConditionalOnMissingBean的默认Bean可直接替换，engine customizer另加不自动替代；tenant filter仅传递不自动拒绝；delegate转交不删除历史也不自动回还；源说明不冒称运行通过",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-workflow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "21bae1244c5543b7066ac5c1dec3322c6409c0b6edd9ebfb20033a6b7b637dda",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语三个层次、Flowable自动装配、租户传递、四类通用审批动作、候选查询/NoOp通知、扩展和验证；业务服务不嵌入Flowable边界完整。",
+        "technical_literals": "Java原片段三译与中文逐字一致；EngineConfigurationConfigurer未带MissingBean，不能仅凭同类型Bean宣称默认已替换；四方法签名、setAssignee及MI_END等字面量保持。",
+        "security_and_failure_semantics": "租户过滤器只传递和finally清理，不自行认证或拒绝缺头；上层负责租户/处理人校验。直接转交不自动回还、未主动设owner不等于删除历史；NoOp不发送真实通知。",
+        "language_and_terminology": "全文逐段实际对照；修正サプライヤー、切り詰め、カスタマイザー及承认者追加削除等直译词，事务与请求编号的最终段落再次核对。",
+        "images_and_links": "本篇无栅格图片；三层Mermaid和工作流原理/前后章节本语链接对应；验证入口是相关测试/运行记录，源码存在不冒充真实审批完成。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "workflow：只有带ConditionalOnMissingBean的默认Bean可直接替换，engine customizer另加不自动替代；tenant filter仅传递不自动拒绝；delegate转交不删除历史也不自动回还；源说明不冒称运行通过",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-workflow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "1ca8cbc819748e94af86301c57b59cdf4a168c2d51c52290700ee8c2462e3a78",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语三个层次、Flowable自动装配、租户传递、四类通用审批动作、候选查询/NoOp通知、扩展和验证；业务服务不嵌入Flowable边界完整。",
+        "technical_literals": "Java原片段三译与中文逐字一致；EngineConfigurationConfigurer未带MissingBean，不能仅凭同类型Bean宣称默认已替换；四方法签名、setAssignee及MI_END等字面量保持。",
+        "security_and_failure_semantics": "租户过滤器只传递和finally清理，不自行认证或拒绝缺头；上层负责租户/处理人校验。直接转交不自动回还、未主动设owner不等于删除历史；NoOp不发送真实通知。",
+        "language_and_terminology": "全文逐段实际对照；승인자 추가·제거、처리자 전달与事务/请求编号等用语清楚，finally清理、默认装配条件和无通知限制完整保留。",
+        "images_and_links": "本篇无栅格图片；三层Mermaid和工作流原理/前后章节本语链接对应；验证入口是相关测试/运行记录，源码存在不冒充真实审批完成。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "workflow：只有带ConditionalOnMissingBean的默认Bean可直接替换，engine customizer另加不自动替代；tenant filter仅传递不自动拒绝；delegate转交不删除历史也不自动回还；源说明不冒称运行通过",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    }
+  }
+}

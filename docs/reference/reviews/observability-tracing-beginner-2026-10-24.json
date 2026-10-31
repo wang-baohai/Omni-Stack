@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-tracing",
+  "source": "docs/wiki/observability-tracing.md",
+  "source_sha256": "7d1d3d30aac9ca2948646a19b877469b47b34030e681cd3760b532bf1087a112",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整审读六篇中文和全部18篇三译；对照当前完整事实文档、Java/Compose及收集存储配置；修正后逐段复核。13段原文在四语共52处另由Docker严格匹配。本记录不是机械QA或抽样签核，不冒称HUMAN_REVIEW/观测运行/图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-tracing.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "87eedd1071fa9067fd670e3e50b6e89ce4d6128c2949f083c042c8e6577eadaf",
+      "checks": {
+        "coverage_and_meaning": "Trace/Span、真实Span优先、MDC finally、Collector中转和Alloy项目筛选解释完整。",
+        "technical_literals": "两段Java、一段YAML、两段Alloy与中文保持同源原文，五个片段逐字绑定。",
+        "security_and_failure_semantics": "兼容X-Trace-Id不等于已保存链路；MQ三段可能不同Trace；只读socket仍高权限，不记录秘密/本文。",
+        "language_and_terminology": "已逐篇完整实际复读英文；信号/指标/日志/链路/告警术语及叙述自然，无新增运行结论。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-tracing.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "e211bcda79b88a65bb63359a704059b79ad96e7c6b3a69575a850e334183c94a",
+      "checks": {
+        "coverage_and_meaning": "Trace/Span、真实Span优先、MDC finally、Collector中转和Alloy项目筛选解释完整。",
+        "technical_literals": "两段Java、一段YAML、两段Alloy与中文保持同源原文，五个片段逐字绑定。",
+        "security_and_failure_semantics": "兼容X-Trace-Id不等于已保存链路；MQ三段可能不同Trace；只读socket仍高权限，不记录秘密/本文。",
+        "language_and_terminology": "全文复读，线程局部与异步传播、消息相关查询的自然表述准确。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-tracing.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "0d39e75a24e9e6a26df560954c30a137386ab0320925968299a587377b1b4053",
+      "checks": {
+        "coverage_and_meaning": "Trace/Span、真实Span优先、MDC finally、Collector中转和Alloy项目筛选解释完整。",
+        "technical_literals": "两段Java、一段YAML、两段Alloy与中文保持同源原文，五个片段逐字绑定。",
+        "security_and_failure_semantics": "兼容X-Trace-Id不等于已保存链路；MQ三段可能不同Trace；只读socket仍高权限，不记录秘密/本文。",
+        "language_and_terminology": "全文复读，真实Span与兼容编号及项目过滤顺序准确，未承诺自动脱敏。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    }
+  }
+}

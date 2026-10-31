@@ -1,0 +1,279 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-metrics",
+  "source": "docs/wiki/observability-metrics.md",
+  "source_sha256": "fda90a829dd53ec242ca8830d7cd978db44b02e3ab246fa0c8df843c2b3e90c9",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current source, translation and actual-image digests",
+  "method": "本人逐篇完整复读最终中文及英日韩全文；43张本轮正式原图已逐张实际查看。此脚本仅校验阅读记录与最终摘要后登记人工智能审校，不执行自动语义盖章，不冒称真人或全部运行验收。",
+  "image_bindings": [
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/shared/monitor-prometheus-targets.png",
+      "sha256": "45005a2e636cc0aa31842217d190e5504efd99deefdc9c5651f7325ab0844e29",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/shared/monitor-prometheus-query.png",
+      "sha256": "6568dcbbcb9e17e45a7d9671a87745f8a1ba210d982ccd5e99a5ba983dbdd1d8",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/zh-CN/monitor-red.png",
+      "sha256": "aa34004537d2ed801b6378c597b1a770f76344bad90d47d631d40a3ba347e953",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/zh-CN/monitor-jvm.png",
+      "sha256": "7790df888667f85eaae8564542026f6f76fba0734b1744d903af298116a43f06",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/zh-CN/monitor-feign.png",
+      "sha256": "401370de49ab274ba49a7c1c6a2d0f1bda1e5eca83e3d70cdc9128add5fce90e",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.md",
+      "image": "docs/images/zh-CN/monitor-mq.png",
+      "sha256": "56ec30936360af56dcba6fd08d5c23d33e421f3599defe4aea5c638158cf0526",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/shared/monitor-prometheus-targets.png",
+      "sha256": "45005a2e636cc0aa31842217d190e5504efd99deefdc9c5651f7325ab0844e29",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/shared/monitor-prometheus-query.png",
+      "sha256": "6568dcbbcb9e17e45a7d9671a87745f8a1ba210d982ccd5e99a5ba983dbdd1d8",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/en-US/monitor-red.png",
+      "sha256": "0ed4da57a3ec6d2a5700b9d3a15f2fcfe370b25fac0266ce471283aeca89819c",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/en-US/monitor-jvm.png",
+      "sha256": "036a80604e10583a65470a69ba6dab678079b800d815cb65b951142beb178e08",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/en-US/monitor-feign.png",
+      "sha256": "c65b18a246ff1d3be13791a1ff140a8f748f92c32ca138de64bceb6e69c61d93",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.en.md",
+      "image": "docs/images/en-US/monitor-mq.png",
+      "sha256": "94ed3657a2a79379e9c9a14cb3d2e24131a2408acc84f6fd46865bb15360ba69",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/shared/monitor-prometheus-targets.png",
+      "sha256": "45005a2e636cc0aa31842217d190e5504efd99deefdc9c5651f7325ab0844e29",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/shared/monitor-prometheus-query.png",
+      "sha256": "6568dcbbcb9e17e45a7d9671a87745f8a1ba210d982ccd5e99a5ba983dbdd1d8",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/ja-JP/monitor-red.png",
+      "sha256": "77583fb4ee2039266a2b92e079cd09c5a82577fc91217e4112b599e58a6af5d7",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/ja-JP/monitor-jvm.png",
+      "sha256": "0e8b44fe612fb746b91b3bababd31e1e3581887c5c8a32c7a3ebd16a80765d31",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/ja-JP/monitor-feign.png",
+      "sha256": "2de77c7ccb0d104495f7f4bf7152c46091ba530a2f5ccc49f07d3b462ba302ef",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.jp.md",
+      "image": "docs/images/ja-JP/monitor-mq.png",
+      "sha256": "969dee0c53b7291ff51a9a64a7cdf9e4b6893ef9a53d99cbc859cf7d9ce95ff1",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/shared/monitor-prometheus-targets.png",
+      "sha256": "45005a2e636cc0aa31842217d190e5504efd99deefdc9c5651f7325ab0844e29",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/shared/monitor-prometheus-query.png",
+      "sha256": "6568dcbbcb9e17e45a7d9671a87745f8a1ba210d982ccd5e99a5ba983dbdd1d8",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/ko-KR/monitor-red.png",
+      "sha256": "c0e12f51c4330138a48ea3f0f3193f546b207e3d280f6e81c5e140b608be9d4e",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/ko-KR/monitor-jvm.png",
+      "sha256": "fcde5c4563e9fd7d7b9647c34f006193261c406c5e7e5fa24a2205f17c4fa813",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/ko-KR/monitor-feign.png",
+      "sha256": "66be639e9bfe4ca6e7d16b3560f3c4a6d05aecf4f52b1b57c63af4f91b052de6",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    },
+    {
+      "article": "docs/wiki/observability-metrics.kr.md",
+      "image": "docs/images/ko-KR/monitor-mq.png",
+      "sha256": "7da1d46edc6fffc2f692b36f7571b0255f95e56498c224fad3c112065b8dcac5",
+      "actual_view_image": true,
+      "evidence": "docs/reference/evidence/monitoring-tutorial-2026-10-25.json",
+      "evidence_sha256": "5c71b4ff6ce93758b37c4bca4d1a14cc15652ccc98d993943fe4a07a63f15311",
+      "scope": "Actual native illustration; not full business or external-notification acceptance"
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-metrics.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "1166980bd5c0d763e51bc697af983ec2ab35de6467f35396912058f8fe649c06",
+      "checks": {
+        "coverage_and_meaning": "完整对照Counter、Gauge、分布统计、抓取与标签，再解释真实RED/JVM/Feign/MQ网页及每类读数。",
+        "technical_literals": "15秒抓取、管理端口19900—19902摘录、0.05等于5%、秒与次数单位、P95和入站/出站方向未漂移；源码块保持原文。",
+        "security_and_failure_semantics": "两个未部署的主机/容器采集目标仍DOWN；八个业务up=1只证明抓取成功。高基数、无样本NaN和Outbox送达边界未弱化。",
+        "language_and_terminology": "逐段对照中文并完整复读最终英文，入站/出站、分位数、空数据与通知边界自然准确；上游界面保留英文按钮便于照图查找。",
+        "images_and_links": "四语RED/JVM/Feign/MQ和共享Prometheus两图全看；保留No data、重复服务图例及当前MQ图例不等于全状态维度的限制。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-metrics.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "b0fb1ebc886c40afd8745157280fbaa4cd646d64df4b4f7e6a4f48da9c66c116",
+      "checks": {
+        "coverage_and_meaning": "完整对照Counter、Gauge、分布统计、抓取与标签，再解释真实RED/JVM/Feign/MQ网页及每类读数。",
+        "technical_literals": "15秒抓取、管理端口19900—19902摘录、0.05等于5%、秒与次数单位、P95和入站/出站方向未漂移；源码块保持原文。",
+        "security_and_failure_semantics": "两个未部署的主机/容器采集目标仍DOWN；八个业务up=1只证明抓取成功。高基数、无样本NaN和Outbox送达边界未弱化。",
+        "language_and_terminology": "逐段对照中文并完整复读最终日文；自然解释専門語、収集対象、分位与追跡，原生英文字段附语境，源码注释不擅自翻译。",
+        "images_and_links": "四语RED/JVM/Feign/MQ和共享Prometheus两图全看；保留No data、重复服务图例及当前MQ图例不等于全状态维度的限制。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-metrics.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 19:58:24",
+      "result": "approved",
+      "translation_sha256": "e4d8f79b3f0a201050b7bb30eb678706f81398b2f488d4b291a0807ba9c5a374",
+      "checks": {
+        "coverage_and_meaning": "完整对照Counter、Gauge、分布统计、抓取与标签，再解释真实RED/JVM/Feign/MQ网页及每类读数。",
+        "technical_literals": "15秒抓取、管理端口19900—19902摘录、0.05等于5%、秒与次数单位、P95和入站/出站方向未漂移；源码块保持原文。",
+        "security_and_failure_semantics": "两个未部署的主机/容器采集目标仍DOWN；八个业务up=1只证明抓取成功。高基数、无样本NaN和Outbox送达边界未弱化。",
+        "language_and_terminology": "逐段对照中文并完整复读最终韩文；메트릭/트레이스/경보、无样本与失败语义保持一致，原生按钮和工程字面量不改写。",
+        "images_and_links": "四语RED/JVM/Feign/MQ和共享Prometheus两图全看；保留No data、重复服务图例及当前MQ图例不等于全状态维度的限制。 相邻篇与事实入口保留对应语言；图像摘要逐项绑定，不用文件存在代替看图。"
+      },
+      "findings": []
+    }
+  }
+}

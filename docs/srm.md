@@ -226,6 +226,8 @@ DomainEventEnvelope 字段包括 eventId/eventType/occurredAt/tenantId/producer�
 
 OwnerResolver 在创建/转移时校验 Auth 用户启用、同租户、主组织及可分配范围，指定他人还需 transfer 权限。OwnerEnricher 去重后分别批量查用户与组织，异常可保留 ID/空名称，不扩权，不保证全部 Feign 在数据库事务外。
 
+内部负责人不得关联当前租户任何 `deleted=0` 的门户关系，`ACTIVE` / `INACTIVE` 均排除。`OwnerOptionServiceImpl` 在截取候选数量前批量剔除门户账号；`SrmOwnerResolver` 再校验创建/转移目标，命中返回 403，门户身份计数为空返回 503。合法内部转移仍在正式业务事务中同步供应商与关联评估的负责人。
+
 事务显式调用 `ReliableMessageRelay.send("srm-domain-out-0", envelope, tenantId, eventId)` 写本地 Outbox；默认 REQUIRED 传播，Relay 后续发送 Broker。停 Relay 不等于停 Outbox 写入。eventId 在 DomainEventEnvelope 顶层，作为 msgKey 传递；Outbox msgId 独立生成，消费者仍须原子处理事件/业务意图。payload 可含明确的 ID、版本、状态、评分或金额快照，不含完整账户、手机、邮箱、邀请令牌。
 
 `srm.supplier.registered.v1` · `srm.supplier.approved.v1` · `srm.supplier.rejected.v1` · `srm.supplier.suspended.v1` · `srm.supplier.blacklisted.v1` · `srm.supplier.eliminated.v1` · `srm.portal-role.assign-requested.v1` · `auth.portal-role.assigned.v1` · `auth.portal-role.assign-failed.v1` · `srm.evaluation.completed.v1` · `srm.risk.level-changed.v1` · `srm.quotation.submitted.v1`
@@ -274,7 +276,7 @@ SRM 查询门户 RFQ 调用 Procurement 的 /api/internal/procurement/rfq/invita
 
 ## 10. 验证边界
 
-复用且逐个摘要匹配的 Docker Reactor 产物中，SRM 为 27 份 JUnit 报告、119 例通过、0 失败/错误/跳过。断言范围包含状态/评分、权限与隔离、邀请/角色结果、报价重放/版本/金额等各测试实际分支，不把旧“取最高颜色”辅助方法测试当作当前风险服务算法验证。
+2026-10-24 留存且逐个摘要匹配的 Docker Reactor 产物中，SRM 为 29 份 JUnit 报告、135 例通过、0 失败/错误/跳过。断言范围包含状态/评分、权限与隔离、邀请/角色结果、报价重放/版本/金额等各测试实际分支，不把旧“取最高颜色”辅助方法测试当作当前风险服务算法验证。
 
 该报告不证明真实验证码注册、外部账号、实时 Workflow/MQ 投递、MySQL 并发或新教程步骤；这些行为需要独立运行证据。四语审校按授权 AI_REVIEW 记录，不冒称 HUMAN_REVIEW；运行/截图证据以各自实际范围为准。
 

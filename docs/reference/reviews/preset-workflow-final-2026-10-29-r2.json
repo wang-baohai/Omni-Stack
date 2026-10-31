@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "document_id": "preset-workflow",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/preset-workflow.md",
+  "source_sha256": "d1a3440d2827e9d91efa823a1a2f8edfffeaff9845f9b5683eead5f4c0a3b7fb",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "r1四语全文已实际完整读过；本次确认备份摘要精确等于r1实际阅读摘要，只将四语各唯一一处workflow直接依赖platform改为base，最终四句及catalog条目实际复读。不冒称重读未改变的全文；连续全文阅读与确切差量共同覆盖当前正文。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-preset-workflow-correction-actual-reading-20261029.json",
+  "actual_reading_sha256": "63b675242eb46b6307414ebad0dc4a8f08e4ffc8bcc3446b64a07b8c82766e48",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/preset-workflow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:27:22",
+      "result": "approved",
+      "translation_sha256": "bc20b7fb01f9ea08c36599c9267870f71ef4f0e3b4d1b95671be9cce0faaecb7",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。 本轮补核catalog实际workflow直接依赖base；四语唯一句差量已逐语复读，其他内容与已完整读过的r1相同。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-DIRECT-DEPENDENCY",
+          "status": "resolved",
+          "description": "catalog实际workflow.dependencies=[base]，原文误写platform；四语单句已纠正，旧AI记录保留且由新摘要记录取代，不倒改旧签核。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/preset-workflow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:27:22",
+      "result": "approved",
+      "translation_sha256": "19d6bc327cc730c645ebaf08f00a1235086d33af56f34df77db7408f8976c1c9",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。 本轮补核catalog实际workflow直接依赖base；四语唯一句差量已逐语复读，其他内容与已完整读过的r1相同。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-DIRECT-DEPENDENCY",
+          "status": "resolved",
+          "description": "catalog实际workflow.dependencies=[base]，原文误写platform；四语单句已纠正，旧AI记录保留且由新摘要记录取代，不倒改旧签核。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/preset-workflow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:27:22",
+      "result": "approved",
+      "translation_sha256": "1a1f7ce8a40aa7c390d92b2cbac2a4016ec5ad516b60b9ce88f9c67374047d08",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。 本轮补核catalog实际workflow直接依赖base；四语唯一句差量已逐语复读，其他内容与已完整读过的r1相同。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-DIRECT-DEPENDENCY",
+          "status": "resolved",
+          "description": "catalog实际workflow.dependencies=[base]，原文误写platform；四语单句已纠正，旧AI记录保留且由新摘要记录取代，不倒改旧签核。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

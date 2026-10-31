@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "document_id": "preset-full",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/preset-full.md",
+  "source_sha256": "0212a2b223c7e11f492ca1f74c109ac2e80ce273cdea4b24584859bcb382c6d1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "四语均实际完整读取无截断，最终改动逐语实际复读，无栅格图。历史运行证据、当前完整覆盖门、发布待审与空库未测分开；S05原G7依赖继续保留阻塞。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-preset-full-actual-reading-20261029.json",
+  "actual_reading_sha256": "16528220275ca0297dc10ca80b6d1155f3649d085a450d8d127b8b44105d9f1a",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/preset-full.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:25:23",
+      "result": "approved",
+      "translation_sha256": "f88ee6a22e5d422552d5d09cc8d69bba62c170f704c645d65a214d2f8ad42ff9",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，14模块16服务/35端口记录34唯一、7296/11776提示与12–16GiB预算区分；保留历史登录/Saga证据且不冒称当前完整G7。纠正所有子集都不含业务权限的误述，仅core全无业务、其余保留所选业务；串行构建及Wiki/工作台/业务模块新页签和菜单搜索范围一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "FULL-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧G7与当前验收区别、串行构建、工作台全菜单/业务模块限定搜索及独立页签一致。",
+          "final_actual_read": true
+        },
+        {
+          "id": "FULL-SUBSET-SEED-BOUNDARY",
+          "status": "resolved",
+          "description": "不是所有子集都无业务权限：core不含业务，其余子集保留选中业务的权限，只移除未选模块；不能冒称空库已实测。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/preset-full.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:25:23",
+      "result": "approved",
+      "translation_sha256": "4e6db8de8a04cea37b773e86e34afaa87803d2208c469795f8f7d625022f5d68",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，14模块16服务/35端口记录34唯一、7296/11776提示与12–16GiB预算区分；保留历史登录/Saga证据且不冒称当前完整G7。纠正所有子集都不含业务权限的误述，仅core全无业务、其余保留所选业务；串行构建及Wiki/工作台/业务模块新页签和菜单搜索范围一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "FULL-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧G7与当前验收区别、串行构建、工作台全菜单/业务模块限定搜索及独立页签一致。",
+          "final_actual_read": true
+        },
+        {
+          "id": "FULL-SUBSET-SEED-BOUNDARY",
+          "status": "resolved",
+          "description": "不是所有子集都无业务权限：core不含业务，其余子集保留选中业务的权限，只移除未选模块；不能冒称空库已实测。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/preset-full.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:25:23",
+      "result": "approved",
+      "translation_sha256": "4789ad11b21bc8e3dcf38dbbffd08fdf7734683deb739280de965ae5e8ad501b",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，14模块16服务/35端口记录34唯一、7296/11776提示与12–16GiB预算区分；保留历史登录/Saga证据且不冒称当前完整G7。纠正所有子集都不含业务权限的误述，仅core全无业务、其余保留所选业务；串行构建及Wiki/工作台/业务模块新页签和菜单搜索范围一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "FULL-HISTORY-SERIAL-TABS",
+          "status": "resolved",
+          "description": "旧G7与当前验收区别、串行构建、工作台全菜单/业务模块限定搜索及独立页签一致。",
+          "final_actual_read": true
+        },
+        {
+          "id": "FULL-SUBSET-SEED-BOUNDARY",
+          "status": "resolved",
+          "description": "不是所有子集都无业务权限：core不含业务，其余子集保留选中业务的权限，只移除未选模块；不能冒称空库已实测。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

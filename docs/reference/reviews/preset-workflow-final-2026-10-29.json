@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "document_id": "preset-workflow",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/preset-workflow.md",
+  "source_sha256": "4edf3e0c5d96d202dadae71852ad55b949d94a30b9d9d50b56c14ad89709c2b8",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "四语均实际完整Get-Content读取无截断；最终修改段落逐条实际复读；无栅格图。历史阶段不倒签，当前运行/完整门禁仍归原S02/S03，最终渲染统一29S04。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-preset-workflow-actual-reading-20261029.json",
+  "actual_reading_sha256": "4b06546f78b0bf07dbf1f6bc28d70be9e172259a23b234db862c653c2dc0c8a3",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/preset-workflow.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:15:58",
+      "result": "approved",
+      "translation_sha256": "12e39c30f6affdc844b55da0808d4031f73a4521638bce698861e18fcf349272",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/preset-workflow.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:15:58",
+      "result": "approved",
+      "translation_sha256": "978554a188efd6cad2977388413a665d0e87dd26c9d81015567efeb6eb711607",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/preset-workflow.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 21:15:58",
+      "result": "approved",
+      "translation_sha256": "f1a373fc6f846785f768a483b40d04923c5cb1335aad0b30af06e921d3e56454",
+      "checks": {
+        "coverage_and_meaning": "四语全文实际读完，8模块/9服务/18端口与候选人、BPMN校验、Flowable服务边界一致。早期登录失败和交付未完成仅保留历史阶段含义；不继承旧G7。串行构建、停用服务原位恢复、Wiki→工作台→工作流新页签四语一致。",
+        "technical_literals": "实际核对显式模块/闭包/服务/端口/命令与配置提示；旧运行计数只作历史快照，不继承覆盖缺陷修复前的G7绿灯。",
+        "security_and_failure_semantics": "保留空库未实测、共享库不重放迁移、原位替换和恢复、不偏移端口、不绕过验证码、不挂源仓和socket的交付角色边界。",
+        "language_and_terminology": "四语完整语义对照及最终修改复读，明确结构解析、构建、启动、业务和发布验收各自证据范围。",
+        "images_and_links": "本文全文实际读完，未引用栅格图；链接保持对应语言，最终站点和渲染在原WP29S04统一验收。"
+      },
+      "findings": [
+        {
+          "id": "WORKFLOW-HISTORICAL-VERDICTS",
+          "status": "resolved",
+          "description": "明确早期/后期/当前输入版本差异，不把覆盖裁剪修复前绿灯继承为当前完整验收。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-SERIAL-COMMANDS",
+          "status": "resolved",
+          "description": "全局--parallel 1；不可执行的本地化docker stop占位符改为明确Compose服务列表，四语命令一致；保留按现场核对停用集合要求。",
+          "final_actual_read": true
+        },
+        {
+          "id": "WORKFLOW-WIKI-WORKSPACE-TABS",
+          "status": "resolved",
+          "description": "同步Wiki首页、工作台融合任务审批、工作台与业务模块独立页签入口。",
+          "final_actual_read": true
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

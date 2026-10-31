@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "frontend-patterns",
+  "source": "docs/frontend-patterns.md",
+  "source_sha256": "b1d1c44a1d5dc937543b7a06f8eb5d4cec4b95cd7bfe01fdfae68c40d97be5bc",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本人实际完整阅读两份事实文档的中文和三译，按中文逐段复核；SLO与导航最终差异另外再次审读。脚本只登记该八篇已发生的实际AI阅读，摘要/机械QA不是语义审批，也不签未读文章或运行页面。",
+  "translations": {
+    "en-US": {
+      "path": "docs/frontend-patterns.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "7c5e8a64c7b8fd95384d587804f30eb92e617edd0281de55352553b73257c8ab",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语：目录与TypeScript类型、Vue SFC顺序、API唯一共享类型、Pinia、路由/权限与会话、组件状态及响应式边界完整。新增首页原生新标签、同页驾驶舱、旧query/hash兼容、模块stable appId搜索逐段对应。",
+        "technical_literals": "保留ApiResponse/PageResult来源、v-permission语义、路由路径与函数原文；My Jobs和マイジョブ对照实际UI。四语最终5.1再次读过，明确Dashboard只为其自己的管理首页，不作私有错误页兜底。六项前端源门已实际通过；这里不代签新镜像页面。",
+        "security_and_failure_semantics": "noopener noreferrer不传token；工作台全授权菜单、业务仅本模块，选择时再验appId。浏览器原生后退和地址输入仍可用，UI不是服务端授权。失败/取消和加载错误不偷换为空或成功。",
+        "language_and_terminology": "全文按中文逐段对照；自然解释同页驾驶舱与私有错误页，无把请求计数预算换成固定停机时长。",
+        "images_and_links": "本事实文档无栅格图片；源码与Wiki入口逐项对照。新旧工作台地址、锚点、语言名称与中文一致，事实只维护契约而不复制完整使用教程。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "新导航边界与旧工作台名称未完整同步，私有错误页会借中立落点露Dashboard。",
+          "resolution": "四语补同页/新标签/稳定appId/私有错误页无兜底规则；源修及六门实际通过，最终实页另验不在本文冒签。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/frontend-patterns.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "d85c7c3bcae5b634e32553e3c052fd1656a3a502bc590576f5746b8e9d4e8986",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语：目录与TypeScript类型、Vue SFC顺序、API唯一共享类型、Pinia、路由/权限与会话、组件状态及响应式边界完整。新增首页原生新标签、同页驾驶舱、旧query/hash兼容、模块stable appId搜索逐段对应。",
+        "technical_literals": "保留ApiResponse/PageResult来源、v-permission语义、路由路径与函数原文；My Jobs和マイジョブ对照实际UI。四语最终5.1再次读过，明确Dashboard只为其自己的管理首页，不作私有错误页兜底。六项前端源门已实际通过；这里不代签新镜像页面。",
+        "security_and_failure_semantics": "noopener noreferrer不传token；工作台全授权菜单、业务仅本模块，选择时再验appId。浏览器原生后退和地址输入仍可用，UI不是服务端授权。失败/取消和加载错误不偷换为空或成功。",
+        "language_and_terminology": "全文逐段实际审读；ホーム、マイワークスペース、マイジョブ与当前导航相符；要求数と時間によるSLOを区別し、技術リテラルは原文保持。",
+        "images_and_links": "本事实文档无栅格图片；源码与Wiki入口逐项对照。新旧工作台地址、锚点、语言名称与中文一致，事实只维护契约而不复制完整使用教程。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "新导航边界与旧工作台名称未完整同步，私有错误页会借中立落点露Dashboard。",
+          "resolution": "四语补同页/新标签/稳定appId/私有错误页无兜底规则；源修及六门实际通过，最终实页另验不在本文冒签。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/frontend-patterns.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "4add65a7b0cef9518e1b2f36169a8e1f9ee58416d6d93717ed751b5281a95aee",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语：目录与TypeScript类型、Vue SFC顺序、API唯一共享类型、Pinia、路由/权限与会话、组件状态及响应式边界完整。新增首页原生新标签、同页驾驶舱、旧query/hash兼容、模块stable appId搜索逐段对应。",
+        "technical_literals": "保留ApiResponse/PageResult来源、v-permission语义、路由路径与函数原文；My Jobs和マイジョブ对照实际UI。四语最终5.1再次读过，明确Dashboard只为其自己的管理首页，不作私有错误页兜底。六项前端源门已实际通过；这里不代签新镜像页面。",
+        "security_and_failure_semantics": "noopener noreferrer不传token；工作台全授权菜单、业务仅本模块，选择时再验appId。浏览器原生后退和地址输入仍可用，UI不是服务端授权。失败/取消和加载错误不偷换为空或成功。",
+        "language_and_terminology": "全文逐段实际审读；워크스페이스、내 작업与模块边界对应，요청 수/시간 기반预算区分，没有省略失败和敏感信息约束。",
+        "images_and_links": "本事实文档无栅格图片；源码与Wiki入口逐项对照。新旧工作台地址、锚点、语言名称与中文一致，事实只维护契约而不复制完整使用教程。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "新导航边界与旧工作台名称未完整同步，私有错误页会借中立落点露Dashboard。",
+          "resolution": "四语补同页/新标签/稳定appId/私有错误页无兜底规则；源修及六门实际通过，最终实页另验不在本文冒签。"
+        }
+      ]
+    }
+  }
+}

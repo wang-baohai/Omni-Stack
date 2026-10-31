@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "common-mqlog",
+  "source": "docs/wiki/common-mqlog.md",
+  "source_sha256": "98e1a11b3e708599094327360f6b769583161ff4ffa3aae1df9c6310f85dca0b",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current whole source/translation contents; code and original plan unchanged",
+  "method": "实际完整读完三个主题的中文与三译，按源码相关方法逐项核对；修正后核对四语最终差异，截断输出对应MQ后半段另外补读。不把机械摘要或翻译结构检查当语义审读。",
+  "actual_complete_reading_sha256": "c9910aea06445de3ff80bdc9994381b5c1a9d0486b64dd64fdfef8b2565e8a38",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-mqlog.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "dae840eb1dc94549636a66db544cb14e9b79fa173c338f9debc317a13ca9e275",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语有效业务事务中的Outbox、跨租户中继、claim/退避/死信、租户开通收据、内部消息查询和六状态，新增说明没有省略失败恢复。",
+        "technical_literals": "Java原片段三译与中文逐字一致；maxRetry默认3按失败计数，20/40秒后第三失败死信；120秒PROCESSING租约实现核对，模板固定rocketmq，新策略Bean不自动迁移记录。",
+        "security_and_failure_semantics": "要求有效事务与代理调用；跨租户后台扫描不等于外部查询可跨租户；旧FAILED收据会跳过同ID，正式Auth重试生成新ID；认证开关选两种过滤器而非免认证；SENT不证明消费成功，重投要求幂等。",
+        "language_and_terminology": "全文逐段实际对照，普通英语解释日志、事务、请求幂等和任务转交；限定条件、失败恢复与源码文字量均完整，最终事实修正后再读。",
+        "images_and_links": "本篇无栅格图片；中继时序图与实际状态一致，common-job/common-workflow前后链接保持本语，源码片段与消息正文不包含真实密钥，不冒称运行验收已过。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "mqlog：有效事务与代理前提；三次失败实际20/40秒后死信；租约过期可回收且非全程exactly-once；FAILED收据跳过旧request，Auth正式入口新ID；两认证实现按开关选择而非Controller消失；SENT非消费成功",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-mqlog.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "99daaf0eecd740132ec7bb1532e61de58dde0bfa173f295cc20e43678d2b1bba",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语有效业务事务中的Outbox、跨租户中继、claim/退避/死信、租户开通收据、内部消息查询和六状态，新增说明没有省略失败恢复。",
+        "technical_literals": "Java原片段三译与中文逐字一致；maxRetry默认3按失败计数，20/40秒后第三失败死信；120秒PROCESSING租约实现核对，模板固定rocketmq，新策略Bean不自动迁移记录。",
+        "security_and_failure_semantics": "要求有效事务与代理调用；跨租户后台扫描不等于外部查询可跨租户；旧FAILED收据会跳过同ID，正式Auth重试生成新ID；认证开关选两种过滤器而非免认证；SENT不证明消费成功，重投要求幂等。",
+        "language_and_terminology": "全文逐段实际对照；修正サプライヤー、切り詰め、カスタマイザー及承认者追加削除等直译词，事务与请求编号的最终段落再次核对。",
+        "images_and_links": "本篇无栅格图片；中继时序图与实际状态一致，common-job/common-workflow前后链接保持本语，源码片段与消息正文不包含真实密钥，不冒称运行验收已过。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "mqlog：有效事务与代理前提；三次失败实际20/40秒后死信；租约过期可回收且非全程exactly-once；FAILED收据跳过旧request，Auth正式入口新ID；两认证实现按开关选择而非Controller消失；SENT非消费成功",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-mqlog.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-26 10:23:57",
+      "result": "approved",
+      "translation_sha256": "c5968fa46e2a7454c9abdc59514196029e09011653f77739fe3dbe2a58bf48c7",
+      "checks": {
+        "coverage_and_meaning": "完整对照四语有效业务事务中的Outbox、跨租户中继、claim/退避/死信、租户开通收据、内部消息查询和六状态，新增说明没有省略失败恢复。",
+        "technical_literals": "Java原片段三译与中文逐字一致；maxRetry默认3按失败计数，20/40秒后第三失败死信；120秒PROCESSING租约实现核对，模板固定rocketmq，新策略Bean不自动迁移记录。",
+        "security_and_failure_semantics": "要求有效事务与代理调用；跨租户后台扫描不等于外部查询可跨租户；旧FAILED收据会跳过同ID，正式Auth重试生成新ID；认证开关选两种过滤器而非免认证；SENT不证明消费成功，重投要求幂等。",
+        "language_and_terminology": "全文逐段实际对照；승인자 추가·제거、처리자 전달与事务/请求编号等用语清楚，finally清理、默认装配条件和无通知限制完整保留。",
+        "images_and_links": "本篇无栅格图片；中继时序图与实际状态一致，common-job/common-workflow前后链接保持本语，源码片段与消息正文不包含真实密钥，不冒称运行验收已过。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "mqlog：有效事务与代理前提；三次失败实际20/40秒后死信；租约过期可回收且非全程exactly-once；FAILED收据跳过旧request，Auth正式入口新ID；两认证实现按开关选择而非Controller消失；SENT非消费成功",
+          "resolution": "根据实际实现方法校正中文与三译并复读最终差异；保留Java原片段，不为文档说明改动业务代码或权限。"
+        }
+      ]
+    }
+  }
+}

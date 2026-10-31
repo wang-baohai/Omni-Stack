@@ -126,7 +126,7 @@ sequenceDiagram
 | `scope` | 数据库权限编码数组；不是空格拼接字符串 |
 | `jti` | 唯一 Token ID，用于 `token:blacklist:{jti}` |
 | `iat` | Unix 秒级签发时间 |
-| `exp` | 到期时间；默认 `iat + 900`，由 `auth.token.access-token-ttl` 配置 |
+| `exp` | 到期时间；由 `auth.token.access-token-ttl` 配置，仓库 application.yml 当前为 7200 秒，代码回退值为 900 |
 
 ### 多租户登录机制
 
@@ -145,7 +145,7 @@ sequenceDiagram
 
 ### 当前状态
 
-`/api/auth/login` 返回 accessToken、Bearer 类型及 expiresIn，不返回 refreshToken；默认访问有效期 900 秒，可配置。`JwkKeyProvider` 当前取 JWKS 第一个 RSA 密钥并缓存，不能据此声称已实现按 kid 选择的完整多密钥轮换。
+`/api/auth/login` 返回 accessToken、Bearer 类型及 expiresIn，不返回 refreshToken；仓库 application.yml 当前访问有效期为 7200 秒（代码回退 900 秒），可通过该配置项调整。`JwkKeyProvider` 当前取 JWKS 第一个 RSA 密钥并缓存，不能据此声称已实现按 kid 选择的完整多密钥轮换。
 
 本节说明当前源码调用与失败边界。实际验证码登录操作、截图与恢复步骤见 [Wiki](wiki/index.md)；OAuth2 会话及授权码流程继续见 Flow 2。
 
@@ -156,6 +156,8 @@ sequenceDiagram
 前端的企业 SSO 入口使用授权码 + PKCE。默认客户端是 `omni-frontend`（`VITE_OAUTH2_CLIENT_ID` 可覆盖前端值，但必须匹配注册记录），认证方式为 `NONE`。新建默认客户端要求 PKCE，授权范围为 `openid profile`，`requireAuthorizationConsent=false`；已存在记录的其他配置不会被初始化器重置。
 
 发起流程先生成 64 字符 verifier、`BASE64URL(SHA256(verifier))` challenge 和随机 state，保存授权参数，再进入 `Login?oauth2=true`。表单用必填租户和真实验证码调用 `/api/auth/session-login` 建立并轮换 HttpSession，随后打开保存的授权 URL。JWT 登录状态不能代替该服务端会话。
+
+`GET /api/auth/session-check` 是精确放行的只读会话探针，显式读取已有 HttpSession 中的安全上下文；没有有效会话时返回业务码 401。它不创建会话，也不将会话身份写入普通 REST 认证上下文；其他业务接口仍要求 Bearer JWT。
 
 ### 时序图
 
@@ -437,7 +439,7 @@ state = payload + "|" + hmac
 4. 新用户 password 为 null，status 为 1，tenantId 来自验证后的 state。
 5. 用户与第三方关联在回调数据库事务内写入。绑定唯一键冲突时，代码回查现有绑定并使用其本地用户。
 6. 尝试分配所选租户的 `USER` 角色；缺失或分配异常时记录 warn。正式种子中的租户1 USER 为 SELF，实际数据范围以当前角色配置为准。
-7. 已有绑定先加载原本地用户，再更新第三方 Token/资料；JWT 的租户来自该用户，不会按此次 state 自动迁移用户。
+7. 已有绑定先核对本地用户所属租户与 state 租户一致；不一致时在更新绑定或签发 JWT 前返回 403。并发绑定回读也在默认角色分配前核对租户。
 8. 加载本地角色/权限后生成 JWT；在线记录异常只 warn，随后发布登录成功审计。
 
 ### sys_user_oauth_provider 表设计
@@ -457,7 +459,9 @@ state = payload + "|" + hmac
 | `uk_provider_user` | `UNIQUE (provider, provider_user_id)` | 第三方身份的全局唯一约束 |
 | `idx_user_id` | `INDEX (user_id)` | 按本地用户查关联的索引 |
 
-该表没有 tenant_id 列，唯一键也不含租户。同一提供商身份全局关联一个本地用户；首次创建使用 state 中的租户，已有绑定复用原用户及其租户。不能描述成每个租户可独立重复绑定同一第三方身份。
+该表没有 tenant_id 列，唯一键也不含租户。同一提供商身份全局关联一个本地用户；首次创建使用 state 中的租户，已有绑定仅允许从原用户所属租户登录，不自动迁移或跨租户复用。同一第三方身份不能在各租户独立重复绑定。
+
+三个 Handler 的令牌交换均发送 UTF-8 编码表单并声明 `application/x-www-form-urlencoded`。外部资料缺少唯一主体 ID 时返回 502；编排层也在查询本地绑定前拒绝缺失主体。
 
 `handleCallback()` 使用数据库事务；对外 Token 交换、网络调用及在线记录并不与本地数据库共同回滚。数据库唯一键/回查处理也不等于所有外部副作用幂等。
 
@@ -534,6 +538,8 @@ sequenceDiagram
 - registerDynamicRoutes 只为组件可解析的 MENU 注册路由，DIRECTORY 仅分组；以 srm:portal: 开头的门户项不在这条动态注册路径内。路由注册在 admin 下，路径把权限码的冒号替换为斜杠，名称替换为连字符，并保留 meta.permissionCode。
 - 登出时重置权限 Store 并移除已登记的动态路由。
 
+公开首页展示 Wiki；登录后从首页在新标签页进入“我的工作台”。工作台把概览、待我审批和个人任务放在同一页面，应用目录、应用弹窗与菜单搜索覆盖当前身份可访问的全部菜单。进入具体业务模块时再打开新标签页；模块页只显示和搜索当前模块的菜单，不提供全局“应用”按钮，也不提供返回首页或工作台的入口。这些前端导航范围不替代服务端权限检查。
+
 **按钮、令牌与服务端授权**
 
 ```vue
@@ -543,7 +549,7 @@ sequenceDiagram
 ```
 
 - 指令在 mounted 和 updated 中检查非空绑定：无权限时设 display:none，否则清空 display。空绑定不会隐藏元素；隐藏按钮不构成服务端授权。
-- decodeJwt 只解码、不验签；getPermissionsFromToken 原样返回 scope，没有把字符串拆为数组。密码 JWT 的 scope 数组与 SAS 的空格分隔字符串不能据此宣称已在该前端工具中统一。签名和失效校验由 Gateway 完成。
+- decodeJwt 只解码、不验签；getPermissionsFromToken 将密码 JWT 的权限数组或 SAS 的空格分隔 scope 字符串统一为权限数组，非法类型返回空数组。签名和失效校验仍由 Gateway 完成，前端解析不会授予服务端权限。
 - Auth 的普通 API 通过 GatewayPreAuthFilter 从转发的角色、权限头构建 Authentication；这里不是再次校验转发的 Bearer JWT，也不是每次重查数据库刷新功能权限。
 - 管理接口按当前 Controller 的 @PreAuthorize 等规则授权，例如用户创建的 system:user:create。公开登录/注册及 MyJobController 的任务归属校验属于各自明确的路径，不能概括为所有写接口都有同一种注解。
 
@@ -1088,7 +1094,7 @@ sequenceDiagram
 | 源码 | 职责 |
 | --- | --- |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [CreateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java) / [UpdateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java) / [UserJobServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java) / [UserJobTypeServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java) | 已登录入口、DTO 校验、类型选择与逐行归属 |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 工作台任务 API 与表单提交 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 工作台任务 API 与表单提交 |
 | [CronGenerator.vue](../omni-frontend/src/components/CronGenerator.vue) / [DynamicFormRenderer.vue](../omni-frontend/src/components/DynamicFormRenderer.vue) / [schema.ts](../omni-frontend/src/types/schema.ts) | 7 种 Cron 频率及标准/兼容 Schema 的动态字段 |
 | [XxlJobAdminClient.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java) / [XxlJobProperties.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java) / [XxlJobAutoConfiguration.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java) | 执行器配置、注册请求与远端查找/补偿 |
 | [0001-base-schema.yaml](../database/changelog/base/0001-base-schema.yaml) / [base.sql](../scripts/sql/seed/base.sql) / [UserJobSeedSyncRunner.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java) | 正式任务结构、种子与启动同步入口 |
@@ -1204,7 +1210,7 @@ sequenceDiagram
 | [UserJobMessage.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java) / [UserJobHandler.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java) | 五字段消息与处理器 SPI |
 | [DrinkWaterRemindHandler.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java) / [base.sql](../scripts/sql/seed/base.sql) | 内置提醒参数及实际文本 |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [UserJobLogServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java) / [SysUserJobLogMapper.java](../omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java) | 父任务归属检查、日志查询与统计 SQL |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 当前页轮询、手动等待与提示 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 当前页轮询、手动等待与提示 |
 | [JobMetrics.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java) | 执行/解析指标入口 |
 
 ### 当前状态

@@ -27,7 +27,7 @@ class SeedManifestLoaderTest {
                 .map(SeedModule::id)
                 .collect(Collectors.toSet());
 
-        assertThat(manifest.version()).isEqualTo("1.0.0-bootstrap");
+        assertThat(manifest.version()).isEqualTo("1.0.1-bootstrap");
         assertThat(moduleIds).hasSize(manifest.modules().size()).contains("platform", "auth", "base");
         assertThat(manifest.sources()).isNotEmpty().allMatch(source -> moduleIds.contains(source.module()));
         assertThat(manifest.assertions()).isNotEmpty().allMatch(assertion -> moduleIds.contains(assertion.module()));

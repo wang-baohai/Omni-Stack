@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "document_id": "common-redis-reactive",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/common-redis-reactive.md",
+  "source_sha256": "53a6419c47e2a2ad8ef4e22ece11eb8f82e0a2780fdce723569afbbc0db30dac",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本轮4篇中文及12译文全部实际完整Get-Content读取且无截断；相关Java/POM/YML原文和开关条件实读。最小修正后最终四语差量实际复读；没有用哈希/行数/代码一致性替代语义审读。无栅格图片；Mermaid新渲染统一原29S04。",
+  "actual_reading_receipt": "wiki-workspace-ux.records.local/codex-common-infrastructure-actual-reading-20261029.json",
+  "actual_reading_sha256": "3727f0b8290b87f4bb58fce79e9866e99de95bc08a438e842d2688050f3e3b35",
+  "images": [],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/common-redis-reactive.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "8e95fc0bf8cceb368963b506f26a5c8c18a54a982b84a3e8df43e69d06576720",
+      "checks": {
+        "coverage_and_meaning": "全文对照POM和application.yml，明确无自定义Java工具与自动配置；项目WebFlux模块选择规则不误写为底层绝无阻塞API，四语修正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "实际全文对照英文：角色与权限、预期与实测、建议与现状、source provenance与实际比对无反转；术语和步骤可读。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "REACTIVE-DEPENDENCY-BOUNDARY",
+          "status": "resolved",
+          "description": "项目模块选择约束不等于Spring依赖中不存在阻塞API，只声明项目未封装的能力。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/common-redis-reactive.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "ab74556ea7beadf3fed3c57fbf8b0bf9ece65369c79696fbaf7cd27e8b35936e",
+      "checks": {
+        "coverage_and_meaning": "全文对照POM和application.yml，明确无自定义Java工具与自动配置；项目WebFlux模块选择规则不误写为底层绝无阻塞API，四语修正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "実際に全文を読み、中国語との対応を確認した。権限・失敗・提案と現状の区別を保ち、説明と手順を理解できる。",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "REACTIVE-DEPENDENCY-BOUNDARY",
+          "status": "resolved",
+          "description": "项目模块选择约束不等于Spring依赖中不存在阻塞API，只声明项目未封装的能力。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/common-redis-reactive.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 20:52:31",
+      "result": "approved",
+      "translation_sha256": "70d7e76138d9ba97ed5e6901d0dd36ab7b49adcb8200393d695c55030639d109",
+      "checks": {
+        "coverage_and_meaning": "全文对照POM和application.yml，明确无自定义Java工具与自动配置；项目WebFlux模块选择规则不误写为底层绝无阻塞API，四语修正并复读。",
+        "technical_literals": "逐项核对本文命令、路径、框架名和数字；保留Docker/权限/租户边界，历史快照及示例结果未改写为当前运行成功。",
+        "security_and_failure_semantics": "全文对照保留未验证、失败及恢复语义；本文不授权自动提交/发布/生产操作，不把建议或厂商案例当本项目能力。",
+        "language_and_terminology": "전문을 실제로 읽고 중국어와 대조했다. 권한과 실패, 제안과 현재 구현을 구분하며 절차와 설명을 이해할 수 있다.",
+        "images_and_links": "实际读完本文，未引用栅格图片，不存在用中文图充三语；内部链接指向对应语言，公共规范入口仍为正式源。链接门另行真实执行。"
+      },
+      "findings": [
+        {
+          "id": "REACTIVE-DEPENDENCY-BOUNDARY",
+          "status": "resolved",
+          "description": "项目模块选择约束不等于Spring依赖中不存在阻塞API，只声明项目未封装的能力。"
+        },
+        {
+          "id": "INFRA-TRANSLATION-TERMS",
+          "status": "resolved",
+          "description": "JP吞吐和回源、KO回源、ENfallback表格词更正为本语言术语/Auth再查询，不新增流程。"
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

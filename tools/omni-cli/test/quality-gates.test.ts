@@ -314,6 +314,41 @@ describe('WP002 quality-gate contract tests', () => {
     });
   });
 
+  it('rejects missing required evidence, locale and state despite a covered label', () => {
+    const fixture = createScreenshotFixture();
+    fixtureCleanup.push(fixture);
+    writeFileSync(join(fixture, 'images/test.png'), readFileSync(join(workspaceRoot, 'docs/images/zh-CN/auth-login.png')));
+    writeFileSync(join(fixture, 'tests/test.spec.ts'), '// 截图门禁的受控测试数据，不作实际页面证据');
+    const locales = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR'];
+    const screenshots = locales.flatMap((locale) => ['entry', 'success'].map((step) => ({
+      id: `${locale}-${step}`, image: 'images/test.png', test: 'tests/test.spec.ts',
+      fixture: 'coverage-negative-test', viewport: '1440x900', locale, version: 'test',
+      module: 'test-module', flow: 'required-flow', step,
+    })));
+    const coverage = { locales, modules: [{ id: 'test-module', status: 'covered',
+      required_flows: ['required-flow'], required_states: ['entry', 'success'] }] };
+    writeFileSync(join(fixture, 'screenshot-coverage.yaml'), YAML.stringify(coverage));
+    const save = (items = screenshots): void => {
+      writeFileSync(join(fixture, 'screenshot-manifest.yaml'), YAML.stringify({ screenshots: items }));
+    };
+    const check = (): ReturnType<typeof runQualityScript> => runQualityScript(fixture, 'screenshots', {
+      WP002_SCREENSHOT_MANIFEST: 'screenshot-manifest.yaml', WP002_SCREENSHOT_COVERAGE: 'screenshot-coverage.yaml',
+    });
+    save();
+    assert.equal(check().exitCode, 0, '完整四语和状态应通过');
+    save([]);
+    assert.notEqual(check().exitCode, 0);
+    assert.match(check().stderr, /required flow "required-flow" 无对应截图/);
+    save(screenshots.filter((item) => item.locale !== 'ko-KR'));
+    assert.notEqual(check().exitCode, 0);
+    assert.match(check().stderr, /required flow "required-flow" 缺少 ko-KR 截图/);
+    save(screenshots.filter((item) => item.locale !== 'ja-JP' || item.step !== 'success'));
+    assert.notEqual(check().exitCode, 0);
+    assert.match(check().stderr, /required state "success" 无对应截图证据 \(ja-JP\)/);
+    save();
+    assert.equal(check().exitCode, 0, '负例恢复后仍能通过同一门禁');
+  });
+
   describe('W2-T10: Duplicate screenshot ID detected', () => {
     it('screenshot checker fails with duplicate IDs', () => {
       const fixture = createScreenshotFixture();
@@ -479,8 +514,8 @@ describe('WP002 quality-gate contract tests', () => {
 });
 
 
-describe('README language-specific AI entry gate', () => {
-  it('accepts localized entries and rejects an English link to the Chinese AI page', () => {
+describe('README language-specific full Wiki entry gate', () => {
+  it('accepts localized entries and rejects an English link to the Chinese Wiki', () => {
     const fixture = createFixtureDir();
     fixtureCleanup.push(fixture);
     for (const name of ['README.md', 'README.en.md', 'README.jp.md', 'README.kr.md']) {
@@ -488,9 +523,12 @@ describe('README language-specific AI entry gate', () => {
     }
     assert.equal(runQualityScript(fixture, 'readme').exitCode, 0);
     const englishPath = join(fixture, 'README.en.md');
-    writeFileSync(englishPath, readFileSync(englishPath, 'utf8').replace('ai/README.en.md', 'ai/README.md'));
+    const mutated = readFileSync(englishPath, 'utf8').replaceAll('docs/wiki/index.en.md', 'docs/wiki/index.md');
+    // 替换全部本语入口，保证错误语言的负例真正生效。
+    assert.ok(!mutated.includes('docs/wiki/index.en.md'));
+    writeFileSync(englishPath, mutated);
     const result = runQualityScript(fixture, 'readme');
     assert.notEqual(result.exitCode, 0);
-    assert.match(result.stderr, /README\.en\.md: 缺少当前事实：ai\/README\.en\.md/);
+    assert.match(result.stderr, /README\.en\.md: 缺少当前事实：\]\(docs\/wiki\/index\.en\.md\)/);
   });
 });

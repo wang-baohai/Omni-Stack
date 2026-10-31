@@ -126,7 +126,7 @@ sequenceDiagram
 | `scope` | DB の権限コード配列。スペース区切り文字列ではない |
 | `jti` | `token:blacklist:{jti}` 用の一意な Token ID |
 | `iat` | Unix 秒の発行時刻 |
-| `exp` | 期限。既定は `iat + 900`、`auth.token.access-token-ttl` で設定 |
+| `exp` | 期限。`auth.token.access-token-ttl` で設定。リポジトリの application.yml は現在 7200 秒、コード上のフォールバックは 900 秒 |
 
 ### マルチテナントログイン機構
 
@@ -145,7 +145,7 @@ CAPTCHA の TTL は `auth.captcha.ttl-seconds` で設定し、既定は 300 秒�
 
 ### 現在のステータス
 
-`/api/auth/login` は accessToken、Bearer 型、expiresIn を返し、refreshToken は返しません。アクセス TTL は既定 900 秒で変更可能です。`JwkKeyProvider` は現在 JWKS の最初の RSA 鍵を選択してキャッシュします。kid に応じた完全な複数鍵ローテーションを実装したことにはなりません。
+`/api/auth/login` は accessToken、Bearer 型、expiresIn を返し、refreshToken は返しません。リポジトリの application.yml ではアクセス TTL を現在 7200 秒に設定しており（コード上のフォールバックは 900 秒）、この設定項目で変更できます。`JwkKeyProvider` は現在 JWKS の最初の RSA 鍵を選択してキャッシュします。kid に応じた完全な複数鍵ローテーションを実装したことにはなりません。
 
 本節は現在のソース呼出しと失敗境界の説明です。実 CAPTCHA ログインの操作・画像・復旧は [Wiki](wiki/index.jp.md)、OAuth2 セッションと認可コードは Flow 2 を参照してください。
 
@@ -156,6 +156,8 @@ CAPTCHA の TTL は `auth.captcha.ttl-seconds` で設定し、既定は 300 秒�
 企業 SSO の入口は認可コード + PKCE を使います。既定クライアントは `omni-frontend` です。`VITE_OAUTH2_CLIENT_ID` でフロントエンドの値を変更できますが、登録済みの値と一致する必要があります。認証方式は `NONE`。既定クライアントを新規作成すると PKCE 必須、要求スコープは `openid profile`、`requireAuthorizationConsent=false` となります。初期化処理は既存登録のその他の設定をリセットしません。
 
 開始時に 64 文字の verifier、`BASE64URL(SHA256(verifier))` challenge、ランダム state を生成し、パラメーターを保存して `Login?oauth2=true` に進みます。フォームは必須テナントと実 CAPTCHA を `/api/auth/session-login` に送り、HttpSession を作成して ID を更新します。その後、保存した認可 URL を開きます。フロントエンドの JWT ログインはこのサーバーセッションの代わりにはなりません。
+
+`GET /api/auth/session-check` は正確なパスだけを公開した読み取り専用のセッション確認です。既存の HttpSession のセキュリティコンテキストを読み、有効なセッションがなければ業務コード 401 を返します。セッションを作成せず、通常の REST 認証コンテキストにも引き継ぎません。他の業務 API は引き続き Bearer JWT を要求します。
 
 ### シーケンス
 
@@ -437,7 +439,7 @@ state = payload + "|" + hmac
 4. 新規ユーザーの password は null、status は 1、tenantId は検証済み state から取得します。
 5. ユーザーと外部 ID の関連をコールバックの DB トランザクション内で書き込みます。関連の一意キー競合時は既存関連とそのローカルユーザーを再取得します。
 6. 選択テナントの `USER` ロール割当てを試み、不在または例外は warn を記録します。正式シードのテナント1 USER は SELF ですが、実際のデータ範囲は現在のロール設定に従います。
-7. 既存関連は元のユーザーを先に取得してから外部 Token/プロフィールを更新します。JWT のテナントはそのユーザー由来で、今回の state による自動移動はしません。
+7. 既存関連のユーザーが state のテナントに属することを確認し、不一致なら関連更新や JWT 発行前に 403 を返します。並行挿入の競合後に再取得した関連も、既定ロール割当て前にテナントを確認します。
 8. ローカルロール/権限の取得後に JWT を生成します。オンライン記録失敗は warn のみで、その後ログイン成功監査を発行します。
 
 ### sys_user_oauth_provider テーブル設計
@@ -457,7 +459,9 @@ state = payload + "|" + hmac
 | `uk_provider_user` | `UNIQUE (provider, provider_user_id)` | 外部 ID のグローバル一意制約 |
 | `idx_user_id` | `INDEX (user_id)` | ローカルユーザー別の関連を検索する索引 |
 
-このテーブルには tenant_id 列がなく、一意キーにもテナントは含みません。一つの外部 ID は全体で一つのローカルユーザーに関連します。初回は state のテナントで作成し、既存関連では元のユーザーとテナントを再利用します。同じ外部 ID をテナントごとに独立して重複関連付けできるわけではありません。
+このテーブルには tenant_id 列がなく、一意キーにもテナントは含みません。一つの外部 ID は全体で一つのローカルユーザーに関連します。初回は state のテナントで作成し、既存関連は元のユーザーのテナントからのみログインでき、自動移動やテナント間の再利用は行いません。同じ外部 ID をテナントごとに独立して重複関連付けできません。
+
+三つの Handler は Token 交換で UTF-8 のフォームと `application/x-www-form-urlencoded` を送信します。外部プロフィールに一意の主体 ID がなければ 502 で拒否し、サービス層もローカル関連の検索前に主体の欠落を拒否します。
 
 `handleCallback()` は DB トランザクションを使います。外部 Token 交換、ネットワーク呼出し、オンライン記録はローカル DB と一体ではロールバックしません。一意キーと再取得処理だけで全外部副作用の冪等性は証明できません。
 
@@ -534,6 +538,8 @@ sequenceDiagram
 - registerDynamicRoutes はコンポーネントを解決できる MENU だけを登録し、DIRECTORY はグループ化だけに使います。srm:portal: で始まるポータル項目はこの登録経路の対象外です。ルートは admin の下に登録し、権限コードのコロンをパスではスラッシュ、名前ではハイフンに置き換え、meta.permissionCode を保持します。
 - ログアウト時に権限 Store をリセットし、登録した動的ルートを削除します。
 
+公開ホームページには Wiki を表示します。ログイン後、ホームページの入口から「マイワークスペース」を新しいブラウザータブで開きます。ワークスペースは概要、承認待ち、個人タスクを一つの画面にまとめ、アプリ一覧、アプリドロワー、メニュー検索は現在のユーザーがアクセスできる全メニューを対象にします。業務モジュールも新しいタブで開き、そのモジュール内のメニューだけを表示・検索します。モジュール画面には全体のアプリボタンやホームページ・ワークスペースへ戻る入口を設けません。このフロントエンドの表示範囲はサーバー側の権限検査を置き換えません。
+
 **ボタン、トークン、サーバーの認可**
 
 ```vue
@@ -543,7 +549,7 @@ sequenceDiagram
 ```
 
 - ディレクティブは mounted と updated で空でないバインド値を確認し、権限がなければ display:none、そうでなければ display を空にします。空バインドでは要素を隠しません。ボタン表示はサーバー操作の認可ではありません。
-- decodeJwt はデコードのみで署名を検証しません。getPermissionsFromToken は scope をそのまま返し、文字列を配列に分割しません。パスワード JWT の scope 配列と SAS の空白区切り文字列を、このフロントエンド関数が統一すると説明してはいけません。署名と期限は Gateway が検証します。
+- decodeJwt はデコードのみで署名を検証しません。getPermissionsFromToken はパスワード JWT の権限配列と SAS の空白区切り scope を権限配列にそろえ、不正な型なら空配列を返します。署名と期限は引き続き Gateway が検証し、フロントエンドの解析だけでサーバー側の権限を付与しません。
 - Auth の通常 API では GatewayPreAuthFilter が転送されたロール・権限ヘッダーから Authentication を構築します。転送された Bearer JWT の再検証や、要求ごとの DB 機能権限再取得ではありません。
 - 管理 API は現在の Controller の規則に従います。例えばユーザー作成は system:user:create の @PreAuthorize を使います。公開ログイン・登録や MyJobController のタスク所有者確認には明示的な別経路があり、全書き込み API を一つのアノテーション規則で表すことはできません。
 
@@ -1088,7 +1094,7 @@ sequenceDiagram
 | ソース | 責務 |
 | --- | --- |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [CreateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java) / [UpdateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java) / [UserJobServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java) / [UserJobTypeServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java) | 認証済み入口・DTO 検証・タイプ選択・行単位の所有権 |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | ワークベンチ API とフォーム送信 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | ワークベンチ API とフォーム送信 |
 | [CronGenerator.vue](../omni-frontend/src/components/CronGenerator.vue) / [DynamicFormRenderer.vue](../omni-frontend/src/components/DynamicFormRenderer.vue) / [schema.ts](../omni-frontend/src/types/schema.ts) | 7 種の Cron 頻度と標準／互換 Schema の動的フィールド |
 | [XxlJobAdminClient.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java) / [XxlJobProperties.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java) / [XxlJobAutoConfiguration.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java) | 実行器設定・登録・リモート検索と補償 |
 | [0001-base-schema.yaml](../database/changelog/base/0001-base-schema.yaml) / [base.sql](../scripts/sql/seed/base.sql) / [UserJobSeedSyncRunner.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java) | 正式スキーマ・シード・起動時同期 |
@@ -1204,7 +1210,7 @@ sequenceDiagram
 | [UserJobMessage.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java) / [UserJobHandler.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java) | 5 フィールドのメッセージと SPI |
 | [DrinkWaterRemindHandler.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java) / [base.sql](../scripts/sql/seed/base.sql) | 内蔵リマインダーのパラメーターと実際の文 |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [UserJobLogServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java) / [SysUserJobLogMapper.java](../omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java) | 親所有権・ログ検索・統計 SQL |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 現在ページのポーリング・手動待機・通知 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 現在ページのポーリング・手動待機・通知 |
 | [JobMetrics.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java) | 実行／解析メトリクス入口 |
 
 ### 現在のステータス

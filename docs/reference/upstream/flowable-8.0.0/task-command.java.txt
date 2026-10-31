@@ -1,0 +1,4 @@
+    @Override
+    public void complete(String taskId) {
+        commandExecutor.execute(new CompleteTaskCmd(taskId, (Map<String, Object>) null));
+    }

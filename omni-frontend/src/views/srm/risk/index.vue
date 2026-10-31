@@ -14,6 +14,7 @@ import {
   type RiskLevel,
   type SupplierRiskSummary,
 } from '@/api/srm-risk'
+import { getScoreThresholds, type RiskScoreThresholdVO } from '@/api/srm-risk-config'
 import RiskIndicator from '@/components/srm/RiskIndicator.vue'
 
 const { t } = useI18n()
@@ -63,22 +64,20 @@ const assessmentDialogVisible = ref(false)
 const assessmentSubmitting = ref(false)
 const assessmentRemark = ref('')
 const assessmentItems = ref<AssessmentFormItem[]>([])
+const scoreThresholds = ref<RiskScoreThresholdVO[]>([])
 
 /** 总分实时计算。 */
 const computedTotalScore = computed(() =>
   assessmentItems.value.reduce((sum, item) => sum + (item.score || 0), 0),
 )
 
-/** 综合等级实时预览：取所有指标中最高等级。 */
-const LEVEL_ORDER: Record<RiskLevel, number> = { GREEN: 0, YELLOW: 1, RED: 2 }
+/** 综合等级按当前租户阈值预览，包含服务端的空表、未命中和超上界规则。 */
 const computedOverallLevel = computed<RiskLevel>(() => {
-  let highest: RiskLevel = 'GREEN'
-  for (const item of assessmentItems.value) {
-    if (LEVEL_ORDER[item.riskLevel] > LEVEL_ORDER[highest]) {
-      highest = item.riskLevel
-    }
-  }
-  return highest
+  const total = computedTotalScore.value
+  const matched = scoreThresholds.value.find((threshold) => total >= threshold.minScore && total <= threshold.maxScore)
+  if (matched) return matched.riskLevel
+  const highest = [...scoreThresholds.value].sort((a, b) => b.maxScore - a.maxScore)[0]
+  return highest && total > highest.maxScore ? highest.riskLevel : 'GREEN'
 })
 
 async function loadRiskSuppliers() {
@@ -137,7 +136,9 @@ async function toggleAssessmentHistory() {
 }
 
 /** 打开综合评估弹窗，从当前指标数据初始化表单。 */
-function openAssessmentDialog() {
+async function openAssessmentDialog() {
+  const response = await getScoreThresholds()
+  scoreThresholds.value = response.data.data
   assessmentItems.value = indicators.value.map((ind) => ({
     id: ind.id,
     indicatorType: ind.indicatorType,
@@ -178,7 +179,7 @@ async function openAssessmentFromList(row: SupplierRiskSummary) {
   } finally {
     detailLoading.value = false
   }
-  openAssessmentDialog()
+  await openAssessmentDialog()
 }
 
 /** 提交综合评估：先逐个更新变化的指标，再创建综合评估记录。 */

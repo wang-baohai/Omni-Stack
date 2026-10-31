@@ -13,7 +13,7 @@ import { usePermissionStore } from '@/stores/permission'
 import { hasManagementAccess } from '@/utils/access'
 import { getRolesFromToken } from '@/utils/jwt'
 import LanguageSelector from '@/components/LanguageSelector.vue'
-import { safeAppRedirect } from '@/utils/navigation'
+import { resolveAppLanding, safeAppRedirect } from '@/utils/navigation'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -21,25 +21,22 @@ const router = useRouter()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
 
-/** 登录成功回调：显示成功提示并跳转到原页面（或工作台） */
+/** 登录成功回调：显示成功提示并跳转到原页面（或按身份落默认站内目标） */
 function handleSuccess() {
   ElMessage.success(t('login.loginSuccess'))
   const redirect = safeAppRedirect(route.query.redirect)
   if (redirect) {
     router.push(redirect)
-  } else {
-    // 从 JWT 解析权限，判断用户角色
-    permissionStore.initFromToken()
-    const roles = getRolesFromToken(localStorage.getItem('token') || '')
-    const isSupplier = roles.includes('SUPPLIER')
-    const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
-    const hasPortalEntry = isSupplier || permissionStore.hasPermission('srm:portal:enroll')
-    if (hasPortalEntry && !hasManagementPermission) {
-      router.push('/supplier-portal')
-    } else {
-      router.push({ name: 'Home' })
-    }
+    return
   }
+  // 从 JWT 解析权限，判断用户角色
+  permissionStore.initFromToken()
+  const roles = getRolesFromToken(localStorage.getItem('token') || '')
+  const isSupplier = roles.includes('SUPPLIER')
+  const hasManagementPermission = hasManagementAccess(permissionStore.permissions, roles)
+  const hasPortalEntry = isSupplier || permissionStore.hasPermission('srm:portal:enroll')
+  // 落点字面量由 navigation 单一来源给出：门户身份回门户，其余回官网首页。
+  router.push(resolveAppLanding(undefined, { entry: hasPortalEntry && !hasManagementPermission ? 'portal' : 'site' }))
 }
 
 /** 切换主题模式 */

@@ -1,0 +1,14 @@
+        // 2、init trigger-param
+        TriggerRequest triggerParam = new TriggerRequest();
+        triggerParam.setJobId(jobInfo.getId());
+        triggerParam.setExecutorHandler(jobInfo.getExecutorHandler());
+        triggerParam.setExecutorParams(jobInfo.getExecutorParam());
+        triggerParam.setExecutorBlockStrategy(jobInfo.getExecutorBlockStrategy());
+        triggerParam.setExecutorTimeout(jobInfo.getExecutorTimeout());
+        triggerParam.setLogId(jobLog.getId());
+        triggerParam.setLogDateTime(jobLog.getTriggerTime().getTime());
+        triggerParam.setGlueType(jobInfo.getGlueType());
+        triggerParam.setGlueSource(jobInfo.getGlueSource());
+        triggerParam.setGlueUpdatetime(jobInfo.getGlueUpdatetime().getTime());
+        triggerParam.setBroadcastIndex(index);
+        triggerParam.setBroadcastTotal(total);

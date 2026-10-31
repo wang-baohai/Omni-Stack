@@ -1,0 +1,53 @@
+{
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "reviewed_at": "2026-10-24T15:31:01.858Z",
+  "method": "本人实际审读四语新增两标题；Docker逐JSON确认此前十章与其余全部字段不变。不是批量重签既有译文。",
+  "locales": [
+    {
+      "locale": "zh-CN",
+      "path": "docs/.vitepress/locales/zh-CN.json",
+      "sha256": "259b4604cc329398cc8a2f7e8168b1e557997543f610323b089bb8591e31e180",
+      "previous_sha256": "d89b985d050f12c67deaa78a86529e371292ebf14076584c8309f061ee431662",
+      "added": {
+        "WIKI-11": "统一日志采集",
+        "WIKI-12": "统一MQ管理"
+      },
+      "result": "approved"
+    },
+    {
+      "locale": "en-US",
+      "path": "docs/.vitepress/locales/en-US.json",
+      "sha256": "c4c3f4ee92fa29c84ebe9f61ad280c41eb80713066be76885cb74df7047eeb66",
+      "previous_sha256": "885877556f831fe1491c3f53cd63e0a799caeaefb352d0f08adc601ba7e6b033",
+      "added": {
+        "WIKI-11": "Centralized log collection",
+        "WIKI-12": "Unified MQ management"
+      },
+      "result": "approved"
+    },
+    {
+      "locale": "ja-JP",
+      "path": "docs/.vitepress/locales/ja-JP.json",
+      "sha256": "b9d930ce22e5c76d0391bebac0d6067b1a8b7414ca5c0453efea2819236eb7d0",
+      "previous_sha256": "2506d90ba7d6776f5e0f6f0e216e7e50e88d6152ef202da44b9ce2ddd44c5f58",
+      "added": {
+        "WIKI-11": "統合ログ収集",
+        "WIKI-12": "統合MQ管理"
+      },
+      "result": "approved"
+    },
+    {
+      "locale": "ko-KR",
+      "path": "docs/.vitepress/locales/ko-KR.json",
+      "sha256": "2a9efa14cf1e8f01793c0be7f3c0940cd1268e9c07665a0ba6f0b335a09ab84d",
+      "previous_sha256": "b0ba793a96426d5ec0c65c1b40e6420bfd39218f1ba550ca4441bb11f6b07703",
+      "added": {
+        "WIKI-11": "통합 로그 수집",
+        "WIKI-12": "통합 MQ 관리"
+      },
+      "result": "approved"
+    }
+  ]
+}

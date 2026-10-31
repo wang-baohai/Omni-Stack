@@ -2,6 +2,8 @@
 
 This document defines current engineering boundaries for metrics, tracing, structured logs, alerts and SLOs. Observability is disabled by default and is not an application startup prerequisite.
 
+For concepts and illustrated walkthroughs of the seven dashboards, collection targets, logs, a real trace and alert pages, read the [observability Wiki chapter](wiki/observability-principles.en.md).
+
 ## 1. Data Flow and Boundaries
 
 | Signal | Application output | Local backend | Query entry |
@@ -70,7 +72,7 @@ Each production service copies the following template and confirms it jointly be
 | SLI | Successful non-5xx requests / valid requests | Explicitly exclude health checks and client cancellations |
 | Target | 99.9% over 30 days | Do not copy the example directly |
 | Latency target | P95 < 800ms, P99 < 2s | Measured by route template |
-| Error budget | 43m12s over 30 days | Calculated automatically from the target |
+| Error budget | Valid requests over 30 days × 0.1% | This table uses requests. A 99.9% time-based availability target over 30 days allows 43m12s; the two budgets are not interchangeable |
 | Fast-burn alert | 1h window, 14.4x | Requires both short and long windows |
 | Slow-burn alert | 6h window, 6x | Bound to on-call response levels |
 | Owner | Team and on-call schedule | Must be reachable |

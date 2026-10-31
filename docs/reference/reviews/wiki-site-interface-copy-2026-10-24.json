@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "wiki-site-interface-copy",
+  "source": "docs/.vitepress/locales/zh-CN.json",
+  "source_sha256": "d89b985d050f12c67deaa78a86529e371292ebf14076584c8309f061ee431662",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本轮完整读取四份界面JSON，逐键对照导航、检索、键盘、主题切换、仅中文原文提示和十章标题。修正英日韩不自然标题后再次读取差异。实际AI语义审读；非机械签核，非真人或页面运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/.vitepress/locales/en-US.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:35:24",
+      "result": "approved",
+      "translation_sha256": "885877556f831fe1491c3f53cd63e0a799caeaefb352d0f08adc601ba7e6b033",
+      "checks": {
+        "coverage_and_meaning": "四份JSON所有叶子键完整对照，九个原章节ID不变，新增WIKI10可观测四语标签准确；上一/下一、检索和目录动作无漏译。",
+        "technical_literals": "JSON键与结构保持一致，Enter/Esc等键名与动作匹配，WIKI01..10编号不翻译、不重排。",
+        "security_and_failure_semantics": "仅中文规范源提示明确不是译文；主题按钮说明切换目标，不隐藏任何待审状态；不把文本更新当已部署。",
+        "language_and_terminology": "Project customization替代不自然的Secondary development；其他全部导航/搜索/键盘与十章标签语义准确。",
+        "images_and_links": "本JSON无图片和路径链接；语言选择/原文入口表达清楚。最终手机/桌面实际菜单与十章运行截图在后续验收。"
+      },
+      "findings": [
+        {
+          "id": "natural-chapter-labels",
+          "description": "部分原章节标题直译，不利于自然理解",
+          "status": "resolved",
+          "resolution": "Project customization替代不自然的Secondary development；其他全部导航/搜索/键盘与十章标签语义准确。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/.vitepress/locales/ja-JP.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:35:24",
+      "result": "approved",
+      "translation_sha256": "2506d90ba7d6776f5e0f6f0e216e7e50e88d6152ef202da44b9ce2ddd44c5f58",
+      "checks": {
+        "coverage_and_meaning": "四份JSON所有叶子键完整对照，九个原章节ID不变，新增WIKI10可观测四语标签准确；上一/下一、检索和目录动作无漏译。",
+        "technical_literals": "JSON键与结构保持一致，Enter/Esc等键名与动作匹配，WIKI01..10编号不翻译、不重排。",
+        "security_and_failure_semantics": "仅中文规范源提示明确不是译文；主题按钮说明切换目标，不隐藏任何待审状态；不把文本更新当已部署。",
+        "language_and_terminology": "Harness改为考え方，其他十章/搜索/主题/原文入口完整自然，Enter/Esc保留键名。",
+        "images_and_links": "本JSON无图片和路径链接；语言选择/原文入口表达清楚。最终手机/桌面实际菜单与十章运行截图在后续验收。"
+      },
+      "findings": [
+        {
+          "id": "natural-chapter-labels",
+          "description": "部分原章节标题直译，不利于自然理解",
+          "status": "resolved",
+          "resolution": "Harness改为考え方，其他十章/搜索/主题/原文入口完整自然，Enter/Esc保留键名。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/.vitepress/locales/ko-KR.json",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:35:24",
+      "result": "approved",
+      "translation_sha256": "b0ba793a96426d5ec0c65c1b40e6420bfd39218f1ba550ca4441bb11f6b07703",
+      "checks": {
+        "coverage_and_meaning": "四份JSON所有叶子键完整对照，九个原章节ID不变，新增WIKI10可观测四语标签准确；上一/下一、检索和目录动作无漏译。",
+        "technical_literals": "JSON键与结构保持一致，Enter/Esc等键名与动作匹配，WIKI01..10编号不翻译、不重排。",
+        "security_and_failure_semantics": "仅中文规范源提示明确不是译文；主题按钮说明切换目标，不隐藏任何待审状态；不把文本更新当已部署。",
+        "language_and_terminology": "修正사상/지원 능력/그림 사용直译，使用概念、支持功能与图文全功能说明；其他逐键语义及动作方向准确。",
+        "images_and_links": "本JSON无图片和路径链接；语言选择/原文入口表达清楚。最终手机/桌面实际菜单与十章运行截图在后续验收。"
+      },
+      "findings": [
+        {
+          "id": "natural-chapter-labels",
+          "description": "部分原章节标题直译，不利于自然理解",
+          "status": "resolved",
+          "resolution": "修正사상/지원 능력/그림 사용直译，使用概念、支持功能与图文全功能说明；其他逐键语义及动作方向准确。"
+        }
+      ]
+    }
+  }
+}

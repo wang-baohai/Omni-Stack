@@ -51,6 +51,13 @@ function statusInfo(status: ProcurementRfqStatus) {
   return statusMap.value[status]
 }
 
+const invitationStatuses = new Set(['INVITED', 'QUOTED', 'AWARDED', 'REJECTED', 'CANCELLED', 'EXPIRED'])
+
+/** 与供应商门户使用同一邀请状态语言资源，未知协议值保留原文。 */
+function invitationStatusLabel(status: string) {
+  return invitationStatuses.has(status) ? t(`portal.quotation.invitationStates.${status}`) : status
+}
+
 async function loadRows() {
   loading.value = true
   try {
@@ -441,7 +448,7 @@ onMounted(loadRows)
       width="720px"
       destroy-on-close
     >
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
         <el-form-item :label="t('procurementRfqPage.sourceRequisition')" prop="requisitionId">
           <el-select
             v-model="form.requisitionId"
@@ -542,7 +549,9 @@ onMounted(loadRows)
           <h3>{{ t('procurementRfqPage.suppliersTitle') }}</h3>
           <el-table :data="detail.suppliers" border>
             <el-table-column prop="supplierName" :label="t('procurementPurchaseOrderTracker.supplier')" min-width="200" />
-            <el-table-column prop="status" :label="t('procurementRfqPage.invitationStatus')" width="110" />
+            <el-table-column :label="t('procurementRfqPage.invitationStatus')" width="110">
+              <template #default="{ row }">{{ invitationStatusLabel(row.status) }}</template>
+            </el-table-column>
             <el-table-column prop="invitedTime" :label="t('procurementRfqPage.invitedTime')" min-width="175">
               <template #default="{ row }">{{ row.invitedTime || '—' }}</template>
             </el-table-column>

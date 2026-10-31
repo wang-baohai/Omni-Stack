@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability",
+  "source": "docs/observability.md",
+  "source_sha256": "a75d50b24e5a09a8c3c3935f87dacbe89e8f4717cf80c23983babebf8ea40745",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "method": "本人实际完整阅读两份事实文档的中文和三译，按中文逐段复核；SLO与导航最终差异另外再次审读。脚本只登记该八篇已发生的实际AI阅读，摘要/机械QA不是语义审批，也不签未读文章或运行页面。",
+  "translations": {
+    "en-US": {
+      "path": "docs/observability.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "376d16ed9c4347f79bdb80d22cf52a894888dc078d17fed2e55c8efa1de218fd",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语指标、W3C链路、ECS结构日志、本地观测组件、采样与安全、仪表板、告警和SLO模板及故障排查；新增实际网页教程入口对应同语文章。",
+        "technical_literals": "保留标准端口、PromQL/TraceQL/LogQL与配置键、P95/P99、99.9%和30天。纠正请求计数错误预算为有效请求数乘0.1%；43m12s只适用于30天按时间计算的99.9%，两种SLI不可互换。",
+        "security_and_failure_semantics": "区分示例阈值与生产SLO；需要代表性流量、真实receiver与演练，默认空告警/NoData不冒称健康、通知或生产通过。凭据不入库，采样与敏感日志仍按源限制。",
+        "language_and_terminology": "全文按中文逐段对照；自然解释同页驾驶舱与私有错误页，无把请求计数预算换成固定停机时长。",
+        "images_and_links": "本事实文档无栅格图片，实际页面和43张已查看监控图在Wiki维护；保留同语链接和源码入口，不因容器可运行而继承全局验收。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧SLO表把请求计数错误预算直接表达成43m12s。",
+          "resolution": "四语改为有效请求数乘0.1%，明确43m12s仅是时间型例子，修后全文与最终差异均实际读过。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/observability.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "0711d0678ffbe9d56796c3732414a5dad3984d8427d6fa3437e522a430fbf73f",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语指标、W3C链路、ECS结构日志、本地观测组件、采样与安全、仪表板、告警和SLO模板及故障排查；新增实际网页教程入口对应同语文章。",
+        "technical_literals": "保留标准端口、PromQL/TraceQL/LogQL与配置键、P95/P99、99.9%和30天。纠正请求计数错误预算为有效请求数乘0.1%；43m12s只适用于30天按时间计算的99.9%，两种SLI不可互换。",
+        "security_and_failure_semantics": "区分示例阈值与生产SLO；需要代表性流量、真实receiver与演练，默认空告警/NoData不冒称健康、通知或生产通过。凭据不入库，采样与敏感日志仍按源限制。",
+        "language_and_terminology": "全文逐段实际审读；ホーム、マイワークスペース、マイジョブ与当前导航相符；要求数と時間によるSLOを区別し、技術リテラルは原文保持。",
+        "images_and_links": "本事实文档无栅格图片，实际页面和43张已查看监控图在Wiki维护；保留同语链接和源码入口，不因容器可运行而继承全局验收。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧SLO表把请求计数错误预算直接表达成43m12s。",
+          "resolution": "四语改为有效请求数乘0.1%，明确43m12s仅是时间型例子，修后全文与最终差异均实际读过。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/observability.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-25 22:44:58",
+      "result": "approved",
+      "translation_sha256": "7c18dfd1eebeeb02933b355ad619159f9b1ffad346884db4aa180fe41a392065",
+      "checks": {
+        "coverage_and_meaning": "实际全文对照四语指标、W3C链路、ECS结构日志、本地观测组件、采样与安全、仪表板、告警和SLO模板及故障排查；新增实际网页教程入口对应同语文章。",
+        "technical_literals": "保留标准端口、PromQL/TraceQL/LogQL与配置键、P95/P99、99.9%和30天。纠正请求计数错误预算为有效请求数乘0.1%；43m12s只适用于30天按时间计算的99.9%，两种SLI不可互换。",
+        "security_and_failure_semantics": "区分示例阈值与生产SLO；需要代表性流量、真实receiver与演练，默认空告警/NoData不冒称健康、通知或生产通过。凭据不入库，采样与敏感日志仍按源限制。",
+        "language_and_terminology": "全文逐段实际审读；워크스페이스、내 작업与模块边界对应，요청 수/시간 기반预算区分，没有省略失败和敏感信息约束。",
+        "images_and_links": "本事实文档无栅格图片，实际页面和43张已查看监控图在Wiki维护；保留同语链接和源码入口，不因容器可运行而继承全局验收。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "issue": "旧SLO表把请求计数错误预算直接表达成43m12s。",
+          "resolution": "四语改为有效请求数乘0.1%，明确43m12s仅是时间型例子，修后全文与最终差异均实际读过。"
+        }
+      ]
+    }
+  }
+}

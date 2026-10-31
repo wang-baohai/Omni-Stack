@@ -126,7 +126,7 @@ sequenceDiagram
 | `scope` | DB 권한 코드 배열. 공백 구분 문자열이 아님 |
 | `jti` | `token:blacklist:{jti}`에 사용하는 고유 Token ID |
 | `iat` | Unix 초 단위 발급 시각 |
-| `exp` | 만료 시각. 기본 `iat + 900`, `auth.token.access-token-ttl`로 설정 |
+| `exp` | 만료 시각. `auth.token.access-token-ttl`로 설정하며, 저장소 application.yml은 현재 7200초이고 코드 폴백은 900초 |
 
 ### 다중 테넌트 로그인 메커니즘
 
@@ -145,7 +145,7 @@ sequenceDiagram
 
 ### 현재 상태
 
-`/api/auth/login`은 accessToken, Bearer 유형, expiresIn을 반환하며 refreshToken을 반환하지 않습니다. 액세스 TTL은 기본 900초이며 설정할 수 있습니다. `JwkKeyProvider`는 현재 JWKS의 첫 RSA 키를 선택해 캐시합니다. kid 기반의 완전한 다중 키 교체가 구현되었다고 볼 수는 없습니다.
+`/api/auth/login`은 accessToken, Bearer 유형, expiresIn을 반환하며 refreshToken을 반환하지 않습니다. 저장소 application.yml의 액세스 TTL은 현재 7200초이며(코드 폴백 900초), 해당 설정 항목으로 변경할 수 있습니다. `JwkKeyProvider`는 현재 JWKS의 첫 RSA 키를 선택해 캐시합니다. kid 기반의 완전한 다중 키 교체가 구현되었다고 볼 수는 없습니다.
 
 이 절은 현재 소스 호출과 실패 경계를 설명합니다. 실제 캡차 로그인 작업·이미지·복구는 [Wiki](wiki/index.kr.md), OAuth2 세션·인가 코드는 Flow 2를 참조하세요.
 
@@ -156,6 +156,8 @@ sequenceDiagram
 기업 SSO 진입점은 인가 코드 + PKCE를 사용합니다. 기본 클라이언트는 `omni-frontend`입니다. `VITE_OAUTH2_CLIENT_ID`로 프런트엔드 값을 바꿀 수 있지만 등록 값과 일치해야 합니다. 인증 방식은 `NONE`입니다. 새 기본 클라이언트는 PKCE를 요구하고 `openid profile`을 요청하며 `requireAuthorizationConsent=false`입니다. 초기화기는 기존 등록의 다른 설정을 초기화하지 않습니다.
 
 시작 시 64자 verifier, `BASE64URL(SHA256(verifier))` challenge, 임의 state를 생성하고 파라미터를 저장한 뒤 `Login?oauth2=true`로 이동합니다. 폼은 필수 테넌트와 실제 캡차를 `/api/auth/session-login`에 보내 HttpSession을 만들고 ID를 갱신합니다. 이어 저장한 인가 URL을 엽니다. 프런트엔드 JWT 로그인은 이 서버 세션을 대신하지 않습니다.
+
+`GET /api/auth/session-check`는 정확한 경로만 공개한 읽기 전용 세션 확인 API입니다. 기존 HttpSession의 보안 컨텍스트를 읽고 유효한 세션이 없으면 업무 코드 401을 반환합니다. 세션을 만들거나 일반 REST 인증 컨텍스트에 해당 신원을 반영하지 않으며, 다른 업무 API는 계속 Bearer JWT를 요구합니다.
 
 ### 시퀀스
 
@@ -437,7 +439,7 @@ state = payload + "|" + hmac
 4. 새 사용자 password는 null, status는 1, tenantId는 검증된 state에서 가져옵니다.
 5. 사용자와 외부 신원 연결은 콜백 DB 트랜잭션에 기록됩니다. 연결 고유 키 충돌 시 기존 연결과 로컬 사용자를 다시 조회합니다.
 6. 선택 테넌트의 `USER` 역할 배정을 시도하며 없거나 예외가 발생하면 warn을 기록합니다. 정식 테넌트1 USER 시드는 SELF이고 실제 데이터 범위는 현재 역할 설정을 따릅니다.
-7. 기존 연결은 원래 로컬 사용자를 먼저 조회한 뒤 외부 Token/프로필을 갱신합니다. JWT 테넌트는 해당 사용자에서 가져오며 이번 state에 맞춰 자동 이전하지 않습니다.
+7. 기존 연결 사용자의 테넌트가 state의 테넌트와 일치하는지 확인하며, 다르면 연결 갱신이나 JWT 발급 전에 403을 반환합니다. 동시 삽입 충돌 후 다시 조회한 연결도 기본 역할 배정 전에 테넌트를 확인합니다.
 8. 로컬 역할/권한 조회 뒤 JWT를 발급합니다. 온라인 기록 실패는 warn만 남기고 이어 로그인 성공 감사 이벤트를 발행합니다.
 
 ### sys_user_oauth_provider 테이블 설계
@@ -457,7 +459,9 @@ state = payload + "|" + hmac
 | `uk_provider_user` | `UNIQUE (provider, provider_user_id)` | 외부 신원의 전역 고유 제약 |
 | `idx_user_id` | `INDEX (user_id)` | 로컬 사용자별 연결 조회 인덱스 |
 
-이 테이블에는 tenant_id 열이 없고 고유 키에도 테넌트가 없습니다. 한 외부 신원은 전역적으로 한 로컬 사용자에 연결됩니다. 최초 생성은 state 테넌트를 사용하고 기존 연결은 원래 사용자와 테넌트를 재사용합니다. 같은 외부 신원을 테넌트별로 독립 중복 연결하는 구조가 아닙니다.
+이 테이블에는 tenant_id 열이 없고 고유 키에도 테넌트가 없습니다. 한 외부 신원은 전역적으로 한 로컬 사용자에 연결됩니다. 최초 생성은 state 테넌트를 사용하며, 기존 연결은 원래 사용자의 테넌트에서만 로그인할 수 있고 자동 이전이나 테넌트 간 재사용은 허용하지 않습니다. 같은 외부 신원을 여러 테넌트에 독립적으로 중복 연결할 수 없습니다.
+
+세 Handler 모두 Token 교환 시 UTF-8 폼과 `application/x-www-form-urlencoded`를 전송합니다. 외부 프로필에 고유 주체 ID가 없으면 502로 거부하며, 서비스 계층도 로컬 연결을 조회하기 전에 주체 누락을 거부합니다.
 
 `handleCallback()`은 DB 트랜잭션을 사용합니다. 외부 Token 교환, 네트워크 호출과 온라인 기록은 로컬 DB와 함께 롤백되지 않습니다. 고유 키/재조회 처리만으로 모든 외부 부수 효과의 멱등성을 입증할 수는 없습니다.
 
@@ -534,6 +538,8 @@ sequenceDiagram
 - registerDynamicRoutes는 컴포넌트를 찾을 수 있는 MENU만 등록하고 DIRECTORY는 그룹화에만 사용합니다. srm:portal:로 시작하는 포털 항목은 이 등록 경로에서 제외됩니다. 라우트는 admin 아래에 등록하며 권한 코드의 콜론을 경로에서는 슬래시, 이름에서는 하이픈으로 바꾸고 meta.permissionCode를 유지합니다.
 - 로그아웃 시 권한 Store를 초기화하고 등록된 동적 라우트를 제거합니다.
 
+공개 홈페이지에는 Wiki를 표시합니다. 로그인 후 홈페이지의 진입점에서 “내 워크스페이스”를 새 브라우저 탭으로 엽니다. 워크스페이스는 개요, 승인 대기와 개인 작업을 한 화면에 모으고, 애플리케이션 목록·드로어·메뉴 검색은 현재 신원이 접근할 수 있는 전체 메뉴를 대상으로 합니다. 업무 모듈도 새 탭으로 열며 해당 모듈의 메뉴만 표시하고 검색합니다. 모듈 화면에는 전체 애플리케이션 버튼이나 홈페이지·워크스페이스로 돌아가는 진입점을 제공하지 않습니다. 이러한 프런트엔드 탐색 범위는 서버의 권한 검사를 대신하지 않습니다.
+
 **버튼, 토큰, 서버 인가**
 
 ```vue
@@ -543,7 +549,7 @@ sequenceDiagram
 ```
 
 - 디렉티브는 mounted와 updated에서 비어 있지 않은 바인딩을 확인합니다. 권한이 없으면 display:none을 설정하고 그 외에는 display를 비웁니다. 빈 바인딩은 요소를 숨기지 않습니다. 버튼 표시 여부는 서버 작업의 인가가 아닙니다.
-- decodeJwt는 디코딩만 하며 서명을 검증하지 않습니다. getPermissionsFromToken은 scope를 그대로 반환하고 문자열을 배열로 나누지 않습니다. 따라서 비밀번호 JWT의 scope 배열과 SAS의 공백 구분 문자열이 이 프론트엔드 함수에서 정규화된다고 설명할 수 없습니다. 서명과 만료는 Gateway가 검증합니다.
+- decodeJwt는 디코딩만 하며 서명을 검증하지 않습니다. getPermissionsFromToken은 비밀번호 JWT의 권한 배열과 SAS의 공백 구분 scope를 권한 배열로 통일하고 잘못된 타입에는 빈 배열을 반환합니다. 서명과 만료는 계속 Gateway가 검증하며 프런트엔드 파싱만으로 서버 권한이 부여되지는 않습니다.
 - Auth의 일반 API에서 GatewayPreAuthFilter는 전달된 역할 및 권한 헤더로 Authentication을 만듭니다. 전달된 Bearer JWT를 다시 검증하거나 요청마다 DB의 기능 권한을 새로 조회하는 과정은 아닙니다.
 - 관리 API는 현재 Controller의 규칙을 따릅니다. 예를 들어 사용자 생성은 system:user:create의 @PreAuthorize를 사용합니다. 공개 로그인·등록과 MyJobController의 작업 소유자 검증에는 명시적인 별도 경로가 있으므로 모든 쓰기 API를 하나의 어노테이션 규칙으로 설명할 수 없습니다.
 
@@ -1088,7 +1094,7 @@ sequenceDiagram
 | 소스 | 책임 |
 | --- | --- |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [CreateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java) / [UpdateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java) / [UserJobServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java) / [UserJobTypeServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java) | 인증된 진입점·DTO 검증·유형 선택·행 소유권 |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 워크벤치 작업 API 및 폼 제출 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 워크벤치 작업 API 및 폼 제출 |
 | [CronGenerator.vue](../omni-frontend/src/components/CronGenerator.vue) / [DynamicFormRenderer.vue](../omni-frontend/src/components/DynamicFormRenderer.vue) / [schema.ts](../omni-frontend/src/types/schema.ts) | Cron 빈도 7종과 표준/호환 Schema 동적 필드 |
 | [XxlJobAdminClient.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java) / [XxlJobProperties.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java) / [XxlJobAutoConfiguration.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java) | 실행기 구성·등록·원격 조회 및 보상 |
 | [0001-base-schema.yaml](../database/changelog/base/0001-base-schema.yaml) / [base.sql](../scripts/sql/seed/base.sql) / [UserJobSeedSyncRunner.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java) | 정식 작업 스키마·시드·시작 동기화 |
@@ -1204,7 +1210,7 @@ sequenceDiagram
 | [UserJobMessage.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java) / [UserJobHandler.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java) | 5필드 메시지와 handler SPI |
 | [DrinkWaterRemindHandler.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java) / [base.sql](../scripts/sql/seed/base.sql) | 내장 알림 파라미터와 실제 텍스트 |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [UserJobLogServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java) / [SysUserJobLogMapper.java](../omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java) | 부모 소유권·로그 조회·통계 SQL |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 현재 페이지 폴링·수동 대기·알림 |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | 현재 페이지 폴링·수동 대기·알림 |
 | [JobMetrics.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java) | 실행/파싱 지표 진입점 |
 
 ### 현재 상태

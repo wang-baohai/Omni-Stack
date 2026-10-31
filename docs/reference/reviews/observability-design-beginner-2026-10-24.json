@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "observability-design",
+  "source": "docs/wiki/observability-design.md",
+  "source_sha256": "8c54f3a7f90e3ea202fa6edb3eaa3a314528df03ddb2baa1899266730bd485a2",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人实际完整审读六篇中文和全部18篇三译；对照当前完整事实文档、Java/Compose及收集存储配置；修正后逐段复核。13段原文在四语共52处另由Docker严格匹配。本记录不是机械QA或抽样签核，不冒称HUMAN_REVIEW/观测运行/图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/observability-design.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "6aa89c8fe877371073aa73c2c08954634245b5ab6fead02f1958819f8e0696f8",
+      "checks": {
+        "coverage_and_meaning": "三条收集路径、七类工具职责及成本、默认关闭范围、内部管理端口和本地保留期准确。",
+        "technical_literals": "Compose五行原文保留，false/0.0/metrics导出与Prometheus抓取区分。",
+        "security_and_failure_semantics": "选型为当前源码推导而非杜撰历史；配置存在不冒称运行；管理口不公开到宿主。",
+        "language_and_terminology": "已逐篇完整实际复读英文；信号/指标/日志/链路/告警术语及叙述自然，无新增运行结论。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/observability-design.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "49ab7fb57691e353f3fb07b58898adc8afc2288d2d25005a45ff6e58da3a60e5",
+      "checks": {
+        "coverage_and_meaning": "三条收集路径、七类工具职责及成本、默认关闭范围、内部管理端口和本地保留期准确。",
+        "technical_literals": "Compose五行原文保留，false/0.0/metrics导出与Prometheus抓取区分。",
+        "security_and_failure_semantics": "选型为当前源码推导而非杜撰历史；配置存在不冒称运行；管理口不公开到宿主。",
+        "language_and_terminology": "全文复读，管理端点改为自然日语管理エンドポイント。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/observability-design.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:41:35",
+      "result": "approved",
+      "translation_sha256": "9f299d7fbd0369d4762ce0ac8a878f29a7376b191b742013705cdcb77f5d0832",
+      "checks": {
+        "coverage_and_meaning": "三条收集路径、七类工具职责及成本、默认关闭范围、内部管理端口和本地保留期准确。",
+        "technical_literals": "Compose五行原文保留，false/0.0/metrics导出与Prometheus抓取区分。",
+        "security_and_failure_semantics": "选型为当前源码推导而非杜撰历史；配置存在不冒称运行；管理口不公开到宿主。",
+        "language_and_terminology": "全文复读，Alertmanager术语统一경보，工具分工及可选profile语义准确。",
+        "images_and_links": "本章无栅格截图；机制图和邻页使用本语，源码/配置原文保留。不冒称已启用观测后端；实际站点渲染另验。"
+      },
+      "findings": []
+    }
+  }
+}

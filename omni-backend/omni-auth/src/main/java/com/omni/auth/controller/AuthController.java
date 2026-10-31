@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -311,13 +312,16 @@ public class AuthController {
      * <p>用于 OAuth2 授权确认页面：当用户通过 SAS 重定向到此页面时，
      * 前端通过此接口判断是否已有 SAS 会话，有则跳过登录表单直接展示授权确认。</p>
      *
+     * @param httpRequest 当前请求；只读取已有会话，不创建会话或更改无状态 API 的认证上下文
      * @return 已认证返回 {@code R.ok(username)}；未认证返回 {@code R.fail(401, ...)}
      */
     @GetMapping("/session-check")
-    public R<String> sessionCheck() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public R<String> sessionCheck(HttpServletRequest httpRequest) {
+        // REST 链保持无状态；仅此只读会话探针显式读取 SAS 已有的 HttpSession。
+        Authentication auth = new HttpSessionSecurityContextRepository()
+                .loadDeferredContext(httpRequest).get().getAuthentication();
         if (auth != null && auth.isAuthenticated()
-                && !"anonymousUser".equals(auth.getPrincipal())) {
+                && !(auth instanceof AnonymousAuthenticationToken)) {
             return R.ok(auth.getName());
         }
         return R.fail(401, "未认证");

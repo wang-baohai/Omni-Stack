@@ -241,7 +241,7 @@ async function save() {
     width="980px"
     destroy-on-close
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
       <el-form-item :label="t('procurementRequisitionFormMessages.titleLabel')" prop="title">
         <el-input v-model="form.title" maxlength="200" show-word-limit />
       </el-form-item>

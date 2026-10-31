@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "workflow-principles",
+  "source": "docs/wiki/workflow-principles.md",
+  "source_sha256": "f9fff9b99b56211d1c7e3c2e9992dee91f8c7efcb37e1554b0b13631fb78893f",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人完整复读七篇中文，再逐篇完整复读全部21篇英日韩，修改后检查差异；框架/工程源码已实际阅读，三译原文另作逐字绑定。不是抽样/机械QA盖章，不冒称真人、运行或图片验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/workflow-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "b26f474d55a9a89f217998d56123bf33d554f6d8b02441e2e76a734cc4f2733d",
+      "checks": {
+        "coverage_and_meaning": "购机教学故事、四个对象、三个版本、BPMN/变量初识和六个同语入口完整；示例不伪装种子或运行证据。",
+        "technical_literals": "无源码块；机制图、术语和相邻六篇的语言后缀正确。",
+        "security_and_failure_semantics": "运行实例不自动换图；完成流程与业务更新分开；变量风险预告完整。",
+        "language_and_terminology": "全文对照中文实际复读；术语、句式和段落自然，events修正standalone与internal API歧义。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/workflow-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "88b7a3d7d61f26b11b9859cdff31bb265a60acdc668f0c7a8a8358521a204eb6",
+      "checks": {
+        "coverage_and_meaning": "购机教学故事、四个对象、三个版本、BPMN/变量初识和六个同语入口完整；示例不伪装种子或运行证据。",
+        "technical_literals": "无源码块；机制图、术语和相邻六篇的语言后缀正确。",
+        "security_and_failure_semantics": "运行实例不自动换图；完成流程与业务更新分开；变量风险预告完整。",
+        "language_and_terminology": "全文复读并修正claim/摘要/跨服务/设计器/组织关系等直译；保留源码注释原文，最终改动段落再次核对。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/workflow-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 14:08:55",
+      "result": "approved",
+      "translation_sha256": "b2633b4c32f0410dff0018ecd87b1aa2b002eebe0c9a92d0a5809bef54dfc8d2",
+      "checks": {
+        "coverage_and_meaning": "购机教学故事、四个对象、三个版本、BPMN/变量初识和六个同语入口完整；示例不伪装种子或运行证据。",
+        "technical_literals": "无源码块；机制图、术语和相邻六篇的语言后缀正确。",
+        "security_and_failure_semantics": "运行实例不自动换图；完成流程与业务更新分开；变量风险预告完整。",
+        "language_and_terminology": "全文复读并修正启用主组织修饰、设计画面用词及助词、兼容处理器与任务委派混淆、终止权限句式，最终差异复核。",
+        "images_and_links": "本章无栅格图片；已有机制图和所有相邻篇链接逐项对照，使用本语后缀；上游原文/许可可选入口保留。站点渲染、十章部署和全局图片验收在后续，不凭本记录冒称通过。"
+      },
+      "findings": []
+    }
+  }
+}

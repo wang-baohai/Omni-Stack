@@ -351,7 +351,7 @@ onMounted(loadRows)
     </el-card>
 
     <el-dialog v-model="editVisible" :title="t('procurementPurchaseOrderPage.editDeliveryTitle')" width="640px">
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="auto">
         <el-form-item :label="t('procurementPurchaseOrderTracker.orderTitle')" prop="title">
           <el-input v-model="form.title" maxlength="200" show-word-limit />
         </el-form-item>

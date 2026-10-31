@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "tenancy-permissions",
+  "source": "docs/wiki/tenancy-permissions.md",
+  "source_sha256": "2efff5c2448fbb5cd0a096ad795533636bf93e9b78df4e3a0d87f974e740c4e1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整复读六篇中文，再逐篇完整复读英日韩18篇正文、表格、标签和边界；源码已在中文/收集阶段实际审读，三译保持连续原文并另做逐字绑定。修正后核对差异。不用机械QA替代语义审校，不冒称真人或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/tenancy-permissions.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "5d5eadc2d99662967131882ebaae38d3d9c7dffb9507bd0e67a07d5cb359e777",
+      "checks": {
+        "coverage_and_meaning": "六范围值、permissionCode限定授予角色与Auth普通合并区别、CRM例子、五领域映射/子表、组织树及角色作用域、ALL例外完整。",
+        "technical_literals": "两段工程原文、owner_user_id/owner_unit_id/requester/current_user_id、SAME_UNIT/UNIT_AND_BELOW与六dataScope、crm模块块及同语链接保留。",
+        "security_and_failure_semantics": "不同SELF列不混用；角色最宽不能跨操作乱用；领域缺scope拒绝与Auth不追加条件有别；在线用户ALL跨租户不能推广到领域；CUSTOM根/后代状态差异保留。",
+        "language_and_terminology": "英文全文对照中文实际复读，故事、框架职责与现有限制表达自然且完整，没有将源码推导译成业务实测。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/tenancy-permissions.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "4cbe68497b30c9444323c813f6425f935d93a28a021b72ad31902c0b698f06fa",
+      "checks": {
+        "coverage_and_meaning": "六范围值、permissionCode限定授予角色与Auth普通合并区别、CRM例子、五领域映射/子表、组织树及角色作用域、ALL例外完整。",
+        "technical_literals": "两段工程原文、owner_user_id/owner_unit_id/requester/current_user_id、SAME_UNIT/UNIT_AND_BELOW与六dataScope、crm模块块及同语链接保留。",
+        "security_and_failure_semantics": "不同SELF列不混用；角色最宽不能跨操作乱用；领域缺scope拒绝与Auth不追加条件有别；在线用户ALL跨租户不能推广到领域；CUSTOM根/后代状态差异保留。",
+        "language_and_terminology": "日文全文实际复读，使用テナント/ロール/データ範囲与プロジェクト等自然术语，修正直译/错字后复核当前段落。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/tenancy-permissions.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 13:29:40",
+      "result": "approved",
+      "translation_sha256": "dc71fd5519f8688f0af0d21d11117ba92c29d44883c08277f97ec0492c508464",
+      "checks": {
+        "coverage_and_meaning": "六范围值、permissionCode限定授予角色与Auth普通合并区别、CRM例子、五领域映射/子表、组织树及角色作用域、ALL例外完整。",
+        "technical_literals": "两段工程原文、owner_user_id/owner_unit_id/requester/current_user_id、SAME_UNIT/UNIT_AND_BELOW与六dataScope、crm模块块及同语链接保留。",
+        "security_and_failure_semantics": "不同SELF列不混用；角色最宽不能跨操作乱用；领域缺scope拒绝与Auth不追加条件有别；在线用户ALL跨租户不能推广到领域；CUSTOM根/后代状态差异保留。",
+        "language_and_terminology": "韩文全文实际复读，使用테넌트/역할/데이터범위等术语，修正主语和正整数句式及数据库table用词后核对差异。",
+        "images_and_links": "本篇无栅格图片。框架机制图标签与中文逐项对应，章节链接使用本语言文件；可选官方源码与Apache许可保留。最终站点渲染和全局图片验收仍在后续步骤，不以本记录冒称通过。"
+      },
+      "findings": []
+    }
+  }
+}

@@ -16,8 +16,8 @@ export interface JwtPayload {
   username: string
   /** 角色编码列表 */
   roles: string[]
-  /** 权限编码列表 */
-  scope: string[]
+  /** 普通登录使用权限数组，SAS 使用空格分隔的标准 scope 字符串。 */
+  scope: string[] | string
   /** JWT 唯一标识 */
   jti: string
   /** 签发时间（epoch 秒） */
@@ -62,7 +62,10 @@ export function decodeJwt(token: string): JwtPayload | null {
  */
 export function getPermissionsFromToken(token: string): string[] {
   const payload = decodeJwt(token)
-  return payload?.scope ?? []
+  const scope = payload?.scope
+  if (typeof scope === 'string') return scope.trim().split(/\s+/).filter(Boolean)
+  if (Array.isArray(scope) && scope.every((code) => typeof code === 'string')) return scope
+  return []
 }
 
 /**

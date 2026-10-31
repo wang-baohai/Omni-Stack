@@ -1,0 +1,2508 @@
+{
+  "schema": 1,
+  "document_id": "usage-asset",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/wiki/usage-asset.md",
+  "source_sha256": "515db0667366c35ca5db56d005f15bb298f13f86925c7c25cfe4d9f87b2415c1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "Exact current semantically reviewed working-tree articles; not clean commit or complete runtime acceptance",
+  "method": "由Codex实际逐篇读完三译及中文最终差量，对照当前中文、真实业务与UI词典；不是文件存在、长度或摘要自动签核。此前逐张实际看图结论仅在相同字节且引用用途一致时复用；本记录不冒称新看148图。",
+  "actual_complete_reading_sha256": "a4809444bfd8aa7f65ffeee46b3c190e498d60c63edad8b8d43523a48c023eda",
+  "images": [
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-overview.png",
+      "image_sha256": "a25f2814f4f6a615b8cdf4595dcc907ea6f01f1aa0c376b33ffade845df31df3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:32.466Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-ledger.png",
+      "image_sha256": "c404a2a60a085b6e140201bc2e812d95bf7aac891a152fb2489dbbc12438f3f5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:33.600Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-detail.png",
+      "image_sha256": "75da70d46f331ef8c182389b8792d5c0ae8ddb05cff504efa5af4664938cbaa7",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:33.858Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/procurement-assets.png",
+      "image_sha256": "96846f69e750df739ba0f5595e73581f48fc6a4fbfd3e2e6bbed12592e4d199e",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:42.620Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": true,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-create-dialog.png",
+      "image_sha256": "421f5c003bc144b59d72d3983331173e9e09411e885d443b30b2830a3140e9d8",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:35.994Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-create-footer.png",
+      "image_sha256": "c9ce41c3d4abcdcb048a4dadb2ba14701b77fb916f0c1d52f371f3832e10b979",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:03:44.908Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-edit-dialog.png",
+      "image_sha256": "00a39e3f00d86cf5d18ac27f93df32b5a385c9121de9da11343d221373171d6a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:36.691Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-edit-footer.png",
+      "image_sha256": "2f5a4ffc0470c67f0035cfb07fccef2c7ec7f001718121a30f8edd96e1114405",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:03:46.181Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-allocate-dialog.png",
+      "image_sha256": "69cc564da88b0f50dda7ec47637cb1135c24bb1113903af5567a88b3dd6d03a3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:38.191Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-allocated.png",
+      "image_sha256": "de30fff0512d52b2795b903bf28b8d3fd5a2193b21e2b5dc07cdb045f916eeb4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:35:57.002Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-accept-confirm.png",
+      "image_sha256": "d9d198f0ca60578973f37a51ef00a4ee7332079ba20ec2622c7daea529ad8d8e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:35:58.731Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-my-in-use.png",
+      "image_sha256": "28f7483578ec5e1d388857c3ed2011d72dee2e34167ca8b608fde907030c5732",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:14.423Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-return-before-accept-confirm.png",
+      "image_sha256": "3f79a9119e406f316a49fd30bc355bc300548e34a048dee8c961e0d2f6f76f6d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:35:59.427Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-return-confirm.png",
+      "image_sha256": "b3e15e6a7f5bdbab6a0652a2707158df8a82f48589c8be55c2ea4fd047b1b3a2",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:30:34.307Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-my-returned.png",
+      "image_sha256": "d91ad6170b92819e953674842a38c604c61eec513637ee13c7e69f6b015b7d2a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:39:39.642Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-return-history.png",
+      "image_sha256": "2459f7d8eefb5e082eb6ca8cbaf27f14534fc6b54c861812b822d9405f77819a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:43:38.470Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-maintenance-confirm.png",
+      "image_sha256": "91216b019ccb05aa3ef7f6e5c958bc74ff6a5e28d5c41c1b048eb94c3bc9f3a1",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:12.740Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-maintenance.png",
+      "image_sha256": "66bad9d22cbbbd89b6dcc902d6d438e61f47a151df8c41e84af66be237016c03",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:28:52.606Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-maintenance-complete-confirm.png",
+      "image_sha256": "010b52477706beb16c157fc477cb5cb4e7c983e985acd9d73455c10ff263ca5d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:28:53.009Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-form.png",
+      "image_sha256": "3e1812cd6c50e340f942e20baf7ff4dfe6b59a965f857cb7f0254416ba964e22",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:12:58.787Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-pending-detail.png",
+      "image_sha256": "45f63c22c931e0867c98f2bfa4b87e9492eb3c547bfac5a57e4d0a61ebf88b44",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:44:46.258Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-approval.png",
+      "image_sha256": "3a54bf54332582536df3e062ccf81693298a8fb1de293de4d5b7a57c3f1190f1",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:29:09.146Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-complete-confirm.png",
+      "image_sha256": "dc966d8a60ca85a39a7e62bc425dc67c3f678857c20739b2e5d8e759161d6149",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:50:19.426Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-completed.png",
+      "image_sha256": "4e938a494feb44eed82e17ed0babf8365976ef77b42f12ed63184fa1ead76af6",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:55:50.443Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-rejected.png",
+      "image_sha256": "653a55c432fe8020347d0880cae2fcf12d1128c620e047abbf55fb93764b1f2e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:40:24.225Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-form.png",
+      "image_sha256": "0b3eab705c840b251b720662b9601bcafd5eb26a15716b0ea91b71e8096e5261",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:52:29.640Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-approval.png",
+      "image_sha256": "a20d9664a9aadecadfc8db7c05bb75231af12ec06f6567ba92f3b1526008532b",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:01:23.849Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-complete-confirm.png",
+      "image_sha256": "32aebcf8c47096f679dffc8caf9928bdd8db904b644a8277a323f68b537d426c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:04:52.738Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-completed.png",
+      "image_sha256": "37c74880fc6d4d4d45e709ef2993d1e4782a27923225b8f0448e93cf9d2b5fa5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:09:08.212Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-scrapped.png",
+      "image_sha256": "50dbcbbf07105d7b16618ef340490972282464ae2f24a6c47631262f10aa948d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:18:04.970Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-rejected.png",
+      "image_sha256": "5dd82882ded71e20df8f61ee46111bf5b37d3ded1d244f4effcb402f3cf81e5c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:59:33.207Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-retry-confirm.png",
+      "image_sha256": "dce4070c700ac3ec208ec96420301dd64efc22b05c82aa43af021e7fb3df5d82",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:53:05.005Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-retry-confirm.png",
+      "image_sha256": "98006f4ece4471d547d7fd2ce197ff80648ea7a11285648a2e2b9e36b93c68ac",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:59:34.221Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-transfer-cancelled.png",
+      "image_sha256": "c09acf9c3f0e08fb173a4e1cb098bb88c18edc55aa07bc5aa7a5db882fed77f5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:32:08.542Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-disposal-cancelled.png",
+      "image_sha256": "5ebae50efe7c4e3d16f63de6e57d588dd32746656c4c2614802c1c1adcf7588a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:46:45.337Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-scope-empty.png",
+      "image_sha256": "762b57e57d64c23d19dee526611d832d1ffaf26b13e1e71f21d8060a50210d91",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:40.183Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.md",
+      "image": "docs/images/zh-CN/asset-management-forbidden.png",
+      "image_sha256": "94e7ffbb58cd7bb608605e7c1114836cec0a3d43f979c40d399531c7038c9d28",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:41.006Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-overview.png",
+      "image_sha256": "9f0c5af8c30a07dc5b488d0bb7f2ec1ede54cc7dc4ff66ea39455fb1c56af67c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:42.053Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-ledger.png",
+      "image_sha256": "3368fe9df5a5d1b39c45eb4bb6bb70d08def6f49a9208e7d8934050889d8864d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:43.228Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-detail.png",
+      "image_sha256": "bec8597816ecb92742554849f0931580dba3ecec73f6b38ca926139f30f50c75",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:43.481Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/procurement-assets.png",
+      "image_sha256": "2e63c2811de570ab3031733372d17c84696a83158bb1aa88907b1b7336bebe16",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:48.319Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": true,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-create-dialog.png",
+      "image_sha256": "635e23c6943fbf38eb858b3d4bcb17e7c19063fb219916ba4109c2af9ca5be56",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:45.604Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-create-footer.png",
+      "image_sha256": "0158525fd93e7960a51a8b8bdf2503f572fc4c7813e3b65d646d91b25b48e218",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:03:55.239Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-edit-dialog.png",
+      "image_sha256": "800985b61e983d2a25e428c4f7e8a2690178ad3fdd699ab332498c69eaa2d943",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:46.253Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-edit-footer.png",
+      "image_sha256": "092aba4b0cc9d00156ba424bc9b748587d8f92a3bbad83b1a2decf3696405df4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:03:56.407Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-allocate-dialog.png",
+      "image_sha256": "ca7a6215c4156c062045b435c53c8a3c181d51165c73ff684a1fbc704419be6a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:47.725Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-allocated.png",
+      "image_sha256": "14bc215e324ae97157b2612be53008a11db297b25076fa2be57c110d48503bf6",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:01.053Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-accept-confirm.png",
+      "image_sha256": "63d18d153049102fb9f6fc6a492edafb6c82dfcab2ba61d3f4e103b9f3033ba0",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:02.728Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-my-in-use.png",
+      "image_sha256": "ccd3398fe4a383d10d7f53127f93112d87e6c2d15f73d16bf4ab566e7b84911d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:17.525Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-return-before-accept-confirm.png",
+      "image_sha256": "26eae81aa653eca6b803f11ed07930221e9451fdf05944656e53186cba3dcaf1",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:03.437Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-return-confirm.png",
+      "image_sha256": "17868809ab31b1f5bfbfacf9a97cf2b41e8d932469d1a48157163998f0b17540",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:30:38.240Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-my-returned.png",
+      "image_sha256": "c6afb2b287c45423d58b1e2a8eae0df649cbf3e459c116df09071564e6246acd",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:39:42.351Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-return-history.png",
+      "image_sha256": "134581e79b354e83c67f2635a3ccff5c81a11e2771edfd14597ed775fd3c2aba",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:43:42.235Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-maintenance-confirm.png",
+      "image_sha256": "9a45721de5c4d94e63e5f148dcec91f9e6f8d1385d042abcc97064b03ca2740e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:15.881Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-maintenance.png",
+      "image_sha256": "5d61a54e9baa96de72fff6939a6cf44c1c630d8bc0025a59ed51f59a1a1a0634",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:28:56.715Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-maintenance-complete-confirm.png",
+      "image_sha256": "8dafff8c98806b8b10ba18e4c6ca1a504d04786d2acb888c864932d1c4a73919",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:28:57.097Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-form.png",
+      "image_sha256": "c30830019b128b83711f266e947cfdd0513b3739138ecca88aea5c035810d183",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:13:02.748Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-pending-detail.png",
+      "image_sha256": "5781d67c96edcecd40aa2a398ef696e0c081fc0895cf5c082a042661b8120e6c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:44:50.605Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-approval.png",
+      "image_sha256": "dc46035f01719e106c668876c6ecc52f2cf516c1d3d1f60787033d84fb14bab4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:29:13.815Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-complete-confirm.png",
+      "image_sha256": "ed89cacdb0ded11d6d67dc3bab211c13d94c707c4a9a5b24f6e2cf56f6f8fde5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:50:23.113Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-completed.png",
+      "image_sha256": "235e6b3f8f2525428488073bd1d6e490beb728de88ea4ac840cbb1d2116a8893",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:55:54.917Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-rejected.png",
+      "image_sha256": "5b20aff05077feb14ad6fb60e87e881d264a36a9c4977a0c9016cee716126df3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:40:28.616Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-form.png",
+      "image_sha256": "68e74c8691308a5ae8a9117d55c903a838f89502669ffe6e469299caca426400",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:52:33.456Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-approval.png",
+      "image_sha256": "bcd7feff992446f79555e69f3952a81791e9b60d96096d23d1beed7b77005dbb",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:01:28.504Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-complete-confirm.png",
+      "image_sha256": "84a45049de03a003ee2774e5741fc3db5fb2f4c39f9f2956a62b4abb64f1d745",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:04:56.221Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-completed.png",
+      "image_sha256": "c47594b4bf31f793180f30eb66be762d1d6e1994db568857ae7d5f08d1141499",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:09:13.088Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-scrapped.png",
+      "image_sha256": "64715e2d1b6a04e4275c92ec9d588f8bed093be55127f97d559e0dd8f4865f50",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:18:09.411Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-rejected.png",
+      "image_sha256": "7fd2c3aa27f0ef2be7fb31f27eb0dee1068fd017490f6aa16f8cea2b3a618bb0",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:59:37.758Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-retry-confirm.png",
+      "image_sha256": "b94506eacda720604be9fa645e2f8f7936a4b3d071f966e4448722ca71f9e4a6",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:53:08.726Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-retry-confirm.png",
+      "image_sha256": "992c82321b8802c89f76c06dbc93b9c320778ffb97e097868dd1405e0a46d354",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:59:37.834Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-transfer-cancelled.png",
+      "image_sha256": "44cb7aa2ac1f8927a4b4da6768aaac7ce4061e6fe66639d0e32c1b73c2a3951e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:32:13.190Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-disposal-cancelled.png",
+      "image_sha256": "264be5c76ac8a510d8b10632cc57816bc26035e0ab1dc92bdca7cd0d7e7a8819",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:46:49.827Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-scope-empty.png",
+      "image_sha256": "9eeb322d1e577db0c63b8f4ff230787fc98b49c4ba74f85da6bdb7b5cf7bb4a2",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:49.665Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.en.md",
+      "image": "docs/images/en-US/asset-management-forbidden.png",
+      "image_sha256": "b9f251a35e41671d39b467ace1658867d655d9a306d82dd9d02375705b771121",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:50.456Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-overview.png",
+      "image_sha256": "93360257fe0657b36b380123e92e6e5003839fbde34f3fb0f0fbbd919f839bd4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:51.481Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-ledger.png",
+      "image_sha256": "8141cfc3f74e649a00b4af86b2a7a7d1e1c6f526faf5c9262fa36ab5e1676c73",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:52.544Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-detail.png",
+      "image_sha256": "c84771e6846174c7001157ad397226b0c0fd13eb3de2aa9bc0db9447e0ff76a3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:52.750Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/procurement-assets.png",
+      "image_sha256": "8272c669e0181666fe0726400af01333825c28cad2ad127202144290291c2e63",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:52.603Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": true,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-create-dialog.png",
+      "image_sha256": "80b9f454c225f2ec304d77e09d6be8638098948dcf37a8f279cd372ffa09923d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:54.835Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-create-footer.png",
+      "image_sha256": "1ea3746c0825ddd24d79d4883a97c6be873542f8dbfb063f1d3853588cf30490",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:04:04.925Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-edit-dialog.png",
+      "image_sha256": "28f462e57d18a5d35dd860343805ffb0394bca595511592064a2b0ec1c6f1c1a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:55.508Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-edit-footer.png",
+      "image_sha256": "4f88d466063618a6aadc3fde0980182e665bb2698a83fa5a87b174cc33fc63d0",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:04:06.159Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-allocate-dialog.png",
+      "image_sha256": "977a69b5460fed5afc0b55fb0c0dd061fb2e9c2921b16c0df543241d08d0ea94",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:57.039Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-allocated.png",
+      "image_sha256": "feffd1555492ffc12d5380643560a1625cb0bf7428c97a5ef9717c9eeb4cc2f6",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:05.070Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-accept-confirm.png",
+      "image_sha256": "f724cd3f1a50c847d501121b3ee841f7f4c8a71653af7dc0e41ed841d59d78f9",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:07.378Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-my-in-use.png",
+      "image_sha256": "2e7acbe30c66a86b05b9efff696cb6488d768f420814c66261ab60ce81008797",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:21.571Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-return-before-accept-confirm.png",
+      "image_sha256": "ca2e0cec18e2e46c1f7b29d362b3f1e58b3c05950d278371972d48acd4637320",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:08.078Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-return-confirm.png",
+      "image_sha256": "088a1da969e6969d8350b322972ce1603c657d5a36d08d9f7ef072ff7cedaeb4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:30:41.525Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-my-returned.png",
+      "image_sha256": "dd883df4f4ca20cd089370409b5d43e8ea85a3c7480e5a731f2aa29fa0a76d06",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:39:45.210Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-return-history.png",
+      "image_sha256": "5e6b4014e3f5ee1257c5c6d56ac4529a1cee0f0176f859d4f1c7b8643cf7a1f7",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:43:45.956Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-maintenance-confirm.png",
+      "image_sha256": "e596bcc72697078bd48aca3942b9dbbaaf8da77e72a82039422c1ef95567db2a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:19.200Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-maintenance.png",
+      "image_sha256": "658284d15e4d9b5b37bd491a5641248a2de98cca6ae456f0c6b5eb2515608a7b",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:29:00.722Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-maintenance-complete-confirm.png",
+      "image_sha256": "7b0e05f93224bbc896bbfd448d12b126747f532d8b435221df06ec259a517e2d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:29:01.122Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-form.png",
+      "image_sha256": "14d6e9c3b4eb3efecaf4e0f39673a19c7ed832cf86f438fde2fede9024933d0d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:13:06.677Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-pending-detail.png",
+      "image_sha256": "fddee29a715bb55a4b095de57beca46e804d131b8b8b1d218ad5f519908d4c34",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:44:55.606Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-approval.png",
+      "image_sha256": "7485101e4a24d190e2ff292e6963b23d579a558e1dec8e111676bf08847c8d74",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:29:18.357Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-complete-confirm.png",
+      "image_sha256": "e7fd1094d89e60f6a482eaa03414fecb696619ced785c3ebc71b83f591d3ed89",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:50:27.252Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-completed.png",
+      "image_sha256": "5827a1a392f539eff0a92367b5c236a06161e09e528c750739d5d30d7647e459",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:55:59.290Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-rejected.png",
+      "image_sha256": "127d04f9b651eea2d419d51c63ca109183a8386b2f8b460a076c95a2ae9ef83f",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:40:32.918Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-form.png",
+      "image_sha256": "baf9a5a23892f59b836a36b2c2f3352da847166f12c1ec066a008e7551defcc0",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:52:37.117Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-approval.png",
+      "image_sha256": "3407f32ac03873f2d3e49be29c61991dcec3a35b589a773a25f75db407e9e27e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:01:33.098Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-complete-confirm.png",
+      "image_sha256": "911ffbed4a121647cc315e55679457824dd1ab6312198ac41fc9a62764ff3c50",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:04:59.710Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-completed.png",
+      "image_sha256": "bd291226a3d9d2fa5a04c95516b95b53055ffd8fa866aaa5ffd307489ad0dffc",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:09:17.021Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-scrapped.png",
+      "image_sha256": "ff55667bc685cf6f47ec3da78394d126fdb142bca326f84d6969606208574332",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:18:14.035Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-rejected.png",
+      "image_sha256": "e820f7211e3c273d11f2a45ad6e11a3190687d82d69938fa0b0eaa0cdfbfa307",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:59:42.442Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-retry-confirm.png",
+      "image_sha256": "ef274962cf3cc658c12d1a9dd67b0413493c88075eb2bc91bf75515749350299",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:53:12.437Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-retry-confirm.png",
+      "image_sha256": "a26d7c182b7e955c446c83a557acd3865a82687fc24e727ac1861961f8f08e73",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:59:41.629Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-transfer-cancelled.png",
+      "image_sha256": "1237cfd042ba6a1b5e8e9c98b19f72a56a0cb2b0df97db9c1153b57cfca26728",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:32:18.171Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-disposal-cancelled.png",
+      "image_sha256": "effd585569e3ef5ab7ee7d5866322b370d9f81caa87bbaadcb55cc4d56e9c727",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:46:54.380Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-scope-empty.png",
+      "image_sha256": "54cce69d865734dfb37430904230a8c516cd931341cbd76e36da2c922961949b",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:58.317Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.jp.md",
+      "image": "docs/images/ja-JP/asset-management-forbidden.png",
+      "image_sha256": "20d33d768b993a4070c3ea537caf66a6acc2636b23dc3be93221403632769cf2",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T06:59:59.158Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-overview.png",
+      "image_sha256": "e4d6819d386d73609b0530de705da61ccd0ebad8b6d8f1b9bed376cbeea65e44",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:00.211Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-ledger.png",
+      "image_sha256": "45d7afe3983c1b81eb3c874d94ced13a9d041621b25df0f18ae0aadcb70dd73c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:01.390Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-detail.png",
+      "image_sha256": "0d39011fcfce3307d92ecaa9d3c17382670d8a4d6a1449d0f0a2d71aba2c82ff",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:01.651Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/procurement-assets.png",
+      "image_sha256": "a592cd276cba7ba6d126c603b3444c9339d99f102f85f09fbcb3134e819f6163",
+      "visual_review_evidence": "docs/reference/evidence/procurement-tutorial-2026-10-28.json",
+      "visual_review_evidence_sha256": "9087398c195593014bb7a8df4f545d5251ad6ba3d51a5b218d1fddb4fcccd6f6",
+      "captured_at": "2026-10-27T08:25:58.360Z",
+      "runtime_image": "sha256:32d4152c937b34d53259373ac6cc40941ca3a1ac1d8db21958160df6e07ce31e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": true,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-create-dialog.png",
+      "image_sha256": "deec52ae43dda9b7eeff7fd51a3e9b35b93cd6a5a0f212dd0c66359188f5e87c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:03.682Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-create-footer.png",
+      "image_sha256": "285177a55c22d3b3068dae427ea8d6ee347f1dc288c64e663e9e13bfe92c5cc0",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:04:15.542Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-edit-dialog.png",
+      "image_sha256": "1577894d1a2871deeb828b5f9ed9c8620d3857b3c7cc6a25f32f7fe2385c2e43",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:04.336Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-edit-footer.png",
+      "image_sha256": "09e546a316600d1b6c4c1b1c8ff797fd1afb54c9986f39261275e18271e08303",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:04:16.719Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-allocate-dialog.png",
+      "image_sha256": "bc8c752e7a2cc9dbbe1a3c6da9d3d05fca65befe54310a00b74e48f0f0c3ab79",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:05.904Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-allocated.png",
+      "image_sha256": "28f05c6da52a695bf5c3d0344dca9e7882f18fd62aa76ec0247e47f0d7e6dac7",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:09.723Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-accept-confirm.png",
+      "image_sha256": "5e3dc7f66d7f879f6106d02e9bbd4a94b4ebcf09331446e0bd4de2a164f476c9",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:11.377Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-my-in-use.png",
+      "image_sha256": "c1f30f94eeee980fadfa81ea058ee88a0c4fade12b1e81c1c10df3249fd09d79",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:24.691Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-return-before-accept-confirm.png",
+      "image_sha256": "2a9e0e1fd844ec7f1556d7452fa370950063b1e95364bd039af3ff3316cd75e5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:36:12.076Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-return-confirm.png",
+      "image_sha256": "82e39f0379fdbef7a1fa0b2165a64105de7ef72b6bd51c5a01f0a59b092b4551",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:30:46.302Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-my-returned.png",
+      "image_sha256": "9ac2292198f39a9aa64c9d04bff3d7ee9d029e91798e179da870d45ccd09117c",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:39:47.856Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-return-history.png",
+      "image_sha256": "44209baa8accb98c18d51ef11204bae6d2dfad65c6c2791cc45abcf7b92e82b3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:43:49.731Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-maintenance-confirm.png",
+      "image_sha256": "fe6ba0d95e0a4458302e5599337844dd6ce8ca0ad6e81e051cc75707a4bb0623",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:26:23.065Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-maintenance.png",
+      "image_sha256": "18dc32ed8e31a6fa901c01b3ba22e3222841a29653dcf4d0c08eec28441ac3d4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:29:04.108Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-maintenance-complete-confirm.png",
+      "image_sha256": "a485c58b076660f3eb45a2c0c4870e1795f67706b21a810d613a9cd2dd1da6e5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:29:04.478Z",
+      "runtime_image": "sha256:d721632db39d271bed92d585be84751443a350051ada64a1237aa55c2fb92a36",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-form.png",
+      "image_sha256": "b5ff6eca3462ad69ba49eb8a2d0ed8610b9404faf0dd0d86cf00cb88690c0548",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:13:10.634Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-pending-detail.png",
+      "image_sha256": "186d95dbe0f2c20b8fa421ee316f4618f73ed940a658f77e2ac6037d37b2fa07",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:44:59.911Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-approval.png",
+      "image_sha256": "3c3c9d70a07175f4befe0889d30630b736f6564775fa4e5fae8fdd9038a67e00",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T09:29:22.944Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-complete-confirm.png",
+      "image_sha256": "28ba6f63ae1e79c2daa3c5d9c7443f71a4000fc668623e19ea0790b5a380ebd4",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:50:30.624Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-completed.png",
+      "image_sha256": "ee1f90e19f4f94915afe03b0ebc2e23583e576ebdaaa0d63652e4068c2a6ed0d",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T08:56:03.637Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-rejected.png",
+      "image_sha256": "0c5487bcbfb2da7271201f6d34d51b74f265cb89b1b536728b487a840f497c27",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:40:37.132Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-form.png",
+      "image_sha256": "a7d2c1a5a262eff7d84a958db64305cd2eb74b36a681b2a77e09e36c081b6a40",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:52:40.838Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-approval.png",
+      "image_sha256": "0fe3574d348b00439cb33a98159e973ab2fb480de9f4bd66375191489e42522e",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:01:37.743Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-complete-confirm.png",
+      "image_sha256": "bb1ef82d3a0cc3b34d709f18a461dfe51a5dc2461d4d7b2393fd2fcf7d7d2bda",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:05:03.787Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-completed.png",
+      "image_sha256": "a546b272fb71b444220c05f960c906f47df6ae19d56e682f299ae6a4a364ec0f",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:09:20.944Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-scrapped.png",
+      "image_sha256": "7dd5e243ec2c7c762486db6497e970c88ecf859ebb6dc339adfcd9eb93082af2",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:18:18.259Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-rejected.png",
+      "image_sha256": "e1d25efbab8f047e9ad24eaacbedbd01398c6c7377298b0d2d2ab9f0fc9d3964",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T00:59:46.994Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-retry-confirm.png",
+      "image_sha256": "982db642fe316dff3722ce90cf8fc4ee7510d1194fecb6f8c18b1a8b1f6f836a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:53:16.172Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-retry-confirm.png",
+      "image_sha256": "c143f8a1b348e246b55e3e30e79cdf768875ece0de01ae49da2ef68c90f859d3",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:59:45.471Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-transfer-cancelled.png",
+      "image_sha256": "e9f119c0dae0f7d193a1fa51a3c0340b60f955affb745c208df4f4dd51771d42",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:32:23.247Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-disposal-cancelled.png",
+      "image_sha256": "d8806770efe9a6cd69fe058160501e319b3894f82c2832ef27042d1f9f7db235",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-29T01:46:58.912Z",
+      "runtime_image": "sha256:3794aede860639d3c8c2983b4257edcdd40ac43552848f08e72d2a180ae1f85e",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-scope-empty.png",
+      "image_sha256": "1932d6dc42e9f9b03158dc829f0905618cb1758f36cab83e7c0590ad434e297a",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:07.899Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    },
+    {
+      "article": "docs/wiki/usage-asset.kr.md",
+      "image": "docs/images/ko-KR/asset-management-forbidden.png",
+      "image_sha256": "a76a56924d86ed57913686c5abf3f7996d70a44b97c4973dd8305737d87a5ed5",
+      "visual_review_evidence": "docs/reference/evidence/asset-tutorial-2026-10-29.json",
+      "visual_review_evidence_sha256": "172a30079a4c5bcab994b958d337db7b9067b066ae97a1afb8839786c1b509fe",
+      "captured_at": "2026-10-28T07:00:08.724Z",
+      "runtime_image": "sha256:c8ea5b55edf39812d8ba7cddd0acb53a106a08c3cef1cdd2135c1e8e94d473a3",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "identity_source": "test-fixture",
+      "cross_article_reuse": false,
+      "historical_failure_capture": false
+    }
+  ],
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/usage-asset.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 19:30:51",
+      "result": "approved",
+      "translation_sha256": "27ada9d1819a4c16912fd6d41417292d7294f8f3438cda41700570ce2e50fe94",
+      "checks": {
+        "coverage_and_meaning": "实际逐节对照中文16节，覆盖16原任务，37图同序：入库/来源/选项/编辑删除/分配/本人领用两种归还/维修/调拨/双处置/审批/重试/取消/范围和失败恢复均有说明。",
+        "technical_literals": "125.50 CNY等实际示例保持；图中业务原文和系统历史不冒译；普通教程无代码、API、SQL或源码跳转依赖。",
+        "security_and_failure_semantics": "区分管理角色与实际待办、本人与部门范围、审批与实物、UNKNOWN原申请重试与明确失败本地取消。已启动流程取消只展示真实恢复结果，不编造UI按钮。S02缺失运行正例明示保留，不当译文签核已实测。",
+        "language_and_terminology": "实际读完整全文，两段工具输出的极短截断已单独重读Local cancellation整段；改后personal asset access句完整复读。分配/接收、审批/实物、UNKNOWN/Start Failed、流程取消/本地取消、来源卡和独立两终态含义与中文一致。",
+        "images_and_links": "四语各37引用，144资产PNG均复用本Goal内已逐张实际view_image的相同字节，另4采购来源图复用原实际审读记录；实际1440×900，横滚和长历史的可见范围不夸大。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "scope": "source+three translations",
+          "finding": "旧已处置不是当前丢弃终态UI",
+          "resolution": "中文改为已丢弃，英Discarded、日廃棄済み、韩버림 완료；报废另对应Scrapped/除却済み/폐기 완료"
+        },
+        {
+          "status": "resolved",
+          "scope": "en-US",
+          "finding": "own可能误解为管理所有权",
+          "resolution": "改为同部门不自动获得personal asset访问"
+        },
+        {
+          "status": "resolved",
+          "scope": "ja-JP",
+          "finding": "取消段占用说明句不自然",
+          "resolution": "改为元の申請で処理中のまま"
+        },
+        {
+          "status": "resolved",
+          "scope": "ko-KR",
+          "finding": "首段混淆表达生硬",
+          "resolution": "改为헷갈리는 일을 줄일 수 있습니다"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/usage-asset.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 19:30:51",
+      "result": "approved",
+      "translation_sha256": "e280b3fa2e03dfc5b8b339497d508f602be8bcb123c4a774b884c22097e00a3f",
+      "checks": {
+        "coverage_and_meaning": "实际逐节对照中文16节，覆盖16原任务，37图同序：入库/来源/选项/编辑删除/分配/本人领用两种归还/维修/调拨/双处置/审批/重试/取消/范围和失败恢复均有说明。",
+        "technical_literals": "125.50 CNY等实际示例保持；图中业务原文和系统历史不冒译；普通教程无代码、API、SQL或源码跳转依赖。",
+        "security_and_failure_semantics": "区分管理角色与实际待办、本人与部门范围、审批与实物、UNKNOWN原申请重试与明确失败本地取消。已启动流程取消只展示真实恢复结果，不编造UI按钮。S02缺失运行正例明示保留，不当译文签核已实测。",
+        "language_and_terminology": "实际分0-75、76-151、152至结尾全文读完；按真实UI使用受領待ち/修理完了/廃棄済み/除却済み及承認/却下。元申請処理中句改后实际复读；未将取消结果伪称可点击终止。",
+        "images_and_links": "四语各37引用，144资产PNG均复用本Goal内已逐张实际view_image的相同字节，另4采购来源图复用原实际审读记录；实际1440×900，横滚和长历史的可见范围不夸大。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "scope": "source+three translations",
+          "finding": "旧已处置不是当前丢弃终态UI",
+          "resolution": "中文改为已丢弃，英Discarded、日廃棄済み、韩버림 완료；报废另对应Scrapped/除却済み/폐기 완료"
+        },
+        {
+          "status": "resolved",
+          "scope": "en-US",
+          "finding": "own可能误解为管理所有权",
+          "resolution": "改为同部门不自动获得personal asset访问"
+        },
+        {
+          "status": "resolved",
+          "scope": "ja-JP",
+          "finding": "取消段占用说明句不自然",
+          "resolution": "改为元の申請で処理中のまま"
+        },
+        {
+          "status": "resolved",
+          "scope": "ko-KR",
+          "finding": "首段混淆表达生硬",
+          "resolution": "改为헷갈리는 일을 줄일 수 있습니다"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/usage-asset.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-29 19:30:51",
+      "result": "approved",
+      "translation_sha256": "75cd84ef9700298a9995c59826c2a83406d1ab82c2ad83645824808d10c62c1f",
+      "checks": {
+        "coverage_and_meaning": "实际逐节对照中文16节，覆盖16原任务，37图同序：入库/来源/选项/编辑删除/分配/本人领用两种归还/维修/调拨/双处置/审批/重试/取消/范围和失败恢复均有说明。",
+        "technical_literals": "125.50 CNY等实际示例保持；图中业务原文和系统历史不冒译；普通教程无代码、API、SQL或源码跳转依赖。",
+        "security_and_failure_semantics": "区分管理角色与实际待办、本人与部门范围、审批与实物、UNKNOWN原申请重试与明确失败本地取消。已启动流程取消只展示真实恢复结果，不编造UI按钮。S02缺失运行正例明示保留，不当译文签核已实测。",
+        "language_and_terminology": "实际分0-81、82-159、160至结尾全文读完；修正首段自然性后复读。인수 대기/수리 완료/버림 완료/폐기 완료及승인/반려对应真实词典；全部失败恢复和权限边界未省略。",
+        "images_and_links": "四语各37引用，144资产PNG均复用本Goal内已逐张实际view_image的相同字节，另4采购来源图复用原实际审读记录；实际1440×900，横滚和长历史的可见范围不夸大。"
+      },
+      "findings": [
+        {
+          "status": "resolved",
+          "scope": "source+three translations",
+          "finding": "旧已处置不是当前丢弃终态UI",
+          "resolution": "中文改为已丢弃，英Discarded、日廃棄済み、韩버림 완료；报废另对应Scrapped/除却済み/폐기 완료"
+        },
+        {
+          "status": "resolved",
+          "scope": "en-US",
+          "finding": "own可能误解为管理所有权",
+          "resolution": "改为同部门不自动获得personal asset访问"
+        },
+        {
+          "status": "resolved",
+          "scope": "ja-JP",
+          "finding": "取消段占用说明句不自然",
+          "resolution": "改为元の申請で処理中のまま"
+        },
+        {
+          "status": "resolved",
+          "scope": "ko-KR",
+          "finding": "首段混淆表达生硬",
+          "resolution": "改为헷갈리는 일을 줄일 수 있습니다"
+        }
+      ]
+    }
+  },
+  "unverified_runtime_scope": "Original WP-28.S02 explicit START_FAILED local-cancel positive is still unverified. Real public process cancellation and UNKNOWN retry are separate cases; these articles do not claim that missing case ran."
+}

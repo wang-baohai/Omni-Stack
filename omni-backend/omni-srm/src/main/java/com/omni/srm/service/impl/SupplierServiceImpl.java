@@ -408,14 +408,22 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public SrmViews.SupplierVO resume(Long id, SrmRequests.StatusRequest request) {
-        return changeStatus(id, request.getVersion(), SupplierStatus.APPROVED, request.getReason());
+        SrmSupplier current = accessGuard.requireSupplier(id);
+        if (!SupplierStatus.SUSPENDED.name().equals(current.getStatus())) {
+            throw new BusinessException(409, "普通恢复仅适用于暂停合作的供应商");
+        }
+        return changeStatus(current, id, request.getVersion(), SupplierStatus.APPROVED, request.getReason());
     }
 
     /** 从黑名单恢复：BLACKLISTED → APPROVED。 */
     @Override
     @Transactional
     public SrmViews.SupplierVO restoreFromBlacklist(Long id, SrmRequests.StatusRequest request) {
-        return changeStatus(id, request.getVersion(), SupplierStatus.APPROVED, request.getReason());
+        SrmSupplier current = accessGuard.requireSupplier(id);
+        if (!SupplierStatus.BLACKLISTED.name().equals(current.getStatus())) {
+            throw new BusinessException(409, "黑名单恢复仅适用于已加入黑名单的供应商");
+        }
+        return changeStatus(current, id, request.getVersion(), SupplierStatus.APPROVED, request.getReason());
     }
 
     /** 加入黑名单。 */

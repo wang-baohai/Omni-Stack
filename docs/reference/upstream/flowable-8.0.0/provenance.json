@@ -1,0 +1,67 @@
+{
+  "artifact": "org.flowable:flowable-engine:8.0.0",
+  "official_archive": "https://repo.maven.apache.org/maven2/org/flowable/flowable-engine/8.0.0/flowable-engine-8.0.0-sources.jar",
+  "archive_sha256": "7575bce1ca46138b320eedf19ac0994540bd5f4cf9d81015497625eeefe8799d",
+  "verified_official_checksums": [
+    {
+      "url": "https://repo.maven.apache.org/maven2/org/flowable/flowable-engine/8.0.0/flowable-engine-8.0.0-sources.jar.sha256",
+      "algorithm": "sha256",
+      "status": 200,
+      "value": "7575bce1ca46138b320eedf19ac0994540bd5f4cf9d81015497625eeefe8799d",
+      "matched": true
+    }
+  ],
+  "license": "Apache-2.0",
+  "license_url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+  "license_sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+  "license_source": "此前已实际取得并校验的官方 Apache 全文；源码jar本身没有单独LICENSE条目。",
+  "upstream_documentation": "https://www.flowable.com/open-source/docs/bpmn/ch07b-BPMN-Constructs/",
+  "excerpts": [
+    {
+      "file": "task-command.java.txt",
+      "original_path": "org/flowable/engine/impl/TaskServiceImpl.java",
+      "original_sha256": "e78540b12275164b1aaf6085a506906910f9f0521c6e8a5b46704175c0ebaa71",
+      "start_line": 234,
+      "end_line": 237,
+      "excerpt_sha256": "a507776d601aa3422d3c3deb09e6006265dabd29adc647de0a3525bc7af2e260",
+      "copyright_and_license_header": "/* Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n * \n *      http://www.apache.org/licenses/LICENSE-2.0\n * \n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "task-advance.java.txt",
+      "original_path": "org/flowable/engine/impl/util/TaskHelper.java",
+      "original_sha256": "7c11cb14479414cb76e3a9536391189be5e3638e5806070261b1c1208a5f2f1b",
+      "start_line": 178,
+      "end_line": 184,
+      "excerpt_sha256": "f6c366cc3106f98e0c8b0dd1d586d6d0f5183faa6646404f95280acb63832f0d",
+      "copyright_and_license_header": "/* Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n * \n *      http://www.apache.org/licenses/LICENSE-2.0\n * \n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "parallel-completion.java.txt",
+      "original_path": "org/flowable/engine/impl/bpmn/behavior/ParallelMultiInstanceBehavior.java",
+      "original_sha256": "61544b42c3b082efd5eb2625d71693cc40f914f1fe4c3964912554f0e9209ab0",
+      "start_line": 231,
+      "end_line": 234,
+      "excerpt_sha256": "8001dcfa50ccc48e7e8294f898a3eae56a8888acd8093ee69bbf963d287da1d4",
+      "copyright_and_license_header": "/* Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n * \n *      http://www.apache.org/licenses/LICENSE-2.0\n * \n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "multi-instance-cleanup.java.txt",
+      "original_path": "org/flowable/engine/impl/bpmn/behavior/MultiInstanceActivityBehavior.java",
+      "original_sha256": "6fcae5d8cbef536e77f324c1b449faf2acd673b0027372ac8a3fcbee284b2656",
+      "start_line": 266,
+      "end_line": 269,
+      "excerpt_sha256": "41ad4f5bb66935ed76b9e69cda88e4ed809dfe5b315fce1389a51fdded4b9952",
+      "copyright_and_license_header": "/* Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n * \n *      http://www.apache.org/licenses/LICENSE-2.0\n * \n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    },
+    {
+      "file": "deployment-command.java.txt",
+      "original_path": "org/flowable/engine/impl/RepositoryServiceImpl.java",
+      "original_sha256": "14a9dc601673173c889b88a4633d450584697045ac09439fac64a33b09b9ee68",
+      "start_line": 98,
+      "end_line": 100,
+      "excerpt_sha256": "f40b83f0a4a3d531c5db0d19fe6fd3aee0940f7cba36a0f56077a0b1284d7f4e",
+      "copyright_and_license_header": "/* Licensed under the Apache License, Version 2.0 (the \"License\");\n * you may not use this file except in compliance with the License.\n * You may obtain a copy of the License at\n * \n *      http://www.apache.org/licenses/LICENSE-2.0\n * \n * Unless required by applicable law or agreed to in writing, software\n * distributed under the License is distributed on an \"AS IS\" BASIS,\n * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n * See the License for the specific language governing permissions and\n * limitations under the License.\n */"
+    }
+  ],
+  "excerpt_policy": "原作者与许可头单独保全，正文仅连续短摘录；不修改上游原文，不引入运行依赖。"
+}

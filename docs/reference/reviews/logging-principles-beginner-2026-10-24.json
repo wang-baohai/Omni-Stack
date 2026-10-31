@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "logging-principles",
+  "source": "docs/wiki/logging-principles.md",
+  "source_sha256": "91f194305b60e4fd21ab1b1d2314f3b68f337aa2058047c29ddd901a0aedefe1",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working tree bound by exact file digests",
+  "method": "本人实际逐篇复读中文及三译全部自然语言，14个相同源码/配置片段逐个实际读取并解释，四语逐字匹配另由Docker正式测试；8张引用实拍全部本人view_image。不是机械QA签核，也不是业务写入/观测运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/logging-principles.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "43fd3c8c4b5612542ff8b0ab79e02a59cab9c93c82cf7c367644ef2f38e9827c",
+      "checks": {
+        "coverage_and_meaning": "三类记录的用途和入口清楚，例子说明保存失败应查哪一种；可选集中采集与仍存在的容器输出分开。",
+        "technical_literals": "结构化字段、collector/store/query、traceId及四个工具名称准确；本篇无源码块。",
+        "security_and_failure_semantics": "编号不是凭证也不是Trace保存证明，操作日志缺失不能推断请求未发生。",
+        "language_and_terminology": "英文整篇实际复读，runtime/operation/security audit、Outbox/relay/consumer区分和自然表述一致。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "docs/wiki/logging-principles.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "b45edd787bbe364655bfdc4b266b4d98384d1456ddbb9a762c64519bdd1bf573",
+      "checks": {
+        "coverage_and_meaning": "三类记录的用途和入口清楚，例子说明保存失败应查哪一种；可选集中采集与仍存在的容器输出分开。",
+        "technical_literals": "结构化字段、collector/store/query、traceId及四个工具名称准确；本篇无源码块。",
+        "security_and_failure_semantics": "编号不是凭证也不是Trace保存证明，操作日志缺失不能推断请求未发生。",
+        "language_and_terminology": "日文整篇实际复读，サニタイズ/サービス/スケジュール等已校正；条件与失败分支没有弱化。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "docs/wiki/logging-principles.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 23:29:12",
+      "result": "approved",
+      "translation_sha256": "f377d336ef9982b10cd474d7a0d90824b300694f38849252af6b49a00150a69e",
+      "checks": {
+        "coverage_and_meaning": "三类记录的用途和入口清楚，例子说明保存失败应查哪一种；可选集中采集与仍存在的容器输出分开。",
+        "technical_literals": "结构化字段、collector/store/query、traceId及四个工具名称准确；本篇无源码块。",
+        "security_and_failure_semantics": "编号不是凭证也不是Trace保存证明，操作日志缺失不能推断请求未发生。",
+        "language_and_terminology": "韩文整篇实际复读，통합/작업/보안/멱등等用词自然；源字面量与适用条件均保留。",
+        "images_and_links": "本篇没有栅格图；片段直接内嵌不依赖跳仓库源码，邻页链接使用本语并由站点门禁另检。"
+      },
+      "findings": []
+    }
+  }
+}

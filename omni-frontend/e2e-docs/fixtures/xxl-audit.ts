@@ -11,9 +11,12 @@ interface RemoteLog extends Omit<XxlExecution, 'origin'> { triggerMsg: string }
 interface RemoteJob { id: number; executorHandler: string; executorParam: string; triggerStatus: number; scheduleConf: string }
 interface PageData<T> { data: T[]; offset: number; pagesize: number; total: number }
 
+/** G8 适配：项目名取本次已核实的 omni-stack，仍要求环境变量严格相等，错误项目必须拒绝。 */
+export const VERIFIED_E2E_PROJECT = 'omni-stack'
+
 /** 从仓库外私有配置读取隔离凭据，返回不持久化 Cookie 的只读客户端。 */
 export async function createXxlAudit(privateEnvFile: string) {
-  if (!existsSync('/.dockerenv') || process.env.E2E_SCHEDULING_UI_PROJECT !== 'omni-wiki-acceptance-20261009') throw new Error('仅允许本次隔离 Docker 项目')
+  if (!existsSync('/.dockerenv') || process.env.E2E_SCHEDULING_UI_PROJECT !== VERIFIED_E2E_PROJECT) throw new Error('仅允许本次隔离 Docker 项目')
   const values: Record<string, string> = {}
   for (const line of readFileSync(privateEnvFile, 'utf8').split(/\r?\n/)) {
     const entry = /^(XXL_JOB_ADMIN_USERNAME|XXL_JOB_ADMIN_PASSWORD)=(.*)$/.exec(line)

@@ -1,0 +1,40 @@
+{
+  "step": "WP-25.S02 / WP-25.S04",
+  "object": "crm_tutorial_four_language_images",
+  "generated_at": "2026-10-21T15:55:00Z",
+  "environment": {
+    "project": "omni-stack",
+    "network": "omni-stack_default",
+    "frontend": "omni-stack-omni-frontend-1:3000",
+    "gateway": "omni-stack-omni-gateway-1:8080",
+    "verifier": "omni-stack-verifier",
+    "image": "omni-frontend:latest sha256:1d634d3c16df"
+  },
+  "chain": {
+    "keyword": "WP25-LINK",
+    "lead": "9 → CONVERTED",
+    "customer": 6,
+    "contact": 8,
+    "opportunity": "7 → WON",
+    "activities": [14, 15],
+    "semantics": [
+      "NEW→FOLLOWING only after completing a follow-up activity",
+      "QUALIFIED required before convert",
+      "reschedule only CANCELLED→PLANNED",
+      "delete/assign/transfer require version"
+    ],
+    "throwaway_objects_cleaned": ["lead 10", "customer 7", "contact 9", "opportunity 8", "activities 16-17"]
+  },
+  "capture": {
+    "scenes": 14,
+    "locales": ["zh-CN", "en-US", "ja-JP", "ko-KR"],
+    "images": 56,
+    "identity": "admin real CAPTCHA login; employee zhangsan real CAPTCHA login for 403",
+    "not_captured": ["SALES_REP/MANAGER/VIEWER positive visibility (no seeded CRM staff accounts)"]
+  },
+  "desensitization": {
+    "phones_masked": true,
+    "emails_masked": true,
+    "tokens_or_passwords_present": false
+  }
+}

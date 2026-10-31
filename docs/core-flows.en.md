@@ -126,7 +126,7 @@ This decoded password-login JWT example uses placeholders and is not a usable to
 | `scope` | Array of database permission codes; not a space-delimited string |
 | `jti` | Unique token ID for `token:blacklist:{jti}` |
 | `iat` | Issue time in Unix seconds |
-| `exp` | Expiry; default `iat + 900`, configured by `auth.token.access-token-ttl` |
+| `exp` | Expiry; configured by `auth.token.access-token-ttl`; the repository application.yml currently sets 7200 seconds, with a code fallback of 900 |
 
 ### Multi-Tenant Login Mechanism
 
@@ -145,7 +145,7 @@ Captcha TTL defaults to 300 seconds via `auth.captcha.ttl-seconds`. Once `valida
 
 ### Current Status
 
-`/api/auth/login` returns accessToken, Bearer type, and expiresIn, without refreshToken. Access TTL defaults to 900 seconds and is configurable. `JwkKeyProvider` currently selects and caches the first RSA key in JWKS; this does not establish complete kid-based multi-key rotation.
+`/api/auth/login` returns accessToken, Bearer type, and expiresIn, without refreshToken. The repository application.yml currently sets the access TTL to 7200 seconds (code fallback 900 seconds), configurable via that property. `JwkKeyProvider` currently selects and caches the first RSA key in JWKS; this does not establish complete kid-based multi-key rotation.
 
 This section describes current source calls and failure boundaries. See the [Wiki](wiki/index.en.md) for real captcha login operations, screenshots, and recovery, and Flow 2 for OAuth2 session and authorization-code behavior.
 
@@ -154,6 +154,8 @@ This section describes current source calls and failure boundaries. See the [Wik
 ### Overview
 
 The enterprise SSO entry uses authorization code + PKCE. The default client is `omni-frontend`; `VITE_OAUTH2_CLIENT_ID` can override the frontend value but must match a registration. Authentication is `NONE`. A newly created default client requires PKCE, requests `openid profile`, and has `requireAuthorizationConsent=false`. The initializer does not reset other settings of an existing registration.
+
+`GET /api/auth/session-check` is an explicitly public, read-only session probe. It reads the security context from an existing HttpSession and returns business code 401 without a valid session. It neither creates a session nor promotes that identity into the ordinary REST security context; other business APIs still require a Bearer JWT.
 
 Initiation generates a 64-character verifier, a `BASE64URL(SHA256(verifier))` challenge, and random state. It saves the parameters and opens `Login?oauth2=true`. The form submits the required tenant and real captcha to `/api/auth/session-login`, which establishes and rotates HttpSession. The frontend then opens the saved authorization URL. A frontend JWT login does not replace this server session.
 
@@ -437,7 +439,7 @@ The callback checks three-part format, recomputed HMAC and a parseable timestamp
 4. A new user has null password, status 1 and the tenantId recovered from validated state.
 5. User and identity link are written in the callback database transaction. A link unique-key conflict triggers lookup of the existing binding and its local user.
 6. Code attempts the selected tenant's `USER` role and logs warn if absent or assignment throws. The formal tenant1 USER seed is SELF; actual data scope follows current role configuration.
-7. An existing binding loads its original local user before updating provider token/profile. JWT tenant comes from that user; current state does not migrate it.
+7. An existing binding must belong to the tenant recovered from state; a mismatch returns 403 before updating the binding or issuing a JWT. A binding read back after a concurrent insert conflict is also checked before default-role assignment.
 8. Local roles/permissions are loaded before JWT generation. Online-record failures only log warn, followed by login-success audit publication.
 
 ### sys_user_oauth_provider Table Design
@@ -457,7 +459,9 @@ The callback checks three-part format, recomputed HMAC and a parseable timestamp
 | `uk_provider_user` | `UNIQUE (provider, provider_user_id)` | Global unique constraint for external identity |
 | `idx_user_id` | `INDEX (user_id)` | Index for links by local user |
 
-The table has no tenant_id column, and its unique key does not include a tenant. One provider identity is globally linked to one local user. First creation uses the state tenant; an existing binding reuses its user and tenant. This is not independent duplicate binding of the same provider identity per tenant.
+The table has no tenant_id column, and its unique key does not include a tenant. One provider identity is globally linked to one local user. First creation uses the state tenant; an existing binding permits login only through its user's tenant, without migration or reuse across tenants. The same provider identity cannot be bound independently in multiple tenants.
+
+All three handlers send UTF-8 form data with `application/x-www-form-urlencoded` for token exchange. A provider profile without a unique subject ID is rejected with 502; the orchestration layer also rejects missing subjects before querying local bindings.
 
 `handleCallback()` uses a database transaction. Provider token exchange, network calls and online records do not roll back jointly with the local database. Unique-key/lookup handling does not establish idempotency of all external side effects.
 
@@ -534,6 +538,8 @@ sequenceDiagram
 - registerDynamicRoutes registers only MENU nodes with a resolvable component; DIRECTORY nodes only group items. Portal entries starting with srm:portal: are outside this registration path. Routes belong to admin; colons in the permission code become slashes in the path and hyphens in the name, and meta.permissionCode is retained.
 - Logout resets the permission Store and removes registered dynamic routes.
 
+The public homepage displays the Wiki; after login, its workspace entry opens “My Workspace” in a new browser tab. The workspace combines the overview, pending approvals and personal jobs on one page. Its application directory, application drawer and menu search cover all menus accessible to the current identity. Opening a business module creates another tab; that module displays and searches only its own menus, without a global applications button or an entry back to the homepage or workspace. These frontend navigation boundaries do not replace server-side authorization checks.
+
 **Buttons, tokens and server authorization**
 
 ```vue
@@ -543,7 +549,7 @@ sequenceDiagram
 ```
 
 - The directive checks nonempty bindings in mounted and updated: it sets display:none when permission is missing and clears display otherwise. An empty binding does not hide the element. Button visibility does not authorize a server operation.
-- decodeJwt decodes without verifying signatures. getPermissionsFromToken returns scope unchanged and does not split strings into arrays. Password JWT scope arrays and SAS space-delimited strings therefore cannot be described as normalized by this frontend helper. Gateway performs signature and expiry checks.
+- decodeJwt decodes without verifying signatures. getPermissionsFromToken normalizes password JWT permission arrays and SAS space-delimited scope strings into permission arrays; invalid types yield an empty array. Gateway still verifies signatures and expiry, and frontend parsing grants no server-side authority.
 - For ordinary Auth APIs, GatewayPreAuthFilter builds Authentication from forwarded role and permission headers. This does not reverify a forwarded Bearer JWT or reload database functional permissions on every request.
 - Management endpoints follow their current Controller rules, such as @PreAuthorize with system:user:create for user creation. Public login/registration and MyJobController ownership checks have explicit separate paths; a single annotation rule does not describe every write endpoint.
 
@@ -1088,7 +1094,7 @@ sequenceDiagram
 | Source | Responsibility |
 | --- | --- |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [CreateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/CreateUserJobRequest.java) / [UpdateUserJobRequest.java](../omni-backend/omni-base/src/main/java/com/omni/base/dto/UpdateUserJobRequest.java) / [UserJobServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobServiceImpl.java) / [UserJobTypeServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobTypeServiceImpl.java) | Authenticated entry, DTO validation, type selection and row ownership |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | Workbench job API and form submission |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | Workbench job API and form submission |
 | [CronGenerator.vue](../omni-frontend/src/components/CronGenerator.vue) / [DynamicFormRenderer.vue](../omni-frontend/src/components/DynamicFormRenderer.vue) / [schema.ts](../omni-frontend/src/types/schema.ts) | 7 Cron frequency types and standard/compatible Schema fields |
 | [XxlJobAdminClient.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobAdminClient.java) / [XxlJobProperties.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/XxlJobProperties.java) / [XxlJobAutoConfiguration.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/config/XxlJobAutoConfiguration.java) | Executor configuration, registration, remote lookup and compensation |
 | [0001-base-schema.yaml](../database/changelog/base/0001-base-schema.yaml) / [base.sql](../scripts/sql/seed/base.sql) / [UserJobSeedSyncRunner.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/UserJobSeedSyncRunner.java) | Formal job schema, seeds and startup synchronization |
@@ -1204,7 +1210,7 @@ Built-in `DrinkWaterRemindHandler` reads `cupShape`; missing or invalid input us
 | [UserJobMessage.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobMessage.java) / [UserJobHandler.java](../omni-backend/omni-common-core/src/main/java/com/omni/common/core/job/UserJobHandler.java) | Five-field message and handler SPI |
 | [DrinkWaterRemindHandler.java](../omni-backend/omni-base/src/main/java/com/omni/base/job/handler/DrinkWaterRemindHandler.java) / [base.sql](../scripts/sql/seed/base.sql) | Built-in reminder parameters and actual text |
 | [MyJobController.java](../omni-backend/omni-base/src/main/java/com/omni/base/controller/MyJobController.java) / [UserJobLogServiceImpl.java](../omni-backend/omni-base/src/main/java/com/omni/base/service/impl/UserJobLogServiceImpl.java) / [SysUserJobLogMapper.java](../omni-backend/omni-base/src/main/java/com/omni/base/mapper/SysUserJobLogMapper.java) | Parent ownership, log query and statistics SQL |
-| [index.vue](../omni-frontend/src/views/home/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | Current-page polling, manual wait and notifications |
+| [index.vue](../omni-frontend/src/views/workspace/jobs/index.vue) / [myJob.ts](../omni-frontend/src/api/myJob.ts) | Current-page polling, manual wait and notifications |
 | [JobMetrics.java](../omni-backend/omni-common-job/src/main/java/com/omni/common/job/JobMetrics.java) | Execution/parsing metrics entry |
 
 ### Current Status

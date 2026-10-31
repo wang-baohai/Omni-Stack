@@ -23,6 +23,19 @@ const liteSelection = { id: 'x', kind: 'preset' as const, profile: 'core', modul
 const fullSelection = { ...liteSelection, id: 'y', lite: false };
 
 describe('development selection', () => {
+  it('passes the exact catalog closure to frontend builds for each preset', () => {
+    const compose = YAML.parse(readFileSync(resolve(workspaceRoot, 'compose.apps.yaml'), 'utf8'));
+    assert.equal(compose.services['omni-frontend'].build.args.VITE_OMNI_MODULES, '${OMNI_FRONTEND_MODULES:-}');
+    for (const preset of ['core', 'workflow', 'crm', 'supply-chain', 'full']) {
+      const selection = planDevelopmentSelection(workspaceRoot, { preset });
+      const environment = developmentCommandEnvironment(workspaceRoot, selection);
+      assert.equal(environment.OMNI_FRONTEND_MODULES, selection.moduleIds.join(','));
+      assert.equal(environment.OMNI_FRONTEND_MODULES.split(',').includes('crm'), preset === 'crm' || preset === 'full');
+      assert.equal(environment.OMNI_FRONTEND_MODULES.split(',').includes('workflow'), ['workflow', 'supply-chain', 'full'].includes(preset));
+      assert.equal(Object.keys(environment).some((key) => /PASSWORD|TOKEN|SECRET/.test(key)), false);
+    }
+  });
+
   it('plans the core preset without optional job or message infrastructure', () => {
     const selection = planDevelopmentSelection(workspaceRoot, { preset: 'core' });
 
@@ -52,6 +65,7 @@ describe('development selection', () => {
     assert.equal(selection.lite, true);
     assert.deepEqual(selection.services, ['omni-frontend']);
     const environment = developmentCommandEnvironment(workspaceRoot, selection);
+    assert.equal(environment.OMNI_FRONTEND_MODULES, undefined, 'frontend-only 不代表后端模块被裁剪');
     assert.equal(environment.MYSQL_ROOT_PASSWORD, 'unused-in-frontend-only-mode');
     assert.equal(environment.OMNI_INTERNAL_API_TOKEN, 'unused-in-frontend-only-mode');
   });

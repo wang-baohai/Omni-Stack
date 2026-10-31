@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "authentication-framework",
+  "source": "docs/wiki/authentication-framework.md",
+  "source_sha256": "0570e5526e6645c32b4b3e45c23a6a464f1293c7ed677d12845205910f00f0cb",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "dbb3e2156a2afe38829cdb2a779ab0914f6f8d2b",
+  "source_state": "current working-tree contents bound by per-file digests",
+  "method": "本人先完整审读中文，再逐篇复读当前英日韩正文、表格与时序标签，对照源码解释和失败恢复；修正后再次核对差异。不是机械QA替代语义审读，不宣称真人复核或运行验收。",
+  "translations": {
+    "en-US": {
+      "path": "docs/wiki/authentication-framework.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "b070127b9663cbb01f974549bc3cc1638dbb48b4b13735999c2d76d1a625b3f9",
+      "checks": {
+        "coverage_and_meaning": "三种选型的责任比较、请求解析/PKCE/正常授权码消费三段逐段解释、框架/工程分工及七端点索引完整。",
+        "technical_literals": "实际7.0.5三段上游连续原文/193–201、151–170、294–299及版本许可保留；四篇项目链接各自语言。",
+        "security_and_failure_semantics": "不把类型名当密码已通过；算法缺失失败不放行；代码消费不等于所有JWT撤销；选型推导未捏造历史评审。",
+        "language_and_terminology": "英语全文实际复读，使用自然解释，保留技术原文和项目能力限制。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.en.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        },
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/wiki/authentication-framework.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "514273ad4151af640d26f87c1bfa11b468bae35370f5426a0c4c6ea729973e7c",
+      "checks": {
+        "coverage_and_meaning": "三种选型的责任比较、请求解析/PKCE/正常授权码消费三段逐段解释、框架/工程分工及七端点索引完整。",
+        "technical_literals": "实际7.0.5三段上游连续原文/193–201、151–170、294–299及版本许可保留；四篇项目链接各自语言。",
+        "security_and_failure_semantics": "不把类型名当密码已通过；算法缺失失败不放行；代码消费不等于所有JWT撤销；选型推导未捏造历史评审。",
+        "language_and_terminology": "日文全文实际复读并去除工程/自有/工件等中文直译，改为プロジェクト/独自/アーティファクト，安全监査采用セキュリティ監査。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.jp.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        },
+        {
+          "id": "japanese-natural-terminology",
+          "status": "resolved",
+          "resolution": "只改非代码正文为自然日文项目/自有接口/制品/安全审计说法，保留全部连续源码。",
+          "description": "初稿有工程/自有等中文式表达。"
+        },
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/wiki/authentication-framework.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-10-24 17:12:40",
+      "result": "approved",
+      "translation_sha256": "ad907f2e84f2350b29026464b93b2902bc3ad7b99b542cef04a1bff132f7b064",
+      "checks": {
+        "coverage_and_meaning": "三种选型的责任比较、请求解析/PKCE/正常授权码消费三段逐段解释、框架/工程分工及七端点索引完整。",
+        "technical_literals": "实际7.0.5三段上游连续原文/193–201、151–170、294–299及版本许可保留；四篇项目链接各自语言。",
+        "security_and_failure_semantics": "不把类型名当密码已通过；算法缺失失败不放行；代码消费不等于所有JWT撤销；选型推导未捏造历史评审。",
+        "language_and_terminology": "韩文全文实际复读，认证/인가/테넌트及项目术语与概念对应；设备页时序已补自然空格。",
+        "images_and_links": "本篇无栅格图片；可选外部资料保留、本章相邻链接指向各自语言；时序自然语言与中文及源码职责逐项对应。最终站点实际渲染仍按原S04/S05验证，不以本译文记录冒称图片或业务门通过。 本轮仅补本站LICENSE.txt与provenance.json入口，原正文逐字不变，新增末段已实际复读；静态文件与根/子路径由原断言继续检查。"
+      },
+      "findings": [
+        {
+          "id": "same-language-neighbor-links",
+          "status": "resolved",
+          "resolution": "全部改为.kr.md对应译文链接，保留原章节意义。",
+          "description": "草稿相邻链接使用中文规范文件名会切回中文。"
+        },
+        {
+          "id": "independent-site-upstream-links",
+          "description": "原页末有出处说明但没有本站许可/来源可点击入口",
+          "status": "resolved",
+          "resolution": "只追加一条本语说明和两个站内链接，原已完整审读的正文/代码逐字不变；本轮实际复读新增末段和真实文件内容/许可，最终构建继续严格校验。"
+        }
+      ]
+    }
+  },
+  "publication_link_review": {
+    "at": "2026-10-24 17:12:40",
+    "original_step": "WP-09.S02",
+    "prior_review_file_sha256": "69f6be79c82cbe03f77ff4228a683424f09217c60bc110d8271770af7cd9604a",
+    "method": "保留原17/18步骤的全文实际审读证据，校验旧正文逐字不变，只对新增的本语静态出处末段进行增量实际复读；新源/译文/审校记录摘要重新绑定。"
+  }
+}

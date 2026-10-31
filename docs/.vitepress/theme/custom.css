@@ -1,0 +1,52 @@
+/* 阅读版式：紧凑导航，优先给正文、表格和图表留出宽度；不改变站点信息架构。 */
+:root {
+  --vp-layout-max-width: 100%;
+  --vp-sidebar-width: 240px;
+}
+
+.vp-doc {
+  max-width: none;
+  margin-inline: auto;
+}
+
+/* 覆盖默认主题带页内目录时的 688px 限宽。 */
+.VPDoc.has-sidebar .content-container,
+.VPDoc.has-sidebar.has-aside .content .content-container {
+  max-width: 1440px;
+}
+
+@media (min-width: 960px) {
+  .VPDoc.has-sidebar { padding: 32px 24px 0; }
+  .VPDoc.has-sidebar .content { min-width: 0; padding: 0 24px 96px; }
+}
+
+@media (min-width: 1280px) {
+  .VPDoc.has-sidebar .aside { flex: 0 0 184px; max-width: 184px; padding-left: 16px; }
+  .VPDoc.has-sidebar .aside-container,
+  .VPDoc.has-sidebar .aside-curtain { width: 168px; }
+  .VPDoc.has-sidebar .aside .outline-link { white-space: normal; line-height: 1.5; padding-block: 4px; }
+}
+
+.vp-doc div[class*='language-'] {
+  overflow-x: auto;
+}
+
+.vp-doc img {
+  max-width: 100%;
+  height: auto;
+}
+
+.vp-doc table {
+  display: block;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .vp-doc {
+    max-width: 100%;
+  }
+
+  .vp-doc h1 {
+    font-size: 1.6rem;
+  }
+}
