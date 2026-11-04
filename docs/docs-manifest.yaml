@@ -2292,16 +2292,16 @@ documents:
     wiki_section: WIKI-01
     wiki_order: 0
     source: README.md
-    source_sha256: 6eaa1c9530e2064c9d22b9fe7b1631b7088c8b7ab85de3f716e4b2a195da483d
+    source_sha256: f54a6cb37a6cf44def79a63ed4b70edc26a2d6ed516b4c6a4d65d13d13985afa
     dependencies:
       - repository-content
     translations:
       en-US:
         path: README.en.md
         status: synchronized
-        reviewed_at: 2026-10-24 23:03:23
-        review_evidence: docs/reference/reviews/project-readme-slim-2026-10-24.json
-        review_evidence_sha256: 9ab7a53d482b14a0e36611fd3c8960dba65a4ae1d70843d1de9b2c4725fce841
+        reviewed_at: "2026-11-04 18:00:18"
+        review_evidence: docs/reference/reviews/project-readme-structure-2026-11-04.json
+        review_evidence_sha256: 869ea3171e1d39e6d1d3257f8f967bdca39a15340bc86daf71ebb811356ac6d1
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18T06:44:23.993Z
@@ -2310,14 +2310,14 @@ documents:
           review_type: AI_REVIEW
         reviewer: Codex
         review_type: AI_REVIEW
-        reviewed_source_sha256: 6eaa1c9530e2064c9d22b9fe7b1631b7088c8b7ab85de3f716e4b2a195da483d
-        translation_sha256: 1a37e544ab8b646ad8d1a2a81daafcdb2b4134b294f8717215323266644ce3d6
+        reviewed_source_sha256: f54a6cb37a6cf44def79a63ed4b70edc26a2d6ed516b4c6a4d65d13d13985afa
+        translation_sha256: 5e06a65572ceeac473ecc898760c8f5b44430ed9c253a4047d0600f45914514f
       ja-JP:
         path: README.jp.md
         status: synchronized
-        reviewed_at: 2026-10-24 23:03:23
-        review_evidence: docs/reference/reviews/project-readme-slim-2026-10-24.json
-        review_evidence_sha256: 9ab7a53d482b14a0e36611fd3c8960dba65a4ae1d70843d1de9b2c4725fce841
+        reviewed_at: "2026-11-04 18:00:18"
+        review_evidence: docs/reference/reviews/project-readme-structure-2026-11-04.json
+        review_evidence_sha256: 869ea3171e1d39e6d1d3257f8f967bdca39a15340bc86daf71ebb811356ac6d1
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18T06:44:23.993Z
@@ -2326,14 +2326,14 @@ documents:
           review_type: AI_REVIEW
         reviewer: Codex
         review_type: AI_REVIEW
-        reviewed_source_sha256: 6eaa1c9530e2064c9d22b9fe7b1631b7088c8b7ab85de3f716e4b2a195da483d
-        translation_sha256: 2ca57ec4ad4e09e49042ab4ea528f87104087479e202df403964e54c0c2e315f
+        reviewed_source_sha256: f54a6cb37a6cf44def79a63ed4b70edc26a2d6ed516b4c6a4d65d13d13985afa
+        translation_sha256: bf5c7ae5b7fc707018cd0bd19148b917fa5bbab6b5ec801ffca0d5cc8088e0c0
       ko-KR:
         path: README.kr.md
         status: synchronized
-        reviewed_at: 2026-10-24 23:03:23
-        review_evidence: docs/reference/reviews/project-readme-slim-2026-10-24.json
-        review_evidence_sha256: 9ab7a53d482b14a0e36611fd3c8960dba65a4ae1d70843d1de9b2c4725fce841
+        reviewed_at: "2026-11-04 18:00:18"
+        review_evidence: docs/reference/reviews/project-readme-structure-2026-11-04.json
+        review_evidence_sha256: 869ea3171e1d39e6d1d3257f8f967bdca39a15340bc86daf71ebb811356ac6d1
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18T06:44:23.993Z
@@ -2342,8 +2342,8 @@ documents:
           review_type: AI_REVIEW
         reviewer: Codex
         review_type: AI_REVIEW
-        reviewed_source_sha256: 6eaa1c9530e2064c9d22b9fe7b1631b7088c8b7ab85de3f716e4b2a195da483d
-        translation_sha256: f44d6a9bcf29c62997bc50ace66d21040c7dc90f66f59f4e9a4509c62511178f
+        reviewed_source_sha256: f54a6cb37a6cf44def79a63ed4b70edc26a2d6ed516b4c6a4d65d13d13985afa
+        translation_sha256: 69a74a31301212d75bc869a6d67fd15f5bb9fe051df2cb91b4437ccf43f2ed9e
   - id: repository-governance
     type: governance
     module: platform

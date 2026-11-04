@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "document_id": "project-readme",
+  "source": "README.md",
+  "source_sha256": "f54a6cb37a6cf44def79a63ed4b70edc26a2d6ed516b4c6a4d65d13d13985afa",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "source_baseline": "b0ccd6765fddad04295864e6cf6641bc73f89af3",
+  "method": "实读四份 README 新增的目录、后端模块及前端源码入口，逐项核对真实目录、服务职责与预设裁剪标记。未改正文保留既有全文审校。 本轮实读四语 AI 小节，对照 ai/manifest.yaml、ai/README.md 和 adapter 生成路径，核对共享源、工具入口和维护次序。 四语 AI 小节的标题统一为工具目录，避免与预设中可选的资产管理模块标题重合。 对照两套派生 SKILL.md、规范源和 quality.yml，逐项复核四语目录表中新增的三个独立入口、职责和 CI 触发方式。",
+  "previous_full_review": {
+    "path": "docs/reference/reviews/project-readme-slim-2026-10-24.json",
+    "sha256": "9ab7a53d482b14a0e36611fd3c8960dba65a4ae1d70843d1de9b2c4725fce841"
+  },
+  "translations": {
+    "en-US": {
+      "path": "README.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 18:00:18",
+      "result": "approved",
+      "translation_sha256": "5e06a65572ceeac473ecc898760c8f5b44430ed9c253a4047d0600f45914514f",
+      "checks": {
+        "coverage_and_meaning": "实际逐项对照四语目录表、后端服务分工和前端源码入口。覆盖相同的十组路径和相同的应用层入口。 AI 小节逐项覆盖清单、Skill、提示词、项目经验与生成适配。 逐项对照新增的 Codex、Qoder 和 GitHub Actions 目录行，职责、触发方式与检查范围一致。",
+        "technical_literals": "核对后端模块名、前端目录、迁移清单、Compose 文件和预设裁剪标记。四语保留相同字面量。 核对 ai/ 路径与 Codex、Qoder 两个派生目录的映射。 确认三条目录路径、两个 Skill 名称和 quality.yml 文件名一致。",
+        "security_and_failure_semantics": "认证与授权职责表述保持一致。受控 fixture、可选观测和源仓库 CI 的范围明确，未扩大运行或交付承诺。 四语均说明先修改共享 Skill 源，再同步工具入口。 四语均区分本地工具入口与源仓库 GitHub Actions 检查。",
+        "language_and_terminology": "Compared the expanded English directory map and application entry points with Chinese. The backend responsibilities, optional modules, and frontend paths have matching scope. Compared the English AI subsection with Chinese for source ownership, the Codex/Qoder mapping, and the order of maintenance steps. 四语标题均指向 AI 工具目录。 对照三条目录说明的术语与业务含义。",
+        "images_and_links": "保留本语言源码索引；新增本语言 AI 说明相对链接，目标存在。"
+      },
+      "findings": []
+    },
+    "ja-JP": {
+      "path": "README.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 18:00:18",
+      "result": "approved",
+      "translation_sha256": "bf5c7ae5b7fc707018cd0bd19148b917fa5bbab6b5ec801ffca0d5cc8088e0c0",
+      "checks": {
+        "coverage_and_meaning": "实际逐项对照四语目录表、后端服务分工和前端源码入口。覆盖相同的十组路径和相同的应用层入口。 AI 小节逐项覆盖清单、Skill、提示词、项目经验与生成适配。 逐项对照新增的 Codex、Qoder 和 GitHub Actions 目录行，职责、触发方式与检查范围一致。",
+        "technical_literals": "核对后端模块名、前端目录、迁移清单、Compose 文件和预设裁剪标记。四语保留相同字面量。 核对 ai/ 路径与 Codex、Qoder 两个派生目录的映射。 确认三条目录路径、两个 Skill 名称和 quality.yml 文件名一致。",
+        "security_and_failure_semantics": "认证与授权职责表述保持一致。受控 fixture、可选观测和源仓库 CI 的范围明确，未扩大运行或交付承诺。 四语均说明先修改共享 Skill 源，再同步工具入口。 四语均区分本地工具入口与源仓库 GitHub Actions 检查。",
+        "language_and_terminology": "中国語と日本語のディレクトリ表、サービスの担当範囲、フロントエンドの参照先を項目ごとに対照し、用語と範囲をそろえた。 中国語と日本語の AI 節を対照し、共有原本、Codex と Qoder の参照先、更新と同期の順序が一致することを確認した。 四语标题均指向 AI 工具目录。 对照三条目录说明的术语与业务含义。",
+        "images_and_links": "保留本语言源码索引；新增本语言 AI 说明相对链接，目标存在。"
+      },
+      "findings": []
+    },
+    "ko-KR": {
+      "path": "README.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 18:00:18",
+      "result": "approved",
+      "translation_sha256": "69a74a31301212d75bc869a6d67fd15f5bb9fe051df2cb91b4437ccf43f2ed9e",
+      "checks": {
+        "coverage_and_meaning": "实际逐项对照四语目录表、后端服务分工和前端源码入口。覆盖相同的十组路径和相同的应用层入口。 AI 小节逐项覆盖清单、Skill、提示词、项目经验与生成适配。 逐项对照新增的 Codex、Qoder 和 GitHub Actions 目录行，职责、触发方式与检查范围一致。",
+        "technical_literals": "核对后端模块名、前端目录、迁移清单、Compose 文件和预设裁剪标记。四语保留相同字面量。 核对 ai/ 路径与 Codex、Qoder 两个派生目录的映射。 确认三条目录路径、两个 Skill 名称和 quality.yml 文件名一致。",
+        "security_and_failure_semantics": "认证与授权职责表述保持一致。受控 fixture、可选观测和源仓库 CI 的范围明确，未扩大运行或交付承诺。 四语均说明先修改共享 Skill 源，再同步工具入口。 四语均区分本地工具入口与源仓库 GitHub Actions 检查。",
+        "language_and_terminology": "중국어와 한국어의 디렉터리 표, 백엔드 모듈 역할, 프런트엔드 진입점을 항목별로 대조하고 경로와 용어가 일치하는지 확인했다. 중국어와 한국어 AI 절의 공유 원본, Codex와 Qoder의 경로, 수정 후 동기화 순서가 일치하는지 확인했다. 四语标题均指向 AI 工具目录。 对照三条目录说明的术语与业务含义。",
+        "images_and_links": "保留本语言源码索引；新增本语言 AI 说明相对链接，目标存在。"
+      },
+      "findings": []
+    }
+  }
+}

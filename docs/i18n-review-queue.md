@@ -71,7 +71,7 @@
 | wiki-source-debugging | docs/wiki/source-debugging.md | 82f7572b9aae | synchronized@2026-10-17 21:07:11 | synchronized@2026-10-17 21:07:11 | synchronized@2026-10-17 21:07:11 |
 | source-map | docs/reference/source-map.md | a1a85b478058 | synchronized@2026-10-14 11:18:34 | synchronized@2026-10-14 11:18:34 | synchronized@2026-10-14 11:18:34 |
 | shared-ai-assets | ai/README.md | 4c82c82114f6 | synchronized@2026-10-18 13:47:01 | synchronized@2026-10-18 13:47:01 | synchronized@2026-10-18 13:47:01 |
-| project-readme | README.md | 6eaa1c9530e2 | synchronized@2026-10-24 23:03:23 | synchronized@2026-10-24 23:03:23 | synchronized@2026-10-24 23:03:23 |
+| project-readme | README.md | f54a6cb37a6c | synchronized@2026-11-04 18:00:18 | synchronized@2026-11-04 18:00:18 | synchronized@2026-11-04 18:00:18 |
 | wiki-interface-reference | docs/wiki/interface-reference.md | f6a38d89750e | synchronized@2026-10-17 21:24:24 | synchronized@2026-10-17 21:24:24 | synchronized@2026-10-17 21:24:24 |
 | wiki-workflow-development | docs/wiki/workflow-development.md | 0705d000ab8f | synchronized@2026-10-14 10:25:08 | synchronized@2026-10-14 10:25:08 | synchronized@2026-10-14 10:25:08 |
 | wiki-outbox-development | docs/wiki/outbox-development.md | d260241659ee | synchronized@2026-10-18 01:20:55 | synchronized@2026-10-18 01:20:55 | synchronized@2026-10-18 01:20:55 |
