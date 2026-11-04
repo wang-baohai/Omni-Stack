@@ -482,7 +482,7 @@ documents:
     module: srm
     owner: srm
     source: docs/srm.md
-    source_sha256: 6e1b0dea2181e6ce43e62edd2d9622716a91bb42c01217963dca85590b391861
+    source_sha256: 533ce7c0afe3c736656f659dde8a10ec53e9b27a729bdd889075439093b48be2
     dependencies:
       - api
       - permissions
@@ -493,51 +493,51 @@ documents:
       en-US:
         path: docs/srm.en.md
         status: synchronized
-        reviewed_at: 2026-10-30 06:50:01
+        reviewed_at: "2026-11-04 15:20:11"
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18 02:13:05
           source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
           translation_sha256: c4df01c59a3f951cbc01d2172f840b5d9bd8c6d21b72e38bbedce244d3db2457
           review_type: AI_REVIEW
-        translation_sha256: f0b6fe6a3f928ba7d296a39c50bf4bdd57b93e6e3172b86ff89880d9f9f1d670
+        translation_sha256: cc087cab021c4a8f7e546c151bcd7c00d0de29db70d777b8354d912359a6f844
         review_type: AI_REVIEW
         reviewer: Codex
-        reviewed_source_sha256: 6e1b0dea2181e6ce43e62edd2d9622716a91bb42c01217963dca85590b391861
-        review_evidence: docs/reference/reviews/srm-final-2026-10-30.json
-        review_evidence_sha256: ae6d672bb21048807ac9149ffc0eca30043eee2096dc3d2041f3b97825aa985c
+        reviewed_source_sha256: 533ce7c0afe3c736656f659dde8a10ec53e9b27a729bdd889075439093b48be2
+        review_evidence: docs/reference/reviews/srm-supplier-picker-cleanup-2026-11-04.json
+        review_evidence_sha256: ff189668553b365a5a7395d016e472d3d19939b420ba700becf59610708b017c
       ja-JP:
         path: docs/srm.jp.md
         status: synchronized
-        reviewed_at: 2026-10-30 06:50:01
+        reviewed_at: "2026-11-04 15:20:11"
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18 02:13:05
           source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
           translation_sha256: 4940e1f357d3689c5bfd461e0950ef2059441750c603bb5d4c6d4bc13bdcbc3f
           review_type: AI_REVIEW
-        translation_sha256: 52a8a044872e95f279f419e3955311c7c078dc0e999df04fa8f0e716692f5160
+        translation_sha256: ba41401a0169c0e1ad51dbd1822473219b00b571d69cb69c91da7c8f23d83080
         review_type: AI_REVIEW
         reviewer: Codex
-        reviewed_source_sha256: 6e1b0dea2181e6ce43e62edd2d9622716a91bb42c01217963dca85590b391861
-        review_evidence: docs/reference/reviews/srm-final-2026-10-30.json
-        review_evidence_sha256: ae6d672bb21048807ac9149ffc0eca30043eee2096dc3d2041f3b97825aa985c
+        reviewed_source_sha256: 533ce7c0afe3c736656f659dde8a10ec53e9b27a729bdd889075439093b48be2
+        review_evidence: docs/reference/reviews/srm-supplier-picker-cleanup-2026-11-04.json
+        review_evidence_sha256: ff189668553b365a5a7395d016e472d3d19939b420ba700becf59610708b017c
       ko-KR:
         path: docs/srm.kr.md
         status: synchronized
-        reviewed_at: 2026-10-30 06:50:01
+        reviewed_at: "2026-11-04 15:20:11"
         previous_review:
           reviewer: Codex
           reviewed_at: 2026-10-18 02:13:05
           source_sha256: b5d3f7de4909a61855d7bc0d1e3aebea1df2f88b33f2f753e8c82ab96d26c200
           translation_sha256: 0e7cff066981da724578e2d4cf79edc23194807bc8bcd1c056c26c4a942926bb
           review_type: AI_REVIEW
-        translation_sha256: 37c81aa136cb62cfe62b5e583047da717bc17c920f22cdbbb51b47787ab771d7
+        translation_sha256: d287faa802cf96aa3f366546758468754c35a1e85d30b2f4696e1112279add7d
         review_type: AI_REVIEW
         reviewer: Codex
-        reviewed_source_sha256: 6e1b0dea2181e6ce43e62edd2d9622716a91bb42c01217963dca85590b391861
-        review_evidence: docs/reference/reviews/srm-final-2026-10-30.json
-        review_evidence_sha256: ae6d672bb21048807ac9149ffc0eca30043eee2096dc3d2041f3b97825aa985c
+        reviewed_source_sha256: 533ce7c0afe3c736656f659dde8a10ec53e9b27a729bdd889075439093b48be2
+        review_evidence: docs/reference/reviews/srm-supplier-picker-cleanup-2026-11-04.json
+        review_evidence_sha256: ff189668553b365a5a7395d016e472d3d19939b420ba700becf59610708b017c
   - id: mq-reliability
     type: module-guide
     module: messaging

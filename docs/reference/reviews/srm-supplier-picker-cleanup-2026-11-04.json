@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "document_id": "srm",
+  "review_type": "AI_REVIEW",
+  "reviewer": "Codex",
+  "HUMAN_REVIEW": 0,
+  "source": "docs/srm.md",
+  "source_sha256": "533ce7c0afe3c736656f659dde8a10ec53e9b27a729bdd889075439093b48be2",
+  "source_baseline": "3bfd5480795799cb9f7c1e6b5de6416145f119c7",
+  "authorization": "docs/adr/0003-authorized-ai-translation-review.md",
+  "authorization_sha256": "5558acf3f514574b8cdb506b298f21f2d3f7bcd9c50b2be7b75410196b62eaed",
+  "method": "增量语义审校。实际审读四语第 7–9 节的相关段落，逐篇对照第 8 节的变化行。只改共享组件表一行，其余字节由已有完整审校覆盖。未重做全篇业务验收。",
+  "previous_full_review": {
+    "path": "docs/reference/reviews/srm-final-2026-10-30.json",
+    "sha256": "ae6d672bb21048807ac9149ffc0eca30043eee2096dc3d2041f3b97825aa985c"
+  },
+  "translations": {
+    "en-US": {
+      "path": "docs/srm.en.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 15:20:11",
+      "result": "approved",
+      "translation_sha256": "cc087cab021c4a8f7e546c151bcd7c00d0de29db70d777b8354d912359a6f844",
+      "checks": {
+        "coverage_and_meaning": "实际对照中文和本语言第 7–9 节。共享组件行只去掉退役的选取组件及其用途，其余五项与 360、子资源、评分和风险说明一致。其他正文逐字节延续已有全文审校。",
+        "technical_literals": "逐一核对共享组件行保留的五个 Vue 文件名和实际路径，API、请求字段和其他技术字面量与已审基线逐字节一致。",
+        "security_and_failure_semantics": "对照前后段落，租户隔离、显式写授权、门户路由和后端最终鉴权表述未变，失败和业务安全约束延续已有全文审校。",
+        "language_and_terminology": "Compared the revised English shared-components row with Chinese. Removing “pickers” matches the retired entry and leaves the other five component roles intact.",
+        "images_and_links": "实际核对共享组件行保留的五个目标文件均存在。仅移除退役组件的链接，图片、其他链接和设计快照保持原样。"
+      },
+      "findings": [
+        {
+          "id": "CLEANUP-SRM-RETIRED-SUPPLIER-PICKER",
+          "status": "resolved",
+          "description": "移除过期的源码链接及对应的选择器用途短语，保留同行其他组件。"
+        }
+      ]
+    },
+    "ja-JP": {
+      "path": "docs/srm.jp.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 15:20:11",
+      "result": "approved",
+      "translation_sha256": "ba41401a0169c0e1ad51dbd1822473219b00b571d69cb69c91da7c8f23d83080",
+      "checks": {
+        "coverage_and_meaning": "实际对照中文和本语言第 7–9 节。共享组件行只去掉退役的选取组件及其用途，其余五项与 360、子资源、评分和风险说明一致。其他正文逐字节延续已有全文审校。",
+        "technical_literals": "逐一核对共享组件行保留的五个 Vue 文件名和实际路径，API、请求字段和其他技术字面量与已审基线逐字节一致。",
+        "security_and_failure_semantics": "对照前后段落，租户隔离、显式写授权、门户路由和后端最终鉴权表述未变，失败和业务安全约束延续已有全文审校。",
+        "language_and_terminology": "日本語の共通部品行を中国語と照合した。「選択」を削り、360・子資源・採点・リスクの用途と既存の用語を維持した。",
+        "images_and_links": "实际核对共享组件行保留的五个目标文件均存在。仅移除退役组件的链接，图片、其他链接和设计快照保持原样。"
+      },
+      "findings": [
+        {
+          "id": "CLEANUP-SRM-RETIRED-SUPPLIER-PICKER",
+          "status": "resolved",
+          "description": "移除过期的源码链接及对应的选择器用途短语，保留同行其他组件。"
+        }
+      ]
+    },
+    "ko-KR": {
+      "path": "docs/srm.kr.md",
+      "reviewer": "Codex",
+      "reviewed_at": "2026-11-04 15:20:11",
+      "result": "approved",
+      "translation_sha256": "d287faa802cf96aa3f366546758468754c35a1e85d30b2f4696e1112279add7d",
+      "checks": {
+        "coverage_and_meaning": "实际对照中文和本语言第 7–9 节。共享组件行只去掉退役的选取组件及其用途，其余五项与 360、子资源、评分和风险说明一致。其他正文逐字节延续已有全文审校。",
+        "technical_literals": "逐一核对共享组件行保留的五个 Vue 文件名和实际路径，API、请求字段和其他技术字面量与已审基线逐字节一致。",
+        "security_and_failure_semantics": "对照前后段落，租户隔离、显式写授权、门户路由和后端最终鉴权表述未变，失败和业务安全约束延续已有全文审校。",
+        "language_and_terminology": "공통 컴포넌트 행을 중국어와 대조했다. 선택기 설명만 제거했고 360, 자식 리소스, 점수, 리스크의 역할은 유지했다。",
+        "images_and_links": "实际核对共享组件行保留的五个目标文件均存在。仅移除退役组件的链接，图片、其他链接和设计快照保持原样。"
+      },
+      "findings": [
+        {
+          "id": "CLEANUP-SRM-RETIRED-SUPPLIER-PICKER",
+          "status": "resolved",
+          "description": "移除过期的源码链接及对应的选择器用途短语，保留同行其他组件。"
+        }
+      ]
+    }
+  },
+  "global_release_claimed": false
+}

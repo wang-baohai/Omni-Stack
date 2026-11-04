@@ -3,7 +3,7 @@
 > 本文件由 `node tools/omni-cli/scripts/docs-review-queue.mjs --generate` 自动生成，
 > 请勿手工编辑条目；复核人必须在 manifest 中更新 status/reviewed_at 后重新生成本文件。
 
-- 生成时间：2026-10-31
+- 生成时间：2026-11-04
 - 中文事实源：122 篇（Chinese-only 3 篇；需翻译 119 篇）
 - 译文待复核：0 篇（en-US/ja-JP/ko-KR）
 - 已完成复核：357 篇（HUMAN_REVIEW 0；AI_REVIEW 357）
@@ -33,7 +33,7 @@
 | scheduling | docs/scheduling.md | 6f9d96f8c3b9 | synchronized@2026-10-25 20:15:03 | synchronized@2026-10-25 20:15:03 | synchronized@2026-10-25 20:15:03 |
 | workflow | docs/workflow.md | 4cc1e13aff69 | synchronized@2026-10-16 15:16:52 | synchronized@2026-10-16 15:16:52 | synchronized@2026-10-16 15:16:52 |
 | crm | docs/crm.md | dbb748468d43 | synchronized@2026-10-15 11:38:58 | synchronized@2026-10-15 11:38:58 | synchronized@2026-10-15 11:38:58 |
-| srm | docs/srm.md | 6e1b0dea2181 | synchronized@2026-10-30 06:50:01 | synchronized@2026-10-30 06:50:01 | synchronized@2026-10-30 06:50:01 |
+| srm | docs/srm.md | 533ce7c0afe3 | synchronized@2026-11-04 15:20:11 | synchronized@2026-11-04 15:20:11 | synchronized@2026-11-04 15:20:11 |
 | mq-reliability | docs/mq-reliability.md | 98aae48046ef | synchronized@2026-10-13 12:26:49 | synchronized@2026-10-13 12:26:49 | synchronized@2026-10-13 12:26:49 |
 | guide-scaffold-development | docs/guides/scaffold-development.md | 6777bfff1f5d | synchronized@2026-10-17 09:58:40 | synchronized@2026-10-17 09:58:40 | synchronized@2026-10-17 09:58:40 |
 
